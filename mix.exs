@@ -35,7 +35,6 @@ defmodule Avrogen.MixProject do
   defp deps do
     [
       {:accessible, "~> 0.3.0"},
-      {:csv, "~> 2.5.0"},
       {:decimal, "~> 2.0"},
       {:erlavro, "~> 2.9"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
