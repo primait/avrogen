@@ -242,7 +242,7 @@ defmodule Mix.Tasks.Compile.AvroSchemaGenerator do
          tasks: tasks
        }) do
     tasks
-    |> Enum.flat_map(fn {_, targets} -> targets end)
+    |> Enum.flat_map(fn %TaskSummary{targets: targets} -> targets end)
     |> List.insert_at(0, manifest_path())
     |> Enum.each(fn target ->
       File.rm(target)
