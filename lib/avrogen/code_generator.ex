@@ -609,11 +609,11 @@ defmodule Avrogen.CodeGenerator do
     random_instance_logical_type_constructor(lt, range_opts(field, lt))
   end
 
-  def random_instance_field(%{"type" => union}, global) when is_list(union) do
+  def random_instance_field(%{"type" => union} = field, global) when is_list(union) do
     primitive =
       union
       |> Enum.filter(fn p -> is_binary(p) and is_primitive(p) end)
-      |> Enum.map(fn p -> random_instance_primitive_constructor(p) end)
+      |> Enum.map(fn p -> random_instance_primitive_constructor(p, range_opts(field, p)) end)
 
     logical =
       union

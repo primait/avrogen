@@ -10,7 +10,7 @@ by adding `avrogen` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:avrogen, "~> 0.2.0"}
+    {:avrogen, "~> 0.2.1"}
   ]
 end
 ```
