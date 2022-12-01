@@ -1,4 +1,4 @@
-defmodule Avro.SchemaGenerator do
+defmodule Avrogen.SchemaGenerator do
   @doc """
   Generates the avro schemas for a given exs file, and returns a list of the schemas generated.
   """
@@ -15,7 +15,7 @@ defmodule Avro.SchemaGenerator do
     |> Enum.map(fn schema ->
       output_file_path =
         out_dir
-        |> Path.join(Avro.Schema.fqn(schema) <> ".avsc")
+        |> Path.join(Avrogen.Schema.fqn(schema) <> ".avsc")
 
       {output_file_path, schema}
     end)

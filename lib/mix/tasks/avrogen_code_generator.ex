@@ -102,8 +102,8 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
 
   use Mix.Task.Compiler
   import HappyWith
-  alias Avro.Schema
-  alias Avro.CodeGenerator
+  alias Avrogen.Schema
+  alias Avrogen.CodeGenerator
 
   # Note: This makes tasks run in the correct context when using an umbrella
   @recursive true

@@ -1,7 +1,7 @@
-defmodule Avro.CodeGenerator.Test do
+defmodule Avrogen.CodeGenerator.Test do
   use ExUnit.Case
 
-  alias Avro.CodeGenerator
+  alias Avrogen.CodeGenerator
 
   describe "Generating a record module" do
     test "externalise_inlined_enums: at top-level" do

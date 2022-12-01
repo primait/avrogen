@@ -1,4 +1,4 @@
-defmodule Avro.Util.FuzzyEnumMatch do
+defmodule Avrogen.Util.FuzzyEnumMatch do
   def preprocess(s) when is_binary(s) do
     normalised =
       s

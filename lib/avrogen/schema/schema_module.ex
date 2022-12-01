@@ -1,4 +1,4 @@
-defmodule Avro.Schema.SchemaModule do
+defmodule Avrogen.Schema.SchemaModule do
   @moduledoc """
   Common behaviour for modules that define avro schemas in code.
   """

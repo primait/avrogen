@@ -1,4 +1,4 @@
-defmodule Avro do
+defmodule Avrogen do
   @moduledoc """
   Provides functions for encoding and decoding avro records.
 
@@ -19,7 +19,7 @@ defmodule Avro do
   """
   import HappyWith
 
-  alias Avro.Schema.SchemaRegistry
+  alias Avrogen.Schema.SchemaRegistry
 
   def encode_schemaless(%module{} = record) do
     encoder = SchemaRegistry.get_encoder()

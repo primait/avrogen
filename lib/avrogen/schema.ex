@@ -1,4 +1,4 @@
-defmodule Avro.Schema do
+defmodule Avrogen.Schema do
   @moduledoc """
   Utils for extracting various info from avro schemas.
   Schemas can be records or enums.
@@ -14,10 +14,10 @@ defmodule Avro.Schema do
     fields
     |> Enum.flat_map(fn
       %{"type" => types} when is_list(types) ->
-        Enum.flat_map(types, fn type -> Avro.Types.external_dependencies(type) end)
+        Enum.flat_map(types, fn type -> Avrogen.Types.external_dependencies(type) end)
 
       %{"type" => type} ->
-        Avro.Types.external_dependencies(type)
+        Avrogen.Types.external_dependencies(type)
     end)
   end
 
@@ -120,7 +120,7 @@ defmodule Avro.Schema do
     for file_path <- schema_file_paths do
       load_schema!(file_path)
     end
-    |> Avro.Schema.topological_sort()
+    |> Avrogen.Schema.topological_sort()
     |> Jason.encode!(pretty: true)
   end
 end

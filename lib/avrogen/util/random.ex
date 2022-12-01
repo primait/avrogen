@@ -1,4 +1,4 @@
-defmodule Avro.Util.Random do
+defmodule Avrogen.Util.Random do
   @moduledoc """
   Helper functions for generating random values.
   """
@@ -333,7 +333,7 @@ defmodule Avro.Util.Random do
     (without forcing all elements to be evaluated up front).
     """
 
-    alias Avro.Util.Random
+    alias Avrogen.Util.Random
     @type constructor_fun() :: (Random.rand_state() -> {Random.rand_state(), any()})
 
     @spec nothing() :: constructor_fun()

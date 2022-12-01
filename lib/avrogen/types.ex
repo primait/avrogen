@@ -1,4 +1,4 @@
-defmodule Avro.Types do
+defmodule Avrogen.Types do
   @moduledoc """
   Utils for extracting various info from avro schemas types.
   """

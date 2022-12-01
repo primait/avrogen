@@ -1,10 +1,10 @@
-defmodule Avro.CodeGenerator do
+defmodule Avrogen.CodeGenerator do
   @moduledoc """
   Generates Elixir modules for a given Avro schema. Currently fairly specific to
   application data v2, but should evolve over time...
   """
   require EEx
-  alias Avro.Schema
+  alias Avrogen.Schema
 
   defp derive_module_prefix(prefix, fqn) do
     namespace =
@@ -60,7 +60,7 @@ defmodule Avro.CodeGenerator do
       emit_code(schema, global, avro_fqn, module_prefix)
     end)
     |> String.trim()
-    |> format_or_log(Avro.Schema.fqn(schema))
+    |> format_or_log(Avrogen.Schema.fqn(schema))
   end
 
   def format_or_log(code_string, filename) do
@@ -198,11 +198,11 @@ defmodule Avro.CodeGenerator do
       def _<%= symbol %>(), do: <%=  ":\'" <> symbol <> "\'" %>
       <% end %>
 
-      @index Avro.Util.FuzzyEnumMatch.make_index(@values)
+      @index Avrogen.Util.FuzzyEnumMatch.make_index(@values)
 
       @spec best_fuzzy_match(String.t(), atom(), number()) :: atom()
       def best_fuzzy_match(string, default_value, minimum_similarity \\\\ 0.5) do
-        Avro.Util.FuzzyEnumMatch.best_match(@index, string, default_value, minimum_similarity)
+        Avrogen.Util.FuzzyEnumMatch.best_match(@index, string, default_value, minimum_similarity)
       end
     end
     """,
@@ -244,7 +244,7 @@ defmodule Avro.CodeGenerator do
       <% end %>
       end
 
-      @behaviour Avro.AvroModule
+      @behaviour Avrogen.AvroModule
 
       @impl true
       def avro_fqn(), do: "<%= avro_fqn %>"
@@ -294,8 +294,8 @@ defmodule Avro.CodeGenerator do
         Kernel.struct(__MODULE__, m)
       end
 
-      alias Avro.Util.Random
-      alias Avro.Util.Random.Constructors
+      alias Avrogen.Util.Random
+      alias Avrogen.Util.Random.Constructors
 
       @spec random_instance(Random.rand_state()) :: {Random.rand_state(), struct()}
       def random_instance(rand_state) do
@@ -581,22 +581,22 @@ defmodule Avro.CodeGenerator do
 
   def random_instance_logical_type_constructor(lt, range_opts \\ "") do
     case lt do
-      "big_decimal" -> "Avro.Util.Random.Constructors.decimal(#{range_opts})"
-      "iso_date" -> "Avro.Util.Random.Constructors.date(#{range_opts})"
-      "iso_datetime" -> "Avro.Util.Random.Constructors.datetime(#{range_opts})"
+      "big_decimal" -> "Avrogen.Util.Random.Constructors.decimal(#{range_opts})"
+      "iso_date" -> "Avrogen.Util.Random.Constructors.date(#{range_opts})"
+      "iso_datetime" -> "Avrogen.Util.Random.Constructors.datetime(#{range_opts})"
     end
   end
 
   def random_instance_primitive_constructor(p, range_opts \\ "") do
     case p do
-      "null" -> "Avro.Util.Random.Constructors.nothing()"
-      "boolean" -> "Avro.Util.Random.Constructors.boolean()"
-      "int" -> "Avro.Util.Random.Constructors.integer(#{range_opts})"
-      "long" -> "Avro.Util.Random.Constructors.integer(#{range_opts})"
-      "float" -> "Avro.Util.Random.Constructors.float(#{range_opts})"
-      "double" -> "Avro.Util.Random.Constructors.float(#{range_opts})"
-      "bytes" -> "Avro.Util.Random.Constructors.string(#{range_opts})"
-      "string" -> "Avro.Util.Random.Constructors.string(#{range_opts})"
+      "null" -> "Avrogen.Util.Random.Constructors.nothing()"
+      "boolean" -> "Avrogen.Util.Random.Constructors.boolean()"
+      "int" -> "Avrogen.Util.Random.Constructors.integer(#{range_opts})"
+      "long" -> "Avrogen.Util.Random.Constructors.integer(#{range_opts})"
+      "float" -> "Avrogen.Util.Random.Constructors.float(#{range_opts})"
+      "double" -> "Avrogen.Util.Random.Constructors.float(#{range_opts})"
+      "bytes" -> "Avrogen.Util.Random.Constructors.string(#{range_opts})"
+      "string" -> "Avrogen.Util.Random.Constructors.string(#{range_opts})"
     end
   end
 
@@ -634,10 +634,10 @@ defmodule Avro.CodeGenerator do
       |> Enum.reject(fn t -> is_nil(t) end)
       |> Enum.map(fn
         %{name: n, type: :record} ->
-          ~s'Avro.Util.Random.Constructors.list(fn rand_state -> #{n}.random_instance(rand_state) end)'
+          ~s'Avrogen.Util.Random.Constructors.list(fn rand_state -> #{n}.random_instance(rand_state) end)'
 
         %{name: n, type: :enum} ->
-          ~s'Avro.Util.Random.Constructors.list(Avro.Util.Random.Constructors.enum_value(#{n}))'
+          ~s'Avrogen.Util.Random.Constructors.list(Avrogen.Util.Random.Constructors.enum_value(#{n}))'
       end)
 
     complex =
@@ -654,7 +654,7 @@ defmodule Avro.CodeGenerator do
       |> Enum.map(fn t ->
         case global[t] do
           %{type: :enum} ->
-            ~s'Avro.Util.Random.Constructors.enum_value(#{Map.get(global[t], :name)})'
+            ~s'Avrogen.Util.Random.Constructors.enum_value(#{Map.get(global[t], :name)})'
 
           %{type: :record, name: _record_name} ->
             ~s'fn rand_state -> #{Map.get(global[t], :name)}.random_instance(rand_state) end'
@@ -672,14 +672,14 @@ defmodule Avro.CodeGenerator do
         global
       ) do
     if is_primitive(type) do
-      ~s"Avro.Util.Random.Constructors.list(#{random_instance_primitive_constructor(type)})"
+      ~s"Avrogen.Util.Random.Constructors.list(#{random_instance_primitive_constructor(type)})"
     else
       case Map.get(global[type], :type) do
         :record ->
-          ~s'Avro.Util.Random.Constructors.list(fn rand_state -> #{Map.get(global[type], :name)}.random_instance(rand_state) end)'
+          ~s'Avrogen.Util.Random.Constructors.list(fn rand_state -> #{Map.get(global[type], :name)}.random_instance(rand_state) end)'
 
         :enum ->
-          ~s'Avro.Util.Random.Constructors.list(Avro.Util.Random.Constructors.enum_value(#{Map.get(global[type], :name)}))'
+          ~s'Avrogen.Util.Random.Constructors.list(Avrogen.Util.Random.Constructors.enum_value(#{Map.get(global[type], :name)}))'
       end
     end
   end
@@ -693,7 +693,7 @@ defmodule Avro.CodeGenerator do
           ~s'fn rand_state -> #{Map.get(global[type], :name)}.random_instance(rand_state) end'
 
         :enum ->
-          ~s'Avro.Util.Random.Constructors.enum_value(#{Map.get(global[type], :name)})'
+          ~s'Avrogen.Util.Random.Constructors.enum_value(#{Map.get(global[type], :name)})'
       end
     end
   end

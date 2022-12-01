@@ -178,7 +178,7 @@ defmodule Mix.Tasks.Compile.AvroSchemaGenerator do
       :ok,
       %TaskSummary{
         sources: [file],
-        targets: Avro.SchemaGenerator.generate_avsc_files!(file, dest)
+        targets: Avrogen.SchemaGenerator.generate_avsc_files!(file, dest)
       }
     }
   end

@@ -1,4 +1,4 @@
-defmodule Avro.Schema.Test do
+defmodule Avrogen.Schema.Test do
   use ExUnit.Case
 
   describe "external_dependencies" do
@@ -13,7 +13,7 @@ defmodule Avro.Schema.Test do
         ]
       }
 
-      assert Avro.Schema.external_dependencies(input) == ["foo.Bar"]
+      assert Avrogen.Schema.external_dependencies(input) == ["foo.Bar"]
     end
 
     test "finds no deps in enum" do
@@ -21,7 +21,7 @@ defmodule Avro.Schema.Test do
         "type" => "enum"
       }
 
-      assert Avro.Schema.external_dependencies(input) == []
+      assert Avrogen.Schema.external_dependencies(input) == []
     end
   end
 
@@ -33,7 +33,7 @@ defmodule Avro.Schema.Test do
         "type" => "record"
       }
 
-      assert Avro.Schema.fqn(input) == "bar.baz.Foo"
+      assert Avrogen.Schema.fqn(input) == "bar.baz.Foo"
     end
 
     test "finds fqn in enum" do
@@ -43,7 +43,7 @@ defmodule Avro.Schema.Test do
         "type" => "enum"
       }
 
-      assert Avro.Schema.fqn(input) == "bar.baz.Foo"
+      assert Avrogen.Schema.fqn(input) == "bar.baz.Foo"
     end
 
     test "finds fqn in record with no namespace" do
@@ -52,7 +52,7 @@ defmodule Avro.Schema.Test do
         "type" => "enum"
       }
 
-      assert Avro.Schema.fqn(input) == "Foo"
+      assert Avrogen.Schema.fqn(input) == "Foo"
     end
   end
 
@@ -92,7 +92,7 @@ defmodule Avro.Schema.Test do
         }
       ]
 
-      assert {:ok, ^expected} = Avro.Schema.topological_sort(input)
+      assert {:ok, ^expected} = Avrogen.Schema.topological_sort(input)
     end
 
     test "errors on cyclic records" do
@@ -117,7 +117,7 @@ defmodule Avro.Schema.Test do
         }
       ]
 
-      assert {:error, _} = Avro.Schema.topological_sort(input)
+      assert {:error, _} = Avrogen.Schema.topological_sort(input)
     end
   end
 end

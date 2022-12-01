@@ -1,4 +1,4 @@
-defmodule Avro.Schema.SchemaRegistry do
+defmodule Avrogen.Schema.SchemaRegistry do
   @moduledoc """
   Stores avro schemas and corresponding codec functions; provides lookup by
   schema name. Initialized on startup with schemas from priv directory.
@@ -33,7 +33,7 @@ defmodule Avro.Schema.SchemaRegistry do
       |> File.read!()
       |> Jason.decode!()
     end)
-    |> Avro.Schema.topological_sort()
+    |> Avrogen.Schema.topological_sort()
     |> Noether.Either.map(fn schemas ->
       json = Jason.encode!(schemas)
       encoder = make_encoder(json)

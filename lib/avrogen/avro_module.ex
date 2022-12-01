@@ -1,4 +1,4 @@
-defmodule Avro.AvroModule do
+defmodule Avrogen.AvroModule do
   @moduledoc """
   Behaviour for generated record modules.
   """
