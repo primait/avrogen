@@ -135,10 +135,10 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
 
     force = config_changed?(previous_options, options)
 
-    dest = Keyword.get(options, :dest, "")
-    paths = Keyword.get(options, :paths, [])
-    schema_root = Keyword.get(options, :schema_root, "")
-    module_prefix = Keyword.get(options, :module_prefix, "")
+    dest = Keyword.get(options, :dest, "generated")
+    paths = Keyword.get(options, :paths, ["schemas/*.avsc"])
+    schema_root = Keyword.get(options, :schema_root, "schemas")
+    module_prefix = Keyword.get(options, :module_prefix, "Avro")
 
     {generated_files, status} =
       paths
@@ -310,19 +310,9 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
 
   defp opts do
     case Keyword.get(Mix.Project.config(), :avro_code_generator_opts, nil) do
-      nil ->
-        raise CompileError,
-          description: ":avro_code_generator_opts must be defined in your mix.exs"
-
-      opts ->
-        opts
+      nil -> Keyword.new()
+      opts -> opts
     end
-    |> tap(fn opts ->
-      if !Keyword.has_key?(opts, :dest) do
-        raise CompileError,
-          description: ":dest key must be provided in :avro_code_generator_opts"
-      end
-    end)
   end
 
   defp log(message) do
