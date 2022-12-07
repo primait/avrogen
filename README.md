@@ -34,97 +34,19 @@ For example, the following schema...
 }
 ```
 
-... generates an elxir module which looks like this:
+... generates a typedstruct which looks like this:
 
 ```elixir
 defmodule Foo.Bar do
-  @moduledoc """
-
-  Fields:
-  `baz`: baz
-  `qux`: qux
-
-  """
-
-  # This module was automatically generated from an AVRO schema.
-  #
-  # On occasion, the generated code exceeds Credo's complexity limits.
-  # credo:disable-for-this-file
-  @dialyzer :no_opaque
-
   use TypedStruct
-  use Accessible
-
-  # This line tells the Jason library how to encode the typedstruct below
-  # With no arguments, this tells Jason to encode everything except the `:__struct__` field
-  # See https://hexdocs.pm/jason/Jason.Encoder.html
-  @derive Jason.Encoder
 
   typedstruct do
     field :baz, nil | String.t()
     field :qux, integer(), enforce: true
   end
 
-  @behaviour Avrogen.AvroModule
+  # The actual generated module will contain a bunch of helper functions here which are subject to a lot of churn and thus have been redacted for brevity
 
-  @impl true
-  def avro_fqn(), do: "foo.Bar"
-
-  @impl true
-  def avro_schema_name(), do: "foo"
-
-  @impl true
-  def to_avro_map(%__MODULE__{} = r) do
-    %{
-      "baz" => r.baz,
-      "qux" => r.qux
-    }
-  end
-
-  @impl true
-  def from_avro_map(%{
-        "baz" => baz,
-        "qux" => qux
-      }) do
-    {:ok,
-     %__MODULE__{
-       baz: baz,
-       qux: qux
-     }}
-  end
-
-  @expected_keys MapSet.new(["baz", "qux"])
-
-  def from_avro_map(%{} = invalid) do
-    actual = Map.keys(invalid) |> MapSet.new()
-    missing = MapSet.difference(@expected_keys, actual) |> Enum.join(", ")
-    {:error, "Missing keys: " <> missing}
-  end
-
-  def from_avro_map(_) do
-    {:error, "Expected a map."}
-  end
-
-  @pii_fields MapSet.new([])
-
-  def pii_fields(), do: @pii_fields
-
-  def drop_pii(%__MODULE__{} = r) do
-    m = Map.from_struct(r)
-
-    Kernel.struct(__MODULE__, m)
-  end
-
-  alias Avrogen.Util.Random
-  alias Avrogen.Util.Random.Constructors
-
-  @spec random_instance(Random.rand_state()) :: {Random.rand_state(), struct()}
-  def random_instance(rand_state) do
-    Constructors.instantiate(rand_state, __MODULE__,
-      baz: [Avrogen.Util.Random.Constructors.nothing(), Avrogen.Util.Random.Constructors.string()],
-      qux: Avrogen.Util.Random.Constructors.integer()
-    )
-  end
 end
 ```
 
@@ -245,6 +167,36 @@ and
 The `Developer` record refernces the `Level` enum using its fully qualified schema name: `hr.Level`. The filename must have the form `hr.Level.avsc` for it to be discovered correctly, otherwise you'll likely result in an error from the generator.
 
 The `schema_root` option passed to the generator tells it where to search for such files.
+
+### PII Fields
+Avrogen introduces an unofficial extension to AVRO schema specification which can be used to mark record's fields as PII (Personally Identifiable Information). Each generated record module gets a `drop_pii/1` function which recursively strips away all fields marked as PII in the record, and any records contained within.
+
+Mark a field as PII by adding `pii: true` option to the field. For example imagine you are storing names and ages of people, and the name is PII (but the age isn't).
+
+```json
+{
+  "type": "record",
+  "name": "Person",
+  "namespace": "example",
+  "fields": [
+    {"name": "name", "type": ["null", "string"], "pii": true},
+    {"name": "age", "type": "int"}
+  ]
+}
+```
+Then you can simply call `drop_pii/1` on your record to replace all the PII fields with `nil` like so:
+
+```elixir
+ex> person = %Avro.Example.Person{name: "John Smith", age: 38} 
+%Avro.Example.Person{age: 38, name: "John Smith"}
+
+ex> Avro.Example.Person.drop_pii(person)
+%Avro.Example.Person{age: 38, name: nil}
+```
+
+> Note: Fields marked as PII must be of a union type containing a null.
+
+The AVRO spec specifies that any extra fields in schemas are ignored, so schemas containing this extension are backwards compatible with other AVRO parsers, as they will just ignore this field.
 
 ## Publishing to Hexpm
 
