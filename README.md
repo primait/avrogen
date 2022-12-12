@@ -198,6 +198,76 @@ ex> Avro.Example.Person.drop_pii(person)
 
 The AVRO spec specifies that any extra fields in schemas are ignored, so schemas containing this extension are backwards compatible with other AVRO parsers, as they will just ignore this field.
 
+### Random Instance Generators
+Each generated module contains a function to create a random instance of the record/enum. This can be useful for fuzz testing, among other things.
+
+E.g. Using the `Person` example above, the generated module will contain the following function:
+```elixir
+def random_instance(rand_state) do
+  # ...
+end
+```
+
+> The function expects to be given an erlang random state type object, which can be seeded in one of many ways depending on what you want to do with it. The simplest way to create this random state is to generate it with the default generator - `:rand.seed(:default)`, as demonstrated below.
+
+You can use this `random_instance/1` function to generate random instances of the module's struct, for example:
+```elixir
+iex> state = :rand.seed(:default)
+iex> {state, person} = Avro.Example.Person.random_instance(state)
+{
+  # ~~snip~~ 
+  %Avro.Foo.Bar{
+    name: <<29, 120, 54, 75, 84, 54, 70, 29, 48, 68, 87, 87>>,
+    age: 1812334491
+  }
+}
+```
+
+In this example, `person` is a random instance of the Avro.Example.Person record, and `state` is the mutated state which can be used again to pass to the next call to `random_instance/1`.
+
+The different types produce random values according to different rules:
+
+- Unions produce a random instance of any one of the types of the union, where each type is equally likely to be chosen.
+- Strings produce a random utf8 binary of up to 1000 codepoints, each of which lie in the range `0 <= codepoint < 10,000` by default.
+- Integers and doubles produce a random value in the range `-2,147,483,648 <= value < 2,147,483,648` by default.
+- Enums produce one of their symbols selected at random, with each symbol having an equal probability of showing up.
+- Arrays produce a random array of up to 10 elements, where the value of each element is a random instance of the array's element type according to the above rules.
+- Records produce a random instance of that record, where each field of the record is generated randomly according to the above rules.
+
+You can control how random you really want these random instances to be using some more unofficial extensions to the avro spec. For example, you can specify the max and min values of int type fields using the "range" specifier like so:
+
+```json
+{
+  "name": "age",
+  "type": "int",
+  "range": {
+    "int": {
+      "max": 80,
+      "min": 16
+    }
+  }
+}
+```
+
+Now when you call `random_instance/1`, the age field will be limited to the range `16 <= age < 80`.
+
+Strings can be formatted according to semantic formatting. Currently the only supported type is "postcode", but support for more types may well be added in the future.
+
+E.g.
+```json
+{
+  "name": "postcode",
+  "type": "string",
+  "range": {
+    "string": {
+      "semantic_type": "postcode"
+    }
+  }
+}
+```
+
+Now, the postcode field will be limited to random postcodes (e.g. `BS23 7SX`), rather than completely random strings.
+
 ## Publishing to Hexpm
 
 Bump the version number in mix.exs using semver semantics and run:
