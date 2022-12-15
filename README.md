@@ -2,6 +2,9 @@
 
 Generate Elixir typedstructs and various useful helper functions from AVRO schemas at compile time.
 
+## Documentation
+The documentation can be found on [HexDocs](https://primauk.hexdocs.pm/avrogen).
+
 ## Rationale
 
 While there exists a handful of libraries to encode and decode AVRO messages in Elixir, all of them consume schemas at runtime, which has the advantage of flexibilty e.g. this approach can be used with a schema registry, but you lose the any compile time type safety for your types.
@@ -149,6 +152,19 @@ You can decode it back into a struct using the `Avrogen.decode_schemaless/2` fun
 ```elixir
 {:ok, message} = Avrogen.decode_schemaless(Avro.Foo.Bar, bytes)
 ```
+
+### Converting to JSON
+Each generated module comes with the `@derive Jason.Encoder` attribute, which tells JSON that the struct can be encoded by simply serializing everything other than the `__struct__` field. See https://hexdocs.pm/jason/Jason.Encoder.html for more details.
+
+Thus, converting a message to JSON is as simple as:
+
+```elixir
+iex> message = %Avro.Test.Person{name: "Dave", age: 37}
+iex> Jason.encode(message)
+{:ok, "{\"age\":37,\"name\":\"Dave\"}"}
+```
+
+> Note: This is not the same as the official AVRO JSON encoding spec, and is mainly used for debugging / making messages human readable.
 
 ### External Schema Resolution
 Schemas commonly depend on other schemas, which can be located in a different file.
@@ -453,10 +469,3 @@ mix hex.organization auth primauk
 
 When prompted, use the credentials in the LastPass entry “Hex UK Shared Account”.
 The username should be `uk-hex-shared@helloprima.com`
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc) and published on [HexDocs](https://hexdocs.pm). Once published, the docs can be found at <https://hexdocs.pm/avrogen>.
-
-## Future Work
-We should be able to do away with the schema registry and simply add `to_binary()` and `from_binary()` function calls into the generated code to go to and from binary. The avro spec is not too complex so this could be done fairly easily.
-
-This would mean we don't have to run the schema registry as a seperate application, and the performance should be decent.
