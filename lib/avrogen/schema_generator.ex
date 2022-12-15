@@ -2,8 +2,8 @@ defmodule Avrogen.SchemaGenerator do
   @doc """
   Generates the avro schemas for a given exs file, and returns a list of the schemas generated.
   """
-  @spec generate_avsc_files!(String.t(), String.t()) :: [String.t()]
-  def generate_avsc_files!(exs_file_path, out_dir) do
+  @spec generate_avsc_files!(String.t(), String.t(), atom()) :: [String.t()]
+  def generate_avsc_files!(exs_file_path, out_dir, schema_resolution_mode) do
     # Execute the exs file
     {{:module, schema_module, _, _}, []} = Code.eval_file(exs_file_path)
 
@@ -13,9 +13,7 @@ defmodule Avrogen.SchemaGenerator do
     # Create the filename for each schema based on its name
     list_of_schemas
     |> Enum.map(fn schema ->
-      output_file_path =
-        out_dir
-        |> Path.join(Avrogen.Schema.fqn(schema) <> ".avsc")
+      output_file_path = Avrogen.Schema.path_from_fqn(out_dir, Avrogen.Schema.fqn(schema), schema_resolution_mode)
 
       {output_file_path, schema}
     end)

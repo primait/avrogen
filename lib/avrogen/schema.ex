@@ -105,22 +105,18 @@ defmodule Avrogen.Schema do
   end
 
   @doc """
-  Derive a schema's file path from its fqn.
+  Resolve a schema's file path from its fqn.
   """
-  @spec path_from_fqn(Path.t(), String.t()) :: Path.t()
-  def path_from_fqn(root, schema_fqn) do
+  @spec path_from_fqn(Path.t(), String.t(), :flat | :tree) :: Path.t()
+  def path_from_fqn(root, schema_fqn, :flat) do
     Path.join(root, schema_fqn) <> ".avsc"
   end
 
-  @doc """
-  Combine a set of schema files into one topologically sorted schema in json format.
-  """
-  @spec generate_combined_schema!([Path.t()]) :: String.t()
-  def generate_combined_schema!(schema_file_paths) do
-    for file_path <- schema_file_paths do
-      load_schema!(file_path)
-    end
-    |> Avrogen.Schema.topological_sort()
-    |> Jason.encode!(pretty: true)
+  def path_from_fqn(root, schema_fqn, :tree) do
+    path =
+      [root | String.split(schema_fqn, ".")]
+      |> Path.join()
+
+    path <> ".avsc"
   end
 end

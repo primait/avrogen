@@ -125,15 +125,16 @@ defmodule Mix.Tasks.Compile.AvroSchemaGenerator do
 
     force = config_changed?(previous_options, options)
 
-    dest = Keyword.get(options, :dest, "")
-    paths = Keyword.get(options, :paths, [])
+    paths = Keyword.get(options, :paths, ["exs_schemas/**/*.exs"])
+    dest = Keyword.get(options, :dest, "schemas")
+    schema_resolution_mode = Keyword.get(options, :schema_resolution_mode, :flat)
 
     {tasks, status} =
       paths
       |> Enum.flat_map(&Path.wildcard/1)
       |> Enum.map(&check_schema_file_state(&1, cache, force))
       |> tap(&report/1)
-      |> Enum.map(&run_task!(&1, dest))
+      |> Enum.map(&run_task!(&1, dest, schema_resolution_mode))
       |> tap(&cleanup_dest!(&1, dest))
       |> Enum.map_reduce(:noop, fn
         {:ok, task}, _status -> {task, :ok}
@@ -173,17 +174,17 @@ defmodule Mix.Tasks.Compile.AvroSchemaGenerator do
     end
   end
 
-  defp run_task!({:stale, file, _outputs}, dest) do
+  defp run_task!({:stale, file, _outputs}, dest, schema_resolution_mode) do
     {
       :ok,
       %TaskSummary{
         sources: [file],
-        targets: Avrogen.SchemaGenerator.generate_avsc_files!(file, dest)
+        targets: Avrogen.SchemaGenerator.generate_avsc_files!(file, dest, schema_resolution_mode)
       }
     }
   end
 
-  defp run_task!({_state, file, outputs}, _dest) do
+  defp run_task!({_state, file, outputs}, _dest, _schema_resolution_mode) do
     {:noop, %TaskSummary{sources: [file], targets: outputs}}
   end
 
@@ -279,19 +280,9 @@ defmodule Mix.Tasks.Compile.AvroSchemaGenerator do
 
   defp opts do
     case Keyword.get(Mix.Project.config(), :avro_schema_generator_opts, nil) do
-      nil ->
-        raise CompileError,
-          description: ":avro_schema_generator_opts must be defined in your mix.exs"
-
-      opts ->
-        opts
+      nil -> Keyword.new()
+      opts -> opts
     end
-    |> tap(fn opts ->
-      if !Keyword.has_key?(opts, :dest) do
-        raise CompileError,
-          description: ":dest key must be provided in :avro_schema_generator_opts"
-      end
-    end)
   end
 
   defp log(message) do

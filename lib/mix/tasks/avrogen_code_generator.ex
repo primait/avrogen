@@ -139,12 +139,13 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
     paths = Keyword.get(options, :paths, ["schemas/*.avsc"])
     schema_root = Keyword.get(options, :schema_root, "schemas")
     module_prefix = Keyword.get(options, :module_prefix, "Avro")
+    schema_resolution_mode = Keyword.get(options, :schema_resolution_mode, :flat)
 
     {generated_files, status} =
       paths
       |> Enum.flat_map(&Path.wildcard/1)
       |> Enum.map(fn path_to_schema ->
-        generate_tasks(path_to_schema, schema_root, dest, force)
+        generate_tasks(path_to_schema, schema_root, schema_resolution_mode, dest, force)
       end)
       |> tap(&report/1)
       |> Enum.map(&run_task!(&1, module_prefix))
@@ -165,14 +166,14 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
     Enum.sort(config_old) != Enum.sort(config)
   end
 
-  defp generate_tasks(path_to_schema, schema_root, dest, force) do
+  defp generate_tasks(path_to_schema, schema_root, schema_resolution_mode, dest, force) do
     schema = Schema.load_schema!(path_to_schema)
 
     deps =
       schema
       |> Schema.external_dependencies()
       |> Enum.map(fn schema_fqn ->
-        Schema.path_from_fqn(schema_root, schema_fqn)
+        Schema.path_from_fqn(schema_root, schema_fqn, schema_resolution_mode)
       end)
 
     path_to_code = CodeGenerator.filename_from_schema(dest, schema)

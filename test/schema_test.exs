@@ -120,4 +120,15 @@ defmodule Avrogen.Schema.Test do
       assert {:error, _} = Avrogen.Schema.topological_sort(input)
     end
   end
+
+  describe "path_from_fqn" do
+    test "flat mode" do
+      assert Avrogen.Schema.path_from_fqn("some/path", "namespace.Name", :flat) == "some/path/namespace.Name.avsc"
+    end
+
+    test "tree mode" do
+      assert Avrogen.Schema.path_from_fqn("some/path", "namespace.Name", :tree) == "some/path/namespace/Name.avsc"
+      assert Avrogen.Schema.path_from_fqn("some/path", "name.space.Name", :tree) == "some/path/name/space/Name.avsc"
+    end
+  end
 end
