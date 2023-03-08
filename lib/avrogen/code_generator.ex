@@ -41,26 +41,41 @@ defmodule Avrogen.CodeGenerator do
   end
 
   @doc """
+  Get all the filenames of the generated elixir source file from a schema.
+  """
+  @spec filenames_from_schema(Path.t(), Schema.schema(), Keyword.t()) :: Path.t()
+  def filenames_from_schema(dest, schema, opts \\ []) do
+    scope_embedded_types = Keyword.get(opts, :scope_embedded_types, false)
+
+    schema
+    |> traverse(%{}, nil, scope_embedded_types)
+    |> Enum.map(&Kernel.elem(&1, 1))
+    |> Enum.map(&filename_from_schema(dest, &1))
+  end
+
+  @doc """
   For a given schema, generate the equivalent elixir source code.
 
   The schema can be the raw map loaded from json.
   The dependencies are a list of other schemas that this schema depends on
   This function returns the elixir code as a string.
   """
-  @spec generate_schema(map(), [map()], String.t()) :: String.t()
-  def generate_schema(schema, dependencies, module_prefix) do
+  @spec generate_schema(map(), [map()], String.t(), Keyword.t()) :: [{String.t(), String.t()}]
+  def generate_schema(schema, dependencies, module_prefix, opts \\ []) do
     # Extract all the embedded fields into a single list of schemas (topologically sorted?)
     # get a map of what enums/records need to be generated / referenced
     # (will rewrite records that have inlined enum types)
-    schemas = traverse(schema, %{}, nil)
+    dest = Keyword.get(opts, :dest, "")
+    scope_embedded_types = Keyword.get(opts, :scope_embedded_types, false)
+    schemas = traverse(schema, %{}, nil, scope_embedded_types)
     global = traverse(dependencies, schemas, nil)
 
     schemas
-    |> Enum.map_join(fn {avro_fqn, schema} ->
+    |> Enum.map(fn {avro_fqn, schema} ->
       emit_code(schema, global, avro_fqn, module_prefix)
+      |> String.trim()
+      |> format_or_log(filename_from_schema(dest, schema))
     end)
-    |> String.trim()
-    |> format_or_log(Avrogen.Schema.fqn(schema))
   end
 
   def format_or_log(code_string, filename) do
@@ -72,6 +87,7 @@ defmodule Avrogen.CodeGenerator do
         reraise e, __STACKTRACE__
     end
     |> IO.iodata_to_binary()
+    |> then(&{filename, &1})
   end
 
   def records_and_enums_to_csv(records) do
@@ -318,19 +334,25 @@ defmodule Avrogen.CodeGenerator do
 
   # <%= Enum.map_join(fields, ",\n", fn field -> drop_pii_field("m", field, global) end) %>
 
-  def traverse(schemas, global, parent_namespace) when is_list(schemas) do
-    Enum.reduce(schemas, global, fn schema, g -> traverse(schema, g, parent_namespace) end)
+  def traverse(schemas, global, parent_namespace, scope_embedded_types \\ false)
+
+  def traverse(schemas, global, parent_namespace, scope_embedded_types) when is_list(schemas) do
+    Enum.reduce(schemas, global, fn schema, g ->
+      traverse(schema, g, parent_namespace, scope_embedded_types)
+    end)
   end
 
   def traverse(
         %{"type" => "record", "name" => name, "fields" => fields} = t,
         global,
-        parent_namespace
+        parent_namespace,
+        scope_embedded_types
       ) do
-    field_parent_namespace = get_namespace(parent_namespace, t)
+    field_parent_namespace = get_namespace(parent_namespace, t, scope_embedded_types)
 
     # rewrite t: externalise all inlined enum types; add respective schemas to global
-    {rewritten_fields, global} = externalise_inlined_enums(fields, global, field_parent_namespace)
+    {rewritten_fields, global} = externalise_inlined_types(fields, global, field_parent_namespace)
+
     rewritten_t = Map.put(t, "fields", rewritten_fields)
 
     # the fully qualified names of referenced schemas
@@ -342,53 +364,104 @@ defmodule Avrogen.CodeGenerator do
         type: :record,
         name: Macro.camelize(name),
         referenced_schemas: referenced_schemas,
-        schema: rewritten_t
+        schema: Map.put_new(rewritten_t, "namespace", parent_namespace)
       })
 
-    Enum.reduce(fields, global, fn field, g -> traverse(field, g, field_parent_namespace) end)
+    Enum.reduce(fields, global, fn field, g ->
+      traverse(field, g, field_parent_namespace, scope_embedded_types)
+    end)
   end
 
-  def traverse(%{"type" => %{"type" => _} = inlined_type} = t, global, parent_namespace) do
-    parent_namespace = get_namespace(parent_namespace, t)
-    traverse(inlined_type, global, parent_namespace)
+  def traverse(
+        %{"type" => %{"type" => _} = inlined_type} = t,
+        global,
+        parent_namespace,
+        scope_embedded_types
+      ) do
+    parent_namespace = get_namespace(parent_namespace, t, scope_embedded_types)
+    traverse(inlined_type, global, parent_namespace, scope_embedded_types)
   end
 
-  def traverse(%{"type" => "enum", "name" => name} = t, global, parent_namespace) do
+  def traverse(
+        %{"type" => "enum", "name" => name} = t,
+        global,
+        parent_namespace,
+        _scope_embedded_types
+      ) do
+    name = Macro.camelize(name)
+    rewritten_field = Map.put(t, "name", name)
+
     Map.put(global, get_fullname(parent_namespace, t), %{
       type: :enum,
-      name: Macro.camelize(name),
-      schema: t
+      name: name,
+      schema: Map.put_new(rewritten_field, "namespace", parent_namespace)
     })
   end
 
-  def traverse(%{"type" => "array", "items" => it} = t, global, parent_namespace) do
-    parent_namespace = get_namespace(parent_namespace, t)
-    traverse(it, global, parent_namespace)
+  def traverse(
+        %{"type" => "array", "items" => it} = t,
+        global,
+        parent_namespace,
+        scope_embedded_types
+      ) do
+    parent_namespace = get_namespace(parent_namespace, t, scope_embedded_types)
+    traverse(it, global, parent_namespace, scope_embedded_types)
   end
 
-  def traverse(%{"type" => union} = t, global, parent_namespace) when is_list(union) do
-    parent_namespace = get_namespace(parent_namespace, t)
-    Enum.reduce(union, global, fn u, g -> traverse(u, g, parent_namespace) end)
+  def traverse(%{"type" => union} = t, global, parent_namespace, scope_embedded_types)
+      when is_list(union) do
+    parent_namespace = get_namespace(parent_namespace, t, scope_embedded_types)
+
+    Enum.reduce(union, global, fn u, g ->
+      traverse(u, g, parent_namespace, scope_embedded_types)
+    end)
   end
 
-  def traverse(%{"type" => primitive_or_reference}, global, _parent_namespace)
+  def traverse(
+        %{"type" => primitive_or_reference},
+        global,
+        _parent_namespace,
+        _scope_embedded_types
+      )
       when is_binary(primitive_or_reference) do
     global
   end
 
-  def traverse(primitive_or_reference, global, _parent_namespace)
+  def traverse(primitive_or_reference, global, _parent_namespace, _scope_embedded_types)
       when is_binary(primitive_or_reference) do
     global
   end
 
-  def traverse(other, _, _) do
+  def traverse(other, _, _, _) do
     raise "cannot traverse #{inspect(other)}"
   end
 
   # given a possibly nil parent namespace and a type, work out the closest
   # enclosing namespace for the type
-  def get_namespace(nil, %{"namespace" => namespace}), do: namespace
-  def get_namespace(parent_namespace, _), do: parent_namespace
+  def get_namespace(parent_namespace, type, scope_embedded_types \\ false)
+  def get_namespace(nil, %{"namespace" => namespace}, false), do: namespace
+  def get_namespace(parent_namespace, _, false), do: parent_namespace
+
+  def get_namespace(nil, %{"namespace" => namespace, "name" => name, "type" => "record"}, true),
+    do: namespace <> "." <> Macro.underscore(name)
+
+  def get_namespace(nil, %{"name" => name, "type" => "record"}, true), do: Macro.underscore(name)
+  def get_namespace(nil, %{"namespace" => namespace, "type" => "record"}, true), do: namespace
+
+  def get_namespace(
+        parent_namespace,
+        %{"namespace" => namespace, "name" => name, "type" => "record"},
+        true
+      ),
+      do: parent_namespace <> "." <> namespace <> "." <> Macro.underscore(name)
+
+  def get_namespace(parent_namespace, %{"namespace" => namespace, "type" => "record"}, true),
+    do: parent_namespace <> "." <> namespace
+
+  def get_namespace(parent_namespace, %{"name" => name, "type" => "record"}, true),
+    do: parent_namespace <> "." <> Macro.underscore(name)
+
+  def get_namespace(parent_namespace, _, true), do: parent_namespace
 
   # work out full name for complex types
   def get_fullname(_parent_namespace, %{"namespace" => namespace, "name" => name})
@@ -400,41 +473,86 @@ defmodule Avrogen.CodeGenerator do
   def get_fullname(parent_namespace, %{"name" => name}),
     do: "#{parent_namespace}.#{Macro.camelize(name)}"
 
-  # pull out all inlined enum definitions and rewrite schema
-  def externalise_inlined_enums(
-        fields,
-        global,
-        parent_namespace
-      )
-      when is_list(fields) do
+  def externalise_inlined_types(fields, global, parent_namespace) when is_list(fields) do
     {rewritten_fields, updated_global} =
       Enum.reduce(fields, {[], global}, fn field, {acc, g} ->
-        {updated_field, updated_g} = maybe_externalise_enum(field, g, parent_namespace)
+        {updated_field, updated_g} = maybe_externalise_type(field, g, parent_namespace)
         {[updated_field | acc], updated_g}
       end)
 
     {Enum.reverse(rewritten_fields), updated_global}
   end
 
-  def maybe_externalise_enum(
-        %{"type" => %{"type" => "enum", "name" => name} = inlined_enum} = field,
+  defguard is_enum_or_record(type) when type == "record" or type == "enum"
+  defp to_type("record"), do: :record
+  defp to_type("enum"), do: :enum
+
+  def maybe_externalise_type(
+        %{"type" => %{"type" => type, "name" => name} = inlined_type} = field,
         global,
         parent_namespace
-      ) do
-    fqn = get_fullname(parent_namespace, inlined_enum)
+      )
+      when is_enum_or_record(type) do
+    fqn = get_fullname(parent_namespace, inlined_type)
     rewritten_field = Map.put(field, "type", fqn)
 
     updated_global =
       Map.put(global, fqn, %{
-        type: :enum,
+        type: to_type(type),
         name: Macro.camelize(name),
-        schema: inlined_enum
+        schema: Map.put(inlined_type, "namespace", parent_namespace)
       })
 
     {rewritten_field, updated_global}
   end
 
-  def maybe_externalise_enum(
+  def maybe_externalise_type(
+        %{
+          "type" => %{
+            "type" => "array",
+            "items" => %{"type" => type, "name" => name} = inlined_type
+          }
+        } = field,
+        global,
+        parent_namespace
+      )
+      when is_enum_or_record(type) do
+    fqn = get_fullname(parent_namespace, inlined_type)
+    rewritten_field = Map.put(field, "type", %{"type" => "array", "items" => fqn})
+
+    updated_global =
+      Map.put(global, fqn, %{
+        type: to_type(type),
+        name: Macro.camelize(name),
+        schema: Map.put(inlined_type, "namespace", parent_namespace)
+      })
+
+    {rewritten_field, updated_global}
+  end
+
+  def maybe_externalise_type(
+        %{
+          "type" => "array",
+          "items" => %{"type" => type, "name" => name} = inlined_type
+        } = field,
+        global,
+        parent_namespace
+      )
+      when is_enum_or_record(type) do
+    fqn = get_fullname(parent_namespace, inlined_type)
+    rewritten_field = Map.put(field, "items", fqn)
+
+    updated_global =
+      Map.put(global, fqn, %{
+        type: to_type(type),
+        name: Macro.camelize(name),
+        schema: Map.put(inlined_type, "namespace", parent_namespace)
+      })
+
+    {rewritten_field, updated_global}
+  end
+
+  def maybe_externalise_type(
         %{"type" => union} = field,
         global,
         parent_namespace
@@ -442,31 +560,32 @@ defmodule Avrogen.CodeGenerator do
       when is_list(union) do
     {updated_union, updated_global} =
       Enum.reduce(union, {[], global}, fn t, {acc, g} ->
-        {updated_type, updated_g} = maybe_externalise_enum(t, g, parent_namespace)
+        {updated_type, updated_g} = maybe_externalise_type(t, g, parent_namespace)
         {[updated_type | acc], updated_g}
       end)
 
     {Map.put(field, "type", Enum.reverse(updated_union)), updated_global}
   end
 
-  def maybe_externalise_enum(
-        %{"type" => "enum", "name" => name} = inlined_enum,
+  def maybe_externalise_type(
+        %{"type" => type, "name" => name} = inlined_type,
         global,
         parent_namespace
-      ) do
-    fqn = get_fullname(parent_namespace, inlined_enum)
+      )
+      when is_enum_or_record(type) do
+    fqn = get_fullname(parent_namespace, inlined_type)
 
     updated_global =
       Map.put(global, fqn, %{
-        type: :enum,
+        type: to_type(type),
         name: Macro.camelize(name),
-        schema: inlined_enum
+        schema: Map.put(inlined_type, "namespace", parent_namespace)
       })
 
     {fqn, updated_global}
   end
 
-  def maybe_externalise_enum(field, global, _parent_namespace) do
+  def maybe_externalise_type(field, global, _parent_namespace) do
     {field, global}
   end
 
@@ -582,7 +701,9 @@ defmodule Avrogen.CodeGenerator do
   def random_instance_logical_type_constructor(lt, range_opts \\ "") do
     case lt do
       "big_decimal" -> "Avrogen.Util.Random.Constructors.decimal(#{range_opts})"
+      "decimal" -> "Avrogen.Util.Random.Constructors.decimal(#{range_opts})"
       "iso_date" -> "Avrogen.Util.Random.Constructors.date(#{range_opts})"
+      "date" -> "Avrogen.Util.Random.Constructors.date(#{range_opts})"
       "iso_datetime" -> "Avrogen.Util.Random.Constructors.datetime(#{range_opts})"
     end
   end
@@ -607,6 +728,10 @@ defmodule Avrogen.CodeGenerator do
 
   def random_instance_field(%{"type" => %{"logicalType" => lt}} = field, _global) do
     random_instance_logical_type_constructor(lt, range_opts(field, lt))
+  end
+
+  def random_instance_field(%{"type" => %{"type" => "map", "values" => values}}, global) do
+    ~s'Avrogen.Util.Random.Constructors.map(#{random_instance_field(values, global)})'
   end
 
   def random_instance_field(%{"type" => union} = field, global) when is_list(union) do
@@ -713,6 +838,46 @@ defmodule Avrogen.CodeGenerator do
 
   def from_avro_map_body_field(%{"name" => name, "type" => %{"logicalType" => lt}}, _global) do
     ~s'#{name}: #{conversion_from_incantation(lt, name)}'
+  end
+
+  def from_avro_map_body_field(
+        %{"name" => name, "type" => %{"type" => "map", "values" => values}},
+        global
+      ) do
+    type_conversion =
+      case values do
+        %{"logicalType" => logical_type} ->
+          conversion_from_incantation(logical_type, "v")
+
+        type when is_binary(type) ->
+          if is_primitive(type) do
+            "v"
+          else
+            case Map.get(global[type], :type) do
+              :record ->
+                # if type is a record, we need to call the respective fromavromap
+                # function on its module -- which returns an ok/error tuple
+                ~s'#{Map.get(global[type], :name)}.from_avro_map(v) |> Noether.Either.map_error(fn e -> raise "#{Map.get(global[type], :name)}.from_avro_map(v) failed: #\#{if is_binary(e), do: e, else: inspect(e)}" end) |> Noether.Either.unwrap()'
+
+              :enum ->
+                # if type is an enum, we need to from_string it
+                ~s"""
+                #{Map.get(global[type], :name)}.value(v)
+                |> Noether.Either.map_error(fn msg -> raise msg end)
+                |> Noether.Either.unwrap()
+                """
+                |> String.trim()
+            end
+          end
+
+        type when is_list(type) ->
+          raise "Error does not yet support maps with union value types"
+
+        type ->
+          raise "Error does not yet support maps with values of type #{type}"
+      end
+
+    ~s'#{name}: Enum.into(#{name}, %{}, fn k, v -> {k, #{type_conversion}} end)'
   end
 
   def from_avro_map_body_field(%{"name" => name, "type" => union}, global) when is_list(union) do
@@ -893,17 +1058,44 @@ defmodule Avrogen.CodeGenerator do
     ]
 
   def conversion_from_incantation("big_decimal", inner), do: ~s'Decimal.new(#{inner})'
+  def conversion_from_incantation("decimal", inner), do: ~s'Decimal.new(#{inner})'
+  def conversion_from_incantation("iso_date", inner), do: ~s'Date.from_iso8601!(#{inner})'
+  def conversion_from_incantation("date", inner), do: ~s'Date.from_iso8601!(#{inner})'
 
-  def conversion_from_incantation("iso_date", inner) do
-    ~s'Date.from_iso8601!(#{inner})'
-  end
-
-  def conversion_from_incantation("iso_datetime", inner) do
-    ~s'DateTime.from_iso8601(#{inner}) |> elem(1)'
-  end
+  def conversion_from_incantation("iso_datetime", inner),
+    do: ~s'DateTime.from_iso8601(#{inner}) |> elem(1)'
 
   def to_avro_map_field(%{"name" => name, "logicalType" => logical_type}, _global) do
     ~s'"#{name}" => #{conversion_incantation(logical_type, "r.#{name}")}'
+  end
+
+  def to_avro_map_field(
+        %{"name" => name, "type" => %{"type" => "map", "values" => values}},
+        global
+      ) do
+    type_conversion =
+      case values do
+        %{"logicalType" => logical_type} ->
+          conversion_incantation(logical_type, "v")
+
+        type when is_binary(type) ->
+          if is_primitive(type) do
+            "v"
+          else
+            case Map.get(global[type], :type) do
+              :record -> ~s'#{Map.get(global[type], :name)}.to_avro_map(v)'
+              :enum -> ~s'Atom.to_string(v)'
+            end
+          end
+
+        type when is_list(type) ->
+          raise "Error does not yet support maps with union value types"
+
+        type ->
+          raise "Error does not yet support maps with values of type #{type}"
+      end
+
+    ~s'"#{name}" => Enum.into(r.#{name}, %{}, fn k, v -> {k, #{type_conversion}} end)'
   end
 
   def to_avro_map_field(%{"name" => name, "type" => type}, global) when is_binary(type) do
@@ -946,6 +1138,8 @@ defmodule Avrogen.CodeGenerator do
         %{type: :enum} ->
           ~s'elements when is_list(elements) -> Enum.map(r.#{name}, fn v -> Atom.to_string(v) end)'
       end)
+
+    # Add support for map in union types
 
     complex =
       union
@@ -1013,29 +1207,18 @@ defmodule Avrogen.CodeGenerator do
     ~s'"#{name}" => #{conversion_incantation(logical_type, "r.#{name}")}'
   end
 
-  def match_conversion_incantation("iso_date") do
-    ~s'%Date{} = d -> Date.to_iso8601(d)'
-  end
+  def match_conversion_incantation("iso_date"), do: ~s'%Date{} = d -> Date.to_iso8601(d)'
+  def match_conversion_incantation("date"), do: ~s'%Date{} = d -> Date.to_iso8601(d)'
+  def match_conversion_incantation("big_decimal"), do: ~s'%Decimal{} = d -> Decimal.to_string(d)'
 
-  def match_conversion_incantation("iso_datetime") do
-    ~s'%DateTime{} = d -> DateTime.to_iso8601(d)'
-  end
+  def match_conversion_incantation("iso_datetime"),
+    do: ~s'%DateTime{} = d -> DateTime.to_iso8601(d)'
 
-  def match_conversion_incantation("big_decimal") do
-    ~s'%Decimal{} = d -> Decimal.to_string(d)'
-  end
-
-  def conversion_incantation("iso_date", inner) do
-    ~s'Date.to_iso8601(#{inner})'
-  end
-
-  def conversion_incantation("iso_datetime", inner) do
-    ~s'DateTime.to_iso8601(#{inner})'
-  end
-
-  def conversion_incantation("big_decimal", inner) do
-    ~s'Decimal.to_string(#{inner})'
-  end
+  def conversion_incantation("iso_date", inner), do: ~s'Date.to_iso8601(#{inner})'
+  def conversion_incantation("date", inner), do: ~s'Date.to_iso8601(#{inner})'
+  def conversion_incantation("iso_datetime", inner), do: ~s'DateTime.to_iso8601(#{inner})'
+  def conversion_incantation("big_decimal", inner), do: ~s'Decimal.to_string(#{inner})'
+  def conversion_incantation("decimal", inner), do: ~s'Decimal.to_string(#{inner})'
 
   def field_comment(%{"name" => name, "doc" => doc}, indent) do
     str = String.trim("`#{name}`: #{doc}") <> "\n"
@@ -1073,6 +1256,7 @@ defmodule Avrogen.CodeGenerator do
   def typedstruct_field_type(%{"logicalType" => t}), do: elixir_type_for_logical_type(t)
   def typedstruct_field_type(%{"type" => single}) when is_binary(single), do: elixir_type(single)
   def typedstruct_field_type(%{"type" => %{"type" => "array"} = array}), do: elixir_type(array)
+  def typedstruct_field_type(%{"type" => %{"type" => "map"} = map}), do: elixir_type(map)
 
   def typedstruct_field_type(%{"type" => %{"logicalType" => t}}),
     do: elixir_type_for_logical_type(t)
@@ -1093,6 +1277,10 @@ defmodule Avrogen.CodeGenerator do
     "[" <> elixir_type(n) <> "]"
   end
 
+  def elixir_type(%{"type" => "map", "values" => v}) do
+    "%{String.t() => " <> elixir_type(v) <> "}"
+  end
+
   def elixir_type(%{"type" => t}), do: elixir_type(t)
 
   def elixir_type(s) do
@@ -1104,7 +1292,9 @@ defmodule Avrogen.CodeGenerator do
 
   @logical_types %{
     "iso_date" => "Date.t()",
+    "date" => "Date.t()",
     "iso_datetime" => "DateTime.t()",
+    "decimal" => "Decimal.t()",
     "big_decimal" => "Decimal.t()"
   }
   def elixir_type_for_logical_type(t) do
@@ -1114,7 +1304,17 @@ defmodule Avrogen.CodeGenerator do
     end
   end
 
-  @primitives ["null", "boolean", "int", "long", "float", "double", "bytes", "string"]
+  @primitives [
+    "null",
+    "boolean",
+    "int",
+    "long",
+    "float",
+    "double",
+    "bytes",
+    "string",
+    "map"
+  ]
   def is_primitive(s), do: s in @primitives
   # ^^^ add ? to function name
 

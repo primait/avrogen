@@ -98,6 +98,7 @@ avro_code_generator_opts: [
   dest: "generated",
   schema_root: "schema",
   module_prefix: "Avro",
+  scoped_embed_paths: ["priv/schema/events.*.avsc"],
   schema_resolution_mode: :flat
 ]
 ```
@@ -108,6 +109,35 @@ The options are:
  - `schema_root` - The root of the schema directory, this is the root dir that will be used to resolve schemas located in other files. Defaults to `"schemas"`
  - `module_prefix` - String to place at the front of generated elixir modules. Defaults to `"Avro"`.
  - `schema_resolution_mode` - Tells the code generator how to resolve external schemas to a filename. Defaults to `:flat`.
+ - `scope_embed_paths` - the glob patterns of the files where any embedded scopes should have
+    the generated module path contain the encompasing types.
+
+    For example, for the following schema
+
+    ```json
+    {
+      "name": "Event",
+      "namespace": "events",
+      "type": "record",
+      "fields": [
+        {
+          "name": "details",
+          "type": {
+            "name": "Subtype",
+            "type": "record",
+            "fields": [
+              ...
+            ]
+          }
+        }
+      ]
+    }
+    ```
+
+    If this file is included in the scoped_embed_paths, then the generated module for `Subtype`
+    would be called `Events.Event.Subtype` otherwise it would be `Events.Subtype `. This option
+    is useful when you have naming clashes in embedded schema subtypes, or if you simply want to
+    namespace subtypes to avoid potential future clashes
 
 ### Using the generated code
 Firstly, you'll need to start the Schema Registry process by adding the following entry to your Application file:
@@ -198,13 +228,16 @@ AVRO Type | Elixir Type
 `double` | `float`
 `string` | `binary`
 `array` | `list`
+`map` | `%{ String.t() => Value.t() }`
 
 The following logical types are also supported:
 AVRO Logical Type | AVRO Underlying Type | Elixir Type
 ---|---|---
 `iso_date` | `string` | `Date`
+`date` | `string` | `Date`
 `iso_datetime` | `string` | `DateTime`
 `big_decimal` | `string` | `Decimal`
+`decimal` | `string` | `Decimal`
 
 The following AVRO types are not supported (yet):
 - `float` (use `double`)

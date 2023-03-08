@@ -17,6 +17,7 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
       avro_code_generator_opts: [
         paths: ["priv/schema/*.avsc"],
         dest: "generated/",
+        scoped_embed_paths: ["priv/schema/events*.avsc"],
         schema_root: "priv/schema",
         module_prefix: "Avro.Generated"
       ]
@@ -32,6 +33,34 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
   - dest: Where to put the generated elixir files.
   - schema_root: Where to find external schema files (see notes on schema file naming below)
   - module_prefix: A common prefix prepended to the front of all module names.
+  - scoped_embed_paths: the glob patterns of the files where any embedded scopes should have
+    the generated module path contain the encompasing types.
+
+    For example, for the following schema
+
+    ```json
+    {
+      "name": "Event",
+      "namespace": "events",
+      "type": "record",
+      "fields": [
+        {
+          "name": "details",
+          "type": {
+            "name": "Subtype",
+            "type": "record",
+            "fields": [
+              ...
+            ]
+          }
+        }
+      ]
+    }
+    ```
+    If this file is included in the scoped_embed_paths, then the generated module for `Subtype`
+    would be called `Events.Event.Subtype` otherwise it would be `Events.Subtype `. This option
+    is useful when you have naming clashes in embedded schema subtypes, or if you simply want to
+    namespace subtypes to avoid potential future clashes
 
   ## Schema File Naming
 
@@ -139,16 +168,26 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
     paths = Keyword.get(options, :paths, ["schemas/*.avsc"])
     schema_root = Keyword.get(options, :schema_root, "schemas")
     module_prefix = Keyword.get(options, :module_prefix, "Avro")
+    scoped_embed_paths = Keyword.get(options, :scoped_embed_paths, [])
     schema_resolution_mode = Keyword.get(options, :schema_resolution_mode, :flat)
+
+    scoped_embed_files = Enum.flat_map(scoped_embed_paths, &Path.wildcard/1)
 
     {generated_files, status} =
       paths
       |> Enum.flat_map(&Path.wildcard/1)
       |> Enum.map(fn path_to_schema ->
-        generate_tasks(path_to_schema, schema_root, schema_resolution_mode, dest, force)
+        generate_tasks(
+          path_to_schema,
+          schema_root,
+          schema_resolution_mode,
+          dest,
+          force,
+          path_to_schema in scoped_embed_files
+        )
       end)
       |> tap(&report/1)
-      |> Enum.map(&run_task!(&1, module_prefix))
+      |> Enum.map(&run_task!(&1, module_prefix, dest))
       |> tap(&cleanup_dest!(&1, dest))
       |> Enum.map_reduce(:noop, fn
         {:ok, path_to_code}, _status -> {path_to_code, :ok}
@@ -166,7 +205,7 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
     Enum.sort(config_old) != Enum.sort(config)
   end
 
-  defp generate_tasks(path_to_schema, schema_root, schema_resolution_mode, dest, force) do
+  defp generate_tasks(path_to_schema, schema_root, schema_resolution_mode, dest, force, scope) do
     schema = Schema.load_schema!(path_to_schema)
 
     deps =
@@ -176,24 +215,21 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
         Schema.path_from_fqn(schema_root, schema_fqn, schema_resolution_mode)
       end)
 
-    path_to_code = CodeGenerator.filename_from_schema(dest, schema)
+    paths = CodeGenerator.filenames_from_schema(dest, schema)
 
     status =
-      case force ||
-             Mix.Utils.stale?([path_to_schema | deps] ++ find_beam_files(), [
-               path_to_code
-             ]) do
+      case force || Mix.Utils.stale?(paths ++ deps ++ find_beam_files(), [paths]) do
         true -> :stale
         false -> :noop
       end
 
-    {status, path_to_schema, deps, path_to_code}
+    {status, path_to_schema, deps, paths, scope}
   end
 
   defp report(files) do
     Enum.count(files, fn
-      {:stale, _, _, _} -> true
-      {:noop, _, _, _} -> false
+      {:stale, _, _, _, _} -> true
+      {:noop, _, _, _, _} -> false
     end)
     |> case do
       0 -> nil
@@ -201,24 +237,31 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
     end
   end
 
-  defp run_task!({:stale, path_to_schema, deps, path_to_code}, module_prefix) do
+  defp run_task!({:stale, path_to_schema, deps, _paths, scope}, module_prefix, dest) do
     [schema | deps_schemas] =
       [path_to_schema | deps]
       |> Enum.map(fn schema -> File.read!(schema) |> Jason.decode!() end)
 
-    code = CodeGenerator.generate_schema(schema, deps_schemas, module_prefix)
-    File.mkdir_p!(Path.dirname(path_to_code))
-    File.write!(path_to_code, code)
+    files =
+      CodeGenerator.generate_schema(schema, deps_schemas, module_prefix,
+        scope_embedded_types: scope,
+        dest: dest
+      )
+      |> Enum.map(fn {file_name, code} ->
+        File.mkdir_p!(Path.dirname(file_name))
+        File.write!(file_name, code)
+        file_name
+      end)
 
-    {:ok, path_to_code}
+    {:ok, files}
   end
 
-  defp run_task!({:noop, _, _, path_to_code}, _) do
-    {:noop, path_to_code}
+  defp run_task!({:noop, _, _, paths, _scope}, _, _) do
+    {:noop, paths}
   end
 
   defp cleanup_dest!(tasks, dest_dir) do
-    generated_files = for {_, path_to_code} <- tasks, do: path_to_code
+    generated_files = Enum.flat_map(tasks, &Kernel.elem(&1, 1))
 
     for file <- ls_r(dest_dir), not Enum.member?(generated_files, file) do
       log("Removing rogue file #{file}")

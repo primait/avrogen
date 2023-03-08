@@ -29,31 +29,27 @@ defmodule Avrogen.Schema do
   Get a schema's fully qualified name by combining its namespace and name.
   """
   @spec fqn(schema()) :: String.t()
-  def fqn(%{"name" => name, "namespace" => namespace}) do
-    "#{namespace}.#{name}"
-  end
-
-  def fqn(%{"name" => name}) do
-    name
-  end
+  def fqn(%{"name" => name, "namespace" => namespace}), do: "#{namespace}.#{name}"
+  def fqn(%{"name" => name}), do: name
+  def fqn(%{name: _name, schema: schema}), do: fqn(schema)
 
   @doc """
   Get a schema's namespace.
+
+  Note: Unsure what to do if the schema has no namespace - make it a MatchError for now...
   """
   @spec namespace(schema()) :: String.t()
-  def namespace(%{"namespace" => namespace}) do
-    namespace
-
-    # Note: Unsure what to do if the schema has no namespace - make it a MatchError for now...
-  end
+  def namespace(%{"namespace" => namespace}), do: namespace
+  def namespace(%{namespace: nil, schema: schema}), do: namespace(schema)
+  def namespace(%{namespace: namespace, schema: _schema}), do: namespace
+  def namespace(%{schema: schema}), do: namespace(schema)
 
   @doc """
   Get a schema's name.
   """
   @spec name(schema()) :: String.t()
-  def name(%{"name" => name}) do
-    name
-  end
+  def name(%{"name" => name}), do: name
+  def name(%{name: name}), do: name
 
   @doc """
   Sort a list of avro schemas in topological order based on dependencies.

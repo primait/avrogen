@@ -24,4 +24,38 @@ defmodule Avrogen.AvroModule do
   The name of the schema that defines the record represented by this module.
   """
   @callback avro_schema_name() :: String.t()
+
+  @doc """
+  Whether embedded schemas should be scoped to the type they are defined in.
+
+  For example, for the following schema
+
+  ```json
+  {
+    "name": "Event",
+    "namespace": "events",
+    "type": "record",
+    "fields": [
+      {
+        "name": "details",
+        "type": {
+          "name": "Subtype",
+          "type": "record",
+          "fields": [
+            ...
+          ]
+        }
+      }
+    ]
+  }
+  ```
+
+  If set to `true` the internal type would be called "Events.Event.Subtype", otherwise, it would be
+  "Events.Subtype".
+
+  If not provided default to `false`
+  """
+  @callback scope_embedded_types?() :: boolean()
+
+  @optional_callbacks scope_embedded_types?: 0
 end

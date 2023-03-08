@@ -3,8 +3,10 @@ defmodule Avrogen.CodeGenerator.Test do
 
   alias Avrogen.CodeGenerator
 
+  @schema_file "test/example_schemas.json"
+
   describe "Generating a record module" do
-    test "externalise_inlined_enums: at top-level" do
+    test "externalise_inlined_types: at top-level" do
       schema =
         ensure_string_keys(%{
           type: :record,
@@ -19,14 +21,26 @@ defmodule Avrogen.CodeGenerator.Test do
                 symbols: [:years, :months, :miles],
                 default: :years
               }
+            },
+            %{
+              name: :fraction,
+              type: %{
+                name: :fraction,
+                type: :record,
+                fields: [
+                  %{name: :numerator, type: :int},
+                  %{name: :denominator, type: :int}
+                ]
+              }
             }
           ]
         })
 
-      assert CodeGenerator.externalise_inlined_enums(schema["fields"], %{}, "parent_namespace") ==
+      assert CodeGenerator.externalise_inlined_types(schema["fields"], %{}, "parent_namespace") ==
                {
                  [
-                   %{"name" => "unit", "type" => "parent_namespace.Unit"}
+                   %{"name" => "unit", "type" => "parent_namespace.Unit"},
+                   %{"name" => "fraction", "type" => "parent_namespace.Fraction"}
                  ],
                  %{
                    "parent_namespace.Unit" => %{
@@ -34,21 +48,34 @@ defmodule Avrogen.CodeGenerator.Test do
                      schema: %{
                        "default" => "years",
                        "name" => "unit",
+                       "namespace" => "parent_namespace",
                        "symbols" => ["years", "months", "miles"],
                        "type" => "enum"
                      },
                      type: :enum
+                   },
+                   "parent_namespace.Fraction" => %{
+                     name: "Fraction",
+                     type: :record,
+                     schema: %{
+                       "fields" => [
+                         %{"name" => "numerator", "type" => "int"},
+                         %{"name" => "denominator", "type" => "int"}
+                       ],
+                       "name" => "fraction",
+                       "namespace" => "parent_namespace",
+                       "type" => "record"
+                     }
                    }
                  }
                }
     end
 
-    test "externalise_inlined_enums: in union" do
+    test "externalise_inlined_types: in union" do
       schema =
         ensure_string_keys(%{
           type: :record,
           name: "Foo",
-          namespace: "application_data.v2",
           fields: [
             %{
               name: :unit,
@@ -59,16 +86,27 @@ defmodule Avrogen.CodeGenerator.Test do
                   type: :enum,
                   symbols: [:years, :months, :miles],
                   default: :years
+                },
+                %{
+                  name: :fraction,
+                  type: :record,
+                  fields: [
+                    %{name: :numerator, type: :int},
+                    %{name: :denominator, type: :int}
+                  ]
                 }
               ]
             }
           ]
         })
 
-      assert CodeGenerator.externalise_inlined_enums(schema["fields"], %{}, "parent_namespace") ==
+      assert CodeGenerator.externalise_inlined_types(schema["fields"], %{}, "parent_namespace") ==
                {
                  [
-                   %{"name" => "unit", "type" => ["null", "parent_namespace.Unit"]}
+                   %{
+                     "name" => "unit",
+                     "type" => ["null", "parent_namespace.Unit", "parent_namespace.Fraction"]
+                   }
                  ],
                  %{
                    "parent_namespace.Unit" => %{
@@ -76,10 +114,157 @@ defmodule Avrogen.CodeGenerator.Test do
                      schema: %{
                        "default" => "years",
                        "name" => "unit",
+                       "namespace" => "parent_namespace",
                        "symbols" => ["years", "months", "miles"],
                        "type" => "enum"
                      },
                      type: :enum
+                   },
+                   "parent_namespace.Fraction" => %{
+                     name: "Fraction",
+                     schema: %{
+                       "fields" => [
+                         %{"name" => "numerator", "type" => "int"},
+                         %{"name" => "denominator", "type" => "int"}
+                       ],
+                       "name" => "fraction",
+                       "namespace" => "parent_namespace",
+                       "type" => "record"
+                     },
+                     type: :record
+                   }
+                 }
+               }
+    end
+
+    test "externalise_inlined_types: array in union" do
+      schema =
+        ensure_string_keys(%{
+          type: :record,
+          name: "Foo",
+          namespace: "application_data.v2",
+          fields: [
+            %{
+              name: :name,
+              type: [
+                :null,
+                %{
+                  name: :units,
+                  type: :array,
+                  items: %{
+                    name: :unit,
+                    type: :enum,
+                    symbols: [:years, :months, :miles],
+                    default: :years
+                  }
+                },
+                %{
+                  name: :fractions,
+                  type: :array,
+                  items: %{
+                    name: :fraction,
+                    type: :record,
+                    fields: [
+                      %{name: :numerator, type: :int},
+                      %{name: :denominator, type: :int}
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        })
+
+      assert CodeGenerator.externalise_inlined_types(schema["fields"], %{}, "parent_namespace") ==
+               {
+                 [
+                   %{
+                     "name" => "name",
+                     "type" => [
+                       "null",
+                       %{
+                         "type" => "array",
+                         "name" => "units",
+                         "items" => "parent_namespace.Unit"
+                       },
+                       %{
+                         "type" => "array",
+                         "name" => "fractions",
+                         "items" => "parent_namespace.Fraction"
+                       }
+                     ]
+                   }
+                 ],
+                 %{
+                   "parent_namespace.Unit" => %{
+                     name: "Unit",
+                     schema: %{
+                       "default" => "years",
+                       "name" => "unit",
+                       "namespace" => "parent_namespace",
+                       "symbols" => ["years", "months", "miles"],
+                       "type" => "enum"
+                     },
+                     type: :enum
+                   },
+                   "parent_namespace.Fraction" => %{
+                     name: "Fraction",
+                     schema: %{
+                       "fields" => [
+                         %{"name" => "numerator", "type" => "int"},
+                         %{"name" => "denominator", "type" => "int"}
+                       ],
+                       "name" => "fraction",
+                       "namespace" => "parent_namespace",
+                       "type" => "record"
+                     },
+                     type: :record
+                   }
+                 }
+               }
+    end
+
+    test "externalise_inlined_types: in array" do
+      schema =
+        ensure_string_keys(%{
+          type: :record,
+          name: "Foo",
+          namespace: "application_data.v2",
+          fields: [
+            %{
+              "name" => "segments",
+              "type" => %{
+                "items" => %{
+                  "fields" => [
+                    %{"name" => "starts_at", "type" => "string"}
+                  ],
+                  "name" => "PolicySegment",
+                  "type" => "record"
+                },
+                "type" => "array"
+              }
+            }
+          ]
+        })
+
+      assert CodeGenerator.externalise_inlined_types(schema["fields"], %{}, "parent_namespace") ==
+               {
+                 [
+                   %{
+                     "name" => "segments",
+                     "type" => %{"type" => "array", "items" => "parent_namespace.PolicySegment"}
+                   }
+                 ],
+                 %{
+                   "parent_namespace.PolicySegment" => %{
+                     name: "PolicySegment",
+                     schema: %{
+                       "name" => "PolicySegment",
+                       "namespace" => "parent_namespace",
+                       "fields" => [%{"name" => "starts_at", "type" => "string"}],
+                       "type" => "record"
+                     },
+                     type: :record
                    }
                  }
                }
@@ -105,6 +290,14 @@ defmodule Avrogen.CodeGenerator.Test do
               type: %{type: :array, items: "application_data.v2.Thingy"}
             },
             %{
+              name: :union_of_primatives,
+              type: [:string, :null]
+            },
+            %{
+              name: :map_type,
+              type: %{type: :map, values: :string}
+            },
+            %{
               name: :union_of_things,
               type: ["application_data.v2.Thingy", "application_data.v2.OtherThing"]
             }
@@ -123,6 +316,17 @@ defmodule Avrogen.CodeGenerator.Test do
                CodeGenerator.typedstruct_field(%{"name" => "field_name", "type" => "string"})
     end
 
+    test "typedstruct_field: map" do
+      assert "field :field_name, %{String.t() => Decimal.t()}, enforce: true" ==
+               CodeGenerator.typedstruct_field(%{
+                 "name" => "field_name",
+                 "type" => %{
+                   "type" => "map",
+                   "values" => %{"type" => "string", "logicalType" => "decimal"}
+                 }
+               })
+    end
+
     test "typedstruct_field: [null, string]" do
       assert "field :field_name, nil | String.t()" ==
                CodeGenerator.typedstruct_field(%{
@@ -139,12 +343,85 @@ defmodule Avrogen.CodeGenerator.Test do
                })
     end
 
+    test "typedstruct_field: 'date logical type'" do
+      assert "field :field_name, Date.t(), enforce: true" ==
+               CodeGenerator.typedstruct_field(%{
+                 "name" => "field_name",
+                 "type" => [%{"type" => "string", "logicalType" => "date"}]
+               })
+    end
+
+    test "typedstruct_field: 'decimal logical type'" do
+      assert "field :field_name, Decimal.t(), enforce: true" ==
+               CodeGenerator.typedstruct_field(%{
+                 "name" => "field_name",
+                 "type" => [%{"type" => "string", "logicalType" => "decimal"}]
+               })
+    end
+
     test "typedstruct_field: [null, 'iso_date logical type']" do
       assert "field :field_name, nil | Date.t()" ==
                CodeGenerator.typedstruct_field(%{
                  "name" => "field_name",
                  "type" => ["null", %{"type" => "string", "logicalType" => "iso_date"}]
                })
+    end
+  end
+
+  describe "to_avro_map_field" do
+    test "handling maps" do
+      map_type = %{
+        "name" => "premium_breakdown",
+        "type" => %{
+          "type" => "map",
+          "values" => %{"logicalType" => "decimal", "type" => "string"}
+        }
+      }
+
+      assert ~s'"premium_breakdown" => Enum.into(r.premium_breakdown, %{}, fn k, v -> {k, Decimal.to_string(v)} end)' ==
+               CodeGenerator.to_avro_map_field(map_type, %{})
+    end
+  end
+
+  describe "from_avro_map_body_field" do
+    test "handling maps" do
+      map_type = %{
+        "name" => "premium_breakdown",
+        "type" => %{
+          "type" => "map",
+          "values" => %{"logicalType" => "decimal", "type" => "string"}
+        }
+      }
+
+      assert ~s'premium_breakdown: Enum.into(premium_breakdown, %{}, fn k, v -> {k, Decimal.new(v)} end)' ==
+               CodeGenerator.from_avro_map_body_field(map_type, %{})
+    end
+  end
+
+  describe "random_instance_field" do
+    test "handling maps" do
+      map_type = %{
+        "name" => "premium_breakdown",
+        "type" => %{
+          "type" => "map",
+          "values" => %{"logicalType" => "decimal", "type" => "string"}
+        }
+      }
+
+      assert ~s'Avrogen.Util.Random.Constructors.map(Avrogen.Util.Random.Constructors.decimal())' ==
+               CodeGenerator.random_instance_field(map_type, %{})
+    end
+  end
+
+  describe "generate_schema" do
+    test "Smoke test" do
+      @schema_file
+      |> File.read!()
+      |> Jason.decode!()
+      |> Enum.each(fn schema ->
+        CodeGenerator.generate_schema(schema, [], "Test", scope_embedded_types: true)
+        |> Enum.each(fn {_filename, code} -> assert code =~ "defmodule" end)
+      end)
     end
   end
 

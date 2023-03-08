@@ -23,11 +23,13 @@ defmodule Avrogen.Schema.SchemaRegistry do
       ])
 
     config = Application.get_env(app, __MODULE__)
+    exclude_files = config |> Keyword.get(:exclude_paths, []) |> Enum.flat_map(&app_wildcard(app, &1))
 
     config[:schemas_path]
     |> Enum.flat_map(fn pattern ->
       app_wildcard(app, pattern)
     end)
+    |> Enum.reject(&Enum.member?(exclude_files, &1))
     |> Enum.map(fn file ->
       file
       |> File.read!()

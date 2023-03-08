@@ -379,6 +379,21 @@ defmodule Avrogen.Util.Random do
       end
     end
 
+    def map(value_constructor, opts \\ []) do
+      max_length = Keyword.get(opts, :max_map_length, 10)
+      key_constructor = string(opts)
+
+      fn rand_state ->
+        {rand_state, length} = Random.integer(rand_state, 0, max_length)
+
+        Enum.reduce(0..length, {rand_state, %{}}, fn _, {rand_state, acc} ->
+          {rand_state, key} = key_constructor.(rand_state)
+          {rand_state, value} = value_constructor.(rand_state)
+          {rand_state, Map.put(acc, key, value)}
+        end)
+      end
+    end
+
     @spec enum_value(atom()) :: constructor_fun()
     def enum_value(enum_module) do
       fn rand_state ->
