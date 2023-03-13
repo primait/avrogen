@@ -378,7 +378,7 @@ defmodule Avrogen.CodeGenerator.Test do
         }
       }
 
-      assert ~s'"premium_breakdown" => Enum.into(r.premium_breakdown, %{}, fn k, v -> {k, Decimal.to_string(v)} end)' ==
+      assert ~s'"premium_breakdown" => Enum.into(r.premium_breakdown, %{}, fn {k, v} -> {k, Decimal.to_string(v)} end)' ==
                CodeGenerator.to_avro_map_field(map_type, %{})
     end
   end
@@ -393,7 +393,7 @@ defmodule Avrogen.CodeGenerator.Test do
         }
       }
 
-      assert ~s'premium_breakdown: Enum.into(premium_breakdown, %{}, fn k, v -> {k, Decimal.new(v)} end)' ==
+      assert ~s'premium_breakdown: Enum.into(premium_breakdown, %{}, fn {k, v} -> {k, Decimal.new(v)} end)' ==
                CodeGenerator.from_avro_map_body_field(map_type, %{})
     end
   end

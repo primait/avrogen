@@ -877,7 +877,7 @@ defmodule Avrogen.CodeGenerator do
           raise "Error does not yet support maps with values of type #{type}"
       end
 
-    ~s'#{name}: Enum.into(#{name}, %{}, fn k, v -> {k, #{type_conversion}} end)'
+    ~s'#{name}: Enum.into(#{name}, %{}, fn {k, v} -> {k, #{type_conversion}} end)'
   end
 
   def from_avro_map_body_field(%{"name" => name, "type" => union}, global) when is_list(union) do
@@ -1095,7 +1095,7 @@ defmodule Avrogen.CodeGenerator do
           raise "Error does not yet support maps with values of type #{type}"
       end
 
-    ~s'"#{name}" => Enum.into(r.#{name}, %{}, fn k, v -> {k, #{type_conversion}} end)'
+    ~s'"#{name}" => Enum.into(r.#{name}, %{}, fn {k, v} -> {k, #{type_conversion}} end)'
   end
 
   def to_avro_map_field(%{"name" => name, "type" => type}, global) when is_binary(type) do
