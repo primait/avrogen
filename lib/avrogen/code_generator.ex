@@ -1044,18 +1044,27 @@ defmodule Avrogen.CodeGenerator do
       "Decimal.new(#{inner})"
     ]
 
+  def from_cond_conversion_incantation("decimal", inner),
+    do: from_cond_conversion_incantation("big_decimal", inner)
+
   def from_cond_conversion_incantation("iso_date", inner),
     do: [
       "is_binary(#{inner}) and ( Date.from_iso8601(#{inner}) |> elem(0) == :ok)",
       "Date.from_iso8601(#{inner}) |> elem(1)"
     ]
 
+  def from_cond_conversion_incantation("date", inner),
+    do: from_cond_conversion_incantation("iso_date", inner)
+
   # TODO: what about the offset??
   def from_cond_conversion_incantation("iso_datetime", inner),
     do: [
-      "is_binary(#{inner}) and ( DateTime.from_iso8601(#{inner} |> elem(0) == :ok)",
+      "is_binary(#{inner}) and ( DateTime.from_iso8601(#{inner}) |> elem(0) == :ok)",
       "DateTime.from_iso8601(#{inner}) |> elem(1)"
     ]
+
+  def from_cond_conversion_incantation("datetime", inner),
+    do: from_cond_conversion_incantation("iso_datetime", inner)
 
   def conversion_from_incantation("big_decimal", inner), do: ~s'Decimal.new(#{inner})'
   def conversion_from_incantation("decimal", inner), do: ~s'Decimal.new(#{inner})'
@@ -1210,6 +1219,7 @@ defmodule Avrogen.CodeGenerator do
   def match_conversion_incantation("iso_date"), do: ~s'%Date{} = d -> Date.to_iso8601(d)'
   def match_conversion_incantation("date"), do: ~s'%Date{} = d -> Date.to_iso8601(d)'
   def match_conversion_incantation("big_decimal"), do: ~s'%Decimal{} = d -> Decimal.to_string(d)'
+  def match_conversion_incantation("decimal"), do: ~s'%Decimal{} = d -> Decimal.to_string(d)'
 
   def match_conversion_incantation("iso_datetime"),
     do: ~s'%DateTime{} = d -> DateTime.to_iso8601(d)'

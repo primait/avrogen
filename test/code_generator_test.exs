@@ -381,6 +381,16 @@ defmodule Avrogen.CodeGenerator.Test do
       assert ~s'"premium_breakdown" => Enum.into(r.premium_breakdown, %{}, fn {k, v} -> {k, Decimal.to_string(v)} end)' ==
                CodeGenerator.to_avro_map_field(map_type, %{})
     end
+
+    test "decimal types" do
+      decimal_type = %{
+        "name" => "price",
+        "type" => ["null", %{"type" => "string", "logicalType" => "decimal"}]
+      }
+
+      assert ~s'"price" => case r.price do\n %Decimal{} = d -> Decimal.to_string(d)\n_ -> r.price\nend' ==
+               CodeGenerator.to_avro_map_field(decimal_type, %{})
+    end
   end
 
   describe "from_avro_map_body_field" do
@@ -395,6 +405,36 @@ defmodule Avrogen.CodeGenerator.Test do
 
       assert ~s'premium_breakdown: Enum.into(premium_breakdown, %{}, fn {k, v} -> {k, Decimal.new(v)} end)' ==
                CodeGenerator.from_avro_map_body_field(map_type, %{})
+    end
+
+    test "decimal types" do
+      decimal_type = %{
+        "name" => "price",
+        "type" => ["null", %{"type" => "string", "logicalType" => "decimal"}]
+      }
+
+      assert ~s'price: if not is_nil(price) and (Decimal.parse(price) != :error) do\n  Decimal.new(price)\nelse\n  price\nend' ==
+               CodeGenerator.from_avro_map_body_field(decimal_type, %{})
+    end
+
+    test "date types" do
+      decimal_type = %{
+        "name" => "price",
+        "type" => ["null", %{"type" => "string", "logicalType" => "date"}]
+      }
+
+      assert ~s'price: if is_binary(price) and ( Date.from_iso8601(price) |> elem(0) == :ok) do\n  Date.from_iso8601(price) |> elem(1)\nelse\n  price\nend' ==
+               CodeGenerator.from_avro_map_body_field(decimal_type, %{})
+    end
+
+    test "datetime types" do
+      decimal_type = %{
+        "name" => "price",
+        "type" => ["null", %{"type" => "string", "logicalType" => "datetime"}]
+      }
+
+      assert ~s'price: if is_binary(price) and ( DateTime.from_iso8601(price) |> elem(0) == :ok) do\n  DateTime.from_iso8601(price) |> elem(1)\nelse\n  price\nend' ==
+               CodeGenerator.from_avro_map_body_field(decimal_type, %{})
     end
   end
 
