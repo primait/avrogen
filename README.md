@@ -488,19 +488,22 @@ map = module.to_avro_map(message)
 
 > Note: Of course, this assumes you know the decoded message type ahead of time. You can ask Avrora to infer the message type using magic headers by calling `decode/1` rather than `decode/2` (omitting the `schema_name` option), but it doesn't disclose the inferred schema name to the caller, which is not particularly useful.
 
-## Publishing to Hexpm
+## Publishing
 
-Bump the version number in mix.exs using semver semantics and run:
+Update `mix.exs` with your version `x.y.z`, e.g. `0.4.1`.
 
-```
-mix hex.publish
-```
+Tag master with the format `v[x.y.z]` after merging your changes to `mix.exs`:
 
-You might need to sign into the primauk organization first, which is done like so:
-
-```
-mix hex.organization auth primauk
+```bash
+git checkout master
+git pull
+git tag -a v[x.y.z]
 ```
 
-When prompted, use the credentials in the LastPass entry “Hex UK Shared Account”.
-The username should be `uk-hex-shared@helloprima.com`
+You should add the changes the new version introduces in the editor that opens up, then push the new tag:
+
+```bash
+git push --tags
+```
+
+This will get picked up by the `Elixir CD` GitHub Action, which will build the package and publish it to Hex.

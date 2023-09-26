@@ -1,0 +1,16 @@
+name: Elixir CD
+
+on:
+  push:
+    tags:
+    - 'v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  elixir-ci:
+    uses: primait/shared-github-actions/.github/workflows/elixir-hex-publish.yml@master
+    with:
+      elixir-version: '1.14.5'
+      otp-version: '25.1.2.1'
+      hex-organization: primauk
+    secrets:
+      HEX_KEY: ${{ secrets.HEX_KEY }}
