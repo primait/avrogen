@@ -1,5 +1,7 @@
 # Avrogen
 
+[![Build Status](https://github.com/primait/avrogen/workflows/Elixir%20CI/badge.svg)](https://github.com/primait/avrogen/actions) [![Hex.pm](https://img.shields.io/badge/hex.pm-green)](https://hex.pm/packages/primauk/avrogen) [![Documentation](https://img.shields.io/badge/documentation-gray)](https://primauk.hexdocs.pm/avrogen/)
+
 Generate Elixir typedstructs and various useful helper functions from AVRO schemas at compile time.
 
 ## Documentation
@@ -148,7 +150,7 @@ def start(_type, _args) do
   children = [
     ...
     # Start a schema registry
-    {Avro.Schema.SchemaRegistry, Application.get_application(__MODULE__)},
+    {Avrogen.Schema.SchemaRegistry, Application.get_application(__MODULE__)},
     ...
   ]
   ...
