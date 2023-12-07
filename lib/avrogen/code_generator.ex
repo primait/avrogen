@@ -80,7 +80,10 @@ defmodule Avrogen.CodeGenerator do
 
   def format_or_log(code_string, filename) do
     try do
-      Code.format_string!(code_string, locals_without_parens: [field: 2, field: 3], file: filename)
+      Code.format_string!(code_string,
+        locals_without_parens: [field: 2, field: 3],
+        file: filename
+      )
     rescue
       e ->
         IO.puts("Failed while formatting #{inspect(code_string)}")
@@ -1273,6 +1276,7 @@ defmodule Avrogen.CodeGenerator do
 
   def elixir_type("null"), do: "nil"
   def elixir_type("string"), do: "String.t()"
+  def elixir_type("bytes"), do: "binary()"
   def elixir_type("int"), do: "integer()"
   def elixir_type("boolean"), do: "boolean()"
   def elixir_type("double"), do: "float()"

@@ -228,7 +228,8 @@ AVRO Type | Elixir Type
 `null` | `nil`
 `int` | `integer`
 `double` | `float`
-`string` | `binary`
+`string` | `String.t()`
+`bytes` | `binary`
 `array` | `list`
 `map` | `%{ String.t() => Value.t() }`
 
@@ -245,7 +246,6 @@ The following AVRO types are not supported (yet):
 - `float` (use `double`)
 - `long` (use `int`)
 - `fixed`
-- `bytes`
 
 ### PII Fields
 Avrogen introduces an unofficial extension to AVRO schema specification which can be used to mark record's fields as PII (Personally Identifiable Information). Each generated record module gets a `drop_pii/1` function which recursively strips away all fields marked as PII in the record, and any records contained within.
@@ -385,13 +385,13 @@ defmodule Person do
   @impl SchemaModule
   def avsc(), do: avro_schema()
 
-  "type": "record",
-  "name": "Person",
-  "namespace": "example",
-  "fields": [
-    {"name": "name", "type": ["null", "string"], "pii": true},
-    {"name": "age", "type": "int"}
-  ]
+  # "type": "record",
+  # "name": "Person",
+  # "namespace": "example",
+  # "fields": [
+  #   {"name": "name", "type": ["null", "string"], "pii": true},
+  #   {"name": "age", "type": "int"}
+  # ]
 
   @person %{
     type: :record,

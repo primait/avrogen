@@ -1,5 +1,5 @@
 defmodule Avrogen.CodeGenerator.Test do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   alias Avrogen.CodeGenerator
 
@@ -332,6 +332,14 @@ defmodule Avrogen.CodeGenerator.Test do
                CodeGenerator.typedstruct_field(%{
                  "name" => "field_name",
                  "type" => ["null", "string"]
+               })
+    end
+
+    test "typedstruct_field: [null, bytes]" do
+      assert "field :field_name, nil | binary()" ==
+               CodeGenerator.typedstruct_field(%{
+                 "name" => "field_name",
+                 "type" => ["null", "bytes"]
                })
     end
 

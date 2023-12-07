@@ -1,5 +1,5 @@
 defmodule Avrogen.Schema.Test do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   describe "external_dependencies" do
     test "finds deps in simple record" do
@@ -123,12 +123,16 @@ defmodule Avrogen.Schema.Test do
 
   describe "path_from_fqn" do
     test "flat mode" do
-      assert Avrogen.Schema.path_from_fqn("some/path", "namespace.Name", :flat) == "some/path/namespace.Name.avsc"
+      assert Avrogen.Schema.path_from_fqn("some/path", "namespace.Name", :flat) ==
+               "some/path/namespace.Name.avsc"
     end
 
     test "tree mode" do
-      assert Avrogen.Schema.path_from_fqn("some/path", "namespace.Name", :tree) == "some/path/namespace/Name.avsc"
-      assert Avrogen.Schema.path_from_fqn("some/path", "name.space.Name", :tree) == "some/path/name/space/Name.avsc"
+      assert Avrogen.Schema.path_from_fqn("some/path", "namespace.Name", :tree) ==
+               "some/path/namespace/Name.avsc"
+
+      assert Avrogen.Schema.path_from_fqn("some/path", "name.space.Name", :tree) ==
+               "some/path/name/space/Name.avsc"
     end
   end
 end

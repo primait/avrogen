@@ -1,0 +1,19 @@
+  {
+    "type": "record",
+    "name": "TestRecord1",
+    "namespace": "events.v1",
+    "fields": [
+      {
+        "name": "opt_string",
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      {
+        "name": "string",
+        "type": "string"
+      }
+    ]
+  }
+  

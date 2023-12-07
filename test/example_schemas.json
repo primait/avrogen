@@ -1,5 +1,23 @@
 [
   {
+    "type": "record",
+    "name": "RecordWithBytes",
+    "namespace": "record_with_bytes",
+    "fields": [
+      {
+        "name": "bytes_field",
+        "type": "bytes"
+      },
+      {
+        "name": "bytes_array_field",
+        "type": {
+          "type": "array",
+          "items": "bytes"
+        }
+      }
+    ]
+  },
+  {
     "fields": [
       {
         "name": "field1",

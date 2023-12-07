@@ -23,7 +23,9 @@ defmodule Avrogen.Schema.SchemaRegistry do
       ])
 
     config = Application.get_env(app, __MODULE__)
-    exclude_files = config |> Keyword.get(:exclude_paths, []) |> Enum.flat_map(&app_wildcard(app, &1))
+
+    exclude_files =
+      config |> Keyword.get(:exclude_paths, []) |> Enum.flat_map(&app_wildcard(app, &1))
 
     config[:schemas_path]
     |> Enum.flat_map(fn pattern ->
@@ -56,7 +58,7 @@ defmodule Avrogen.Schema.SchemaRegistry do
   end
 
   @doc """
-  Return the super-schema which contains the topologically sorted concatination
+  Return the super-schema which contains the topologically sorted concatenation
   of all schemas managed by this registry as a json string.
   """
   def get_avsc() do
@@ -78,12 +80,12 @@ defmodule Avrogen.Schema.SchemaRegistry do
   end
 
   # Creates a binary format encoder function for the given avsc.
-  defp make_encoder(avsc) do
+  def make_encoder(avsc) do
     :avro.make_encoder(avsc, map_type: :map, record_type: :map)
   end
 
   # Creates a binary format decoder function for the given avsc.
-  defp make_decoder(avsc) do
+  def make_decoder(avsc) do
     :avro.make_decoder(avsc,
       map_type: :map,
       record_type: :map,
