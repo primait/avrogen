@@ -7,10 +7,9 @@ on:
 
 jobs:
   elixir-ci:
-    uses: primait/shared-github-actions/.github/workflows/elixir-hex-publish.yml@master
+    uses: primait/shared-github-actions/.github/workflows/elixir-hex-publish.yml@fa16cdef30a45ea77eef69461f58a9d957e3cf40
     with:
-      elixir-version: '1.14.5'
-      otp-version: '25.1.2.1'
+      version-file: ".tool-versions"
       hex-organization: primauk
     secrets:
       HEX_KEY: ${{ secrets.HEX_KEY }}
