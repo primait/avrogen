@@ -4,9 +4,6 @@
 
 Generate Elixir typedstructs and various useful helper functions from AVRO schemas at compile time.
 
-## Documentation
-The documentation can be found on [HexDocs](https://primauk.hexdocs.pm/avrogen).
-
 ## Rationale
 
 While there exists a handful of libraries to encode and decode AVRO messages in Elixir, all of them consume schemas at runtime, which has the advantage of flexibilty e.g. this approach can be used with a schema registry, but you lose the any compile time type safety for your types.
