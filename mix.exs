@@ -34,17 +34,17 @@ defmodule Avrogen.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:accessible, "~> 0.3.0"},
+      {:accessible, "~> 0.3"},
       {:decimal, "~> 2.0"},
       {:erlavro, "~> 2.9"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
-      {:excribe, "~> 0.1.1"},
+      {:excribe, "~> 0.1"},
       {:happy_with, "~> 1.0"},
       {:jason, "~> 1.0"},
-      {:libgraph, "~> 0.16.0"},
-      {:noether, "~> 0.2.2"},
+      {:libgraph, "~> 0.16"},
+      {:noether, "~> 0.2"},
       {:timex, "~> 3.6"},
-      {:typed_struct, "~> 0.3.0"}
+      {:typed_struct, "~> 0.3"}
     ]
   end
 
