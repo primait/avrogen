@@ -7,7 +7,7 @@ on:
 
 jobs:
   elixir-ci:
-    uses: primait/shared-github-actions/.github/workflows/elixir-hex-publish.yml@fa16cdef30a45ea77eef69461f58a9d957e3cf40
+    uses: primait/shared-github-actions/.github/workflows/elixir-hex-publish.yml@master
     with:
       version-file: ".tool-versions"
       hex-organization: primauk
