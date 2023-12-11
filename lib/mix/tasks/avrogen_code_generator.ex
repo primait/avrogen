@@ -130,9 +130,11 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
   """
 
   use Mix.Task.Compiler
+
   import HappyWith
-  alias Avrogen.Schema
+
   alias Avrogen.CodeGenerator
+  alias Avrogen.Schema
 
   # Note: This makes tasks run in the correct context when using an umbrella
   @recursive true
@@ -141,6 +143,9 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
   @manifest_version 1
 
   defmodule Manifest do
+    @moduledoc """
+    Manifest file (see above).
+    """
     import TypedStruct
 
     typedstruct do
@@ -286,7 +291,7 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
     end
   end
 
-  defp find_beam_files() do
+  defp find_beam_files do
     {:ok, appname} = :application.get_application(__MODULE__)
 
     Mix.Project.build_path()
@@ -296,7 +301,7 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
     |> Path.wildcard()
   end
 
-  defp print_app_name() do
+  defp print_app_name do
     if name = Mix.Shell.printable_app_name() do
       IO.puts("==> #{name}")
     end
@@ -308,7 +313,7 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
 
   @shortdoc "Delete generated artifacts"
   @impl true
-  def clean() do
+  def clean do
     manifest_path()
     |> load_manifest()
     |> do_clean()

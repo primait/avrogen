@@ -6,32 +6,9 @@ on:
   pull_request:
     branches: [ "master" ]
 
-permissions:
-  contents: read
-
 jobs:
-  build:
-    name: Build and test
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Elixir
-      id: setup-elixir
-      uses: erlef/setup-beam@v1
-      with:
-        version-file: ".tool-versions"
-        version-type: strict
-
-    - name: Restore dependencies cache
-      uses: actions/cache@v3
-      with:
-        path: deps
-        key: elixir-mix-${{ runner.os }}-${{ steps.setup-elixir.outputs.otp-version }}-${{ steps.setup-elixir.outputs.elixir-version }}-${{ hashFiles('**/mix.lock') }}
-        restore-keys: ${{ runner.os }}-mix-
-
-    - name: Install dependencies
-      run: mix deps.get
-
-    - name: Run tests
-      run: mix test
+  elixir_ci:
+    name: "Elixir Checks"
+    uses: primait/shared-github-actions/.github/workflows/elixir-ci.yml@elixir-ci-v3.1
+    with:
+      version-file: ".tool-versions"

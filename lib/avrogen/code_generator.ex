@@ -6,6 +6,19 @@ defmodule Avrogen.CodeGenerator do
   require EEx
   alias Avrogen.Schema
 
+  @primitives [
+    "null",
+    "boolean",
+    "int",
+    "long",
+    "float",
+    "double",
+    "bytes",
+    "string",
+    "map"
+  ]
+  defguard is_primitive(s) when s in @primitives
+
   defp derive_module_prefix(prefix, fqn) do
     namespace =
       fqn
@@ -852,25 +865,29 @@ defmodule Avrogen.CodeGenerator do
         %{"logicalType" => logical_type} ->
           conversion_from_incantation(logical_type, "v")
 
-        type when is_binary(type) ->
-          if is_primitive(type) do
-            "v"
-          else
-            case Map.get(global[type], :type) do
-              :record ->
-                # if type is a record, we need to call the respective fromavromap
-                # function on its module -- which returns an ok/error tuple
-                ~s'#{Map.get(global[type], :name)}.from_avro_map(v) |> Noether.Either.map_error(fn e -> raise "#{Map.get(global[type], :name)}.from_avro_map(v) failed: #\#{if is_binary(e), do: e, else: inspect(e)}" end) |> Noether.Either.unwrap()'
+        type when is_binary(type) and is_primitive(type) ->
+          "v"
 
-              :enum ->
-                # if type is an enum, we need to from_string it
-                ~s"""
-                #{Map.get(global[type], :name)}.value(v)
-                |> Noether.Either.map_error(fn msg -> raise msg end)
-                |> Noether.Either.unwrap()
-                """
-                |> String.trim()
-            end
+        type when is_binary(type) ->
+          case Map.get(global[type], :type) do
+            :record ->
+              # if type is a record, we need to call the respective from_avro_map
+              # function on its module -- which returns an ok/error tuple
+              ~s"""
+              #{Map.get(global[type], :name)}.from_avro_map(v)
+              |> Noether.Either.map_error(fn e -> raise "#{Map.get(global[type], :name)}.from_avro_map(v) failed: #\#{if is_binary(e), do: e, else: inspect(e)}" end)
+              |> Noether.Either.unwrap()
+              """
+              |> String.trim()
+
+            :enum ->
+              # if type is an enum, we need to from_string it
+              ~s"""
+              #{Map.get(global[type], :name)}.value(v)
+              |> Noether.Either.map_error(fn msg -> raise msg end)
+              |> Noether.Either.unwrap()
+              """
+              |> String.trim()
           end
 
         type when is_list(type) ->
@@ -1090,14 +1107,13 @@ defmodule Avrogen.CodeGenerator do
         %{"logicalType" => logical_type} ->
           conversion_incantation(logical_type, "v")
 
+        type when is_binary(type) and is_primitive(type) ->
+          "v"
+
         type when is_binary(type) ->
-          if is_primitive(type) do
-            "v"
-          else
-            case Map.get(global[type], :type) do
-              :record -> ~s'#{Map.get(global[type], :name)}.to_avro_map(v)'
-              :enum -> ~s'Atom.to_string(v)'
-            end
+          case Map.get(global[type], :type) do
+            :record -> ~s'#{Map.get(global[type], :name)}.to_avro_map(v)'
+            :enum -> ~s'Atom.to_string(v)'
           end
 
         type when is_list(type) ->
@@ -1317,20 +1333,6 @@ defmodule Avrogen.CodeGenerator do
       elixir_type -> elixir_type
     end
   end
-
-  @primitives [
-    "null",
-    "boolean",
-    "int",
-    "long",
-    "float",
-    "double",
-    "bytes",
-    "string",
-    "map"
-  ]
-  def is_primitive(s), do: s in @primitives
-  # ^^^ add ? to function name
 
   def primitive_zero_val("string"), do: ~s{""}
   def primitive_zero_val("int"), do: 0

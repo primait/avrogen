@@ -6,8 +6,8 @@ defmodule Avrogen.Test.Roundtrip do
   """
   use ExUnit.Case, async: true
 
-  alias Avrogen.Schema.SchemaRegistry
   alias Avrogen.CodeGenerator
+  alias Avrogen.Schema.SchemaRegistry
 
   @schemas_dir "test/roundtrip_schemas"
 

@@ -1,8 +1,13 @@
 defmodule Avrogen.SchemaGenerator do
+  @moduledoc """
+  Generate avro schemas from .exs files.
+  """
+
   alias Avrogen.CodeGenerator
 
   @doc """
-  Generates the avro schemas for a given exs file, and returns a list of the schemas generated.
+  Generates the avro schemas for a given .exs file, and returns a list of the
+  schemas generated.
   """
   @spec generate_avsc_files!(String.t(), String.t(), atom()) :: [String.t()]
   def generate_avsc_files!(exs_file_path, out_dir, schema_resolution_mode) do

@@ -20,7 +20,8 @@ defmodule Avrogen.MixProject do
       package: package(),
       aliases: aliases(),
       deps: deps(),
-      docs: docs()
+      docs: docs(),
+      dialyzer: [plt_add_apps: [:mix]]
     ]
   end
 
@@ -35,7 +36,9 @@ defmodule Avrogen.MixProject do
   defp deps do
     [
       {:accessible, "~> 0.3"},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:decimal, "~> 2.0"},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:erlavro, "~> 2.9"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:excribe, "~> 0.1"},

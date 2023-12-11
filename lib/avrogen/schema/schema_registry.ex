@@ -61,21 +61,21 @@ defmodule Avrogen.Schema.SchemaRegistry do
   Return the super-schema which contains the topologically sorted concatenation
   of all schemas managed by this registry as a json string.
   """
-  def get_avsc() do
+  def get_avsc do
     :ets.lookup_element(__MODULE__, @ets_name, 2)
   end
 
   @doc """
   Return the binary encoder function which is capable of encoding all messages.
   """
-  def get_encoder() do
+  def get_encoder do
     :ets.lookup_element(__MODULE__, @ets_name, 3)
   end
 
   @doc """
   Return the binary decoding function which is capable of decoding all schemas.
   """
-  def get_decoder() do
+  def get_decoder do
     :ets.lookup_element(__MODULE__, @ets_name, 4)
   end
 

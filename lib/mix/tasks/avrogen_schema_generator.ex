@@ -221,7 +221,7 @@ defmodule Mix.Tasks.Compile.AvroSchemaGenerator do
     Enum.sort(config_old) != Enum.sort(config)
   end
 
-  defp print_app_name() do
+  defp print_app_name do
     if name = Mix.Shell.printable_app_name() do
       IO.puts("==> #{name}")
     end
@@ -233,7 +233,7 @@ defmodule Mix.Tasks.Compile.AvroSchemaGenerator do
 
   @shortdoc "Delete generated artifacts"
   @impl true
-  def clean() do
+  def clean do
     manifest_path()
     |> load_manifest()
     |> do_clean()

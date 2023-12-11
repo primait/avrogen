@@ -41,7 +41,7 @@ defmodule Avrogen.Util.Random do
   Creates a fresh rand_state.
   """
   @spec init_rand_state() :: rand_state()
-  def init_rand_state() do
+  def init_rand_state do
     :rand.seed(:default)
   end
 
@@ -319,7 +319,7 @@ defmodule Avrogen.Util.Random do
   end
 
   defmodule Constructors do
-    @doc """
+    @moduledoc """
     Provides functions that return "constructor functions". A constructor
     function is a function that expects a rand_state and optional parameters,
     and, on invocation, returns an updated rand_state and a randomly generated
@@ -337,10 +337,10 @@ defmodule Avrogen.Util.Random do
     @type constructor_fun() :: (Random.rand_state() -> {Random.rand_state(), any()})
 
     @spec nothing() :: constructor_fun()
-    def nothing(), do: fn rand_state -> {rand_state, nil} end
+    def nothing, do: fn rand_state -> {rand_state, nil} end
 
     @spec boolean() :: constructor_fun()
-    def boolean() do
+    def boolean do
       fn rand_state -> Random.boolean(rand_state) end
     end
 
@@ -422,6 +422,16 @@ defmodule Avrogen.Util.Random do
       end
     end
 
+    defp list_length_n(constructor_fun, n, initial_rand_state) do
+      {list, urs} =
+        Enum.map_reduce(1..n, initial_rand_state, fn _, rs ->
+          {urs, value} = constructor_fun.(rs)
+          {value, urs}
+        end)
+
+      {urs, list}
+    end
+
     @spec list(constructor_fun(), integer()) :: constructor_fun()
     def list(constructor_fun, max_length \\ 10) do
       fn rand_state ->
@@ -430,10 +440,7 @@ defmodule Avrogen.Util.Random do
         if n == 0 do
           {updated_rand_state, []}
         else
-          Enum.reduce(1..n, {updated_rand_state, []}, fn _, {rs, acc} ->
-            {urs, value} = constructor_fun.(rs)
-            {urs, [value | acc]}
-          end)
+          list_length_n(constructor_fun, n, updated_rand_state)
         end
       end
     end

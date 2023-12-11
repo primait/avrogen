@@ -1,4 +1,7 @@
 defmodule Avrogen.Util.FuzzyEnumMatch do
+  @moduledoc """
+  Fuzzy enum matching.
+  """
   def preprocess(s) when is_binary(s) do
     normalised =
       s
@@ -24,9 +27,12 @@ defmodule Avrogen.Util.FuzzyEnumMatch do
       {_, canonical, trigrams} = preprocess(Atom.to_string(atom))
 
       Enum.reduce(trigrams, trigram_index, fn trigram, index ->
-        Map.update(index, trigram, MapSet.new([{canonical, atom}]), fn set ->
-          MapSet.put(set, {canonical, atom})
-        end)
+        Map.update(
+          index,
+          trigram,
+          MapSet.new([{canonical, atom}]),
+          &MapSet.put(&1, {canonical, atom})
+        )
       end)
     end)
   end
@@ -46,9 +52,8 @@ defmodule Avrogen.Util.FuzzyEnumMatch do
   @doc """
   Returns the closest match for s from the lookup index; returns the default
   value if the similarity is less than the given threshold or if s is not a
-  string. 
+  string.
   """
-
   def best_match(index, s, default_value, min_similarity \\ 0.5)
 
   def best_match(index, s, default_value, min_similarity) when is_binary(s) do

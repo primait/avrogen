@@ -1,6 +1,6 @@
 # Avrogen
 
-[![Build Status](https://github.com/primait/avrogen/workflows/Elixir%20CI/badge.svg)](https://github.com/primait/avrogen/actions) [![Hex.pm](https://img.shields.io/badge/hex.pm-green)](https://hex.pm/packages/primauk/avrogen) [![Documentation](https://img.shields.io/badge/documentation-gray)](https://primauk.hexdocs.pm/avrogen/)
+[![Build Status](https://github.com/primait/avrogen/actions/workflows/elixir.yml/badge.svg)](https://github.com/primait/avrogen/actions/workflows/elixir.yml) [![Hex.pm](https://img.shields.io/badge/hex.pm-green)](https://hex.pm/packages/primauk/avrogen) [![Documentation](https://img.shields.io/badge/documentation-gray)](https://primauk.hexdocs.pm/avrogen/)
 
 Generate Elixir typedstructs and various useful helper functions from AVRO schemas at compile time.
 
