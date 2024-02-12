@@ -825,9 +825,12 @@ defmodule Avrogen.CodeGenerator do
     end
   end
 
-  def random_instance_field(%{"type" => type} = field, global) do
+  def random_instance_field(%{"type" => type} = field, global),
+    do: random_instance_field(type, global, range_opts(field, type))
+
+  def random_instance_field(type, global, range_opts \\ "") when is_binary(type) do
     if is_primitive(type) do
-      random_instance_primitive_constructor(type, range_opts(field, type))
+      random_instance_primitive_constructor(type, range_opts)
     else
       case Map.get(global[type], :type) do
         :record ->

@@ -459,6 +459,43 @@ defmodule Avrogen.CodeGenerator.Test do
       assert ~s'Avrogen.Util.Random.Constructors.map(Avrogen.Util.Random.Constructors.decimal())' ==
                CodeGenerator.random_instance_field(map_type, %{})
     end
+
+    test "handling maps, with custom types as values" do
+      map_type = %{
+        "name" => "premium_breakdown",
+        "type" => %{
+          "type" => "map",
+          "values" => "renewals.events.v1.Price"
+        }
+      }
+
+      assert ~s'Avrogen.Util.Random.Constructors.map(fn rand_state -> Price.random_instance(rand_state) end)' ==
+               CodeGenerator.random_instance_field(map_type, %{
+                 "renewals.events.v1.Price" => %{
+                   name: "Price",
+                   referenced_schemas: ["renewals.events.v1.MonthlyPrice"],
+                   schema: %{
+                     "fields" => [
+                       %{
+                         "doc" => "The total cost when paying annually",
+                         "logicalType" => "decimal",
+                         "name" => "annual",
+                         "type" => "string"
+                       },
+                       %{
+                         "doc" => "The monthly payment plan details",
+                         "name" => "monthly",
+                         "type" => ["null", "renewals.events.v1.MonthlyPrice"]
+                       }
+                     ],
+                     "name" => "Price",
+                     "namespace" => "renewals.events.v1",
+                     "type" => "record"
+                   },
+                   type: :record
+                 }
+               })
+    end
   end
 
   describe "generate_schema" do

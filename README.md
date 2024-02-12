@@ -65,7 +65,7 @@ by adding `avrogen` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:avrogen, "~> 0.2.1", organization: "primauk"}
+    {:avrogen, "~> 0.4.3", organization: "primauk"}
   ]
 end
 ```
