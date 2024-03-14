@@ -376,6 +376,58 @@ defmodule Avrogen.CodeGenerator.Test do
     end
   end
 
+  describe "from_avro_map_main_clause" do
+    test "with no optional fields" do
+      fields = [
+        %{"name" => "first_name", "type" => "string"},
+        %{"name" => "surname", "type" => "string"},
+        %{"name" => "email", "type" => ["null", "string"]}
+      ]
+
+      assert """
+             @impl true
+             def from_avro_map(%{
+               "first_name" => first_name,
+               "surname" => surname,
+               "email" => email
+             }) do
+               
+               {:ok, %__MODULE__{
+                 first_name: first_name,
+                 surname: surname,
+                 email: email
+               }}
+             end
+             """ == CodeGenerator.from_avro_map_main_clause(fields, %{})
+    end
+
+    test "with optional fields" do
+      fields = [
+        %{"name" => "first_name", "type" => "string"},
+        %{"name" => "surname", "type" => "string"},
+        %{"name" => "email", "type" => ["null", "string"], "default" => "null"},
+        %{"name" => "optin", "type" => "boolean", "default" => true}
+      ]
+
+      assert """
+             @impl true
+             def from_avro_map(%{
+               "first_name" => first_name,
+               "surname" => surname
+             } = avro_map) do
+               email = avro_map["email"]
+               optin = avro_map["optin"] || true
+               {:ok, %__MODULE__{
+                 first_name: first_name,
+                 surname: surname,
+                 email: email,
+                 optin: optin
+               }}
+             end
+             """ == CodeGenerator.from_avro_map_main_clause(fields, %{})
+    end
+  end
+
   describe "to_avro_map_field" do
     test "handling maps" do
       map_type = %{

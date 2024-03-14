@@ -291,17 +291,10 @@ defmodule Avrogen.CodeGenerator do
         }
       end
 
-      @impl true
-      def from_avro_map(%{
-        <%= Enum.map_join(fields, ",\n", fn field -> from_avro_map_head_field(field, global) end)  %>
-      }) do
-        {:ok, %__MODULE__{
-          <%= Enum.map_join(fields, ",\n", fn field -> from_avro_map_body_field(field, global) end)  %>
-        }}
-      end
+      <%= from_avro_map_main_clause(fields, global) %>
 
       @expected_keys MapSet.new(
-      [<%= Enum.map(fields, fn %{"name" => f} -> Enum.join(["\\"", f, "\\""]) end) |> Enum.join(", ") %>
+      [<%= fields |> Enum.reject(&has_default?/1) |> Enum.map(fn %{"name" => f} -> Enum.join(["\\"", f, "\\""]) end) |> Enum.join(", ") %>
       ])
 
       def from_avro_map(%{} = invalid) do
@@ -345,6 +338,26 @@ defmodule Avrogen.CodeGenerator do
       :global,
       :moduledoc,
       :avro_fqn
+    ]
+  )
+
+  EEx.function_from_string(
+    :def,
+    :from_avro_map_main_clause,
+    """
+    @impl true
+    def from_avro_map(%{
+      <%= fields |> Enum.reject(&has_default?/1) |> Enum.map_join(",\n  ", fn field -> from_avro_map_head_field(field, global) end)  %>
+    }<%= if Enum.any?(fields, &has_default?/1) do %> = avro_map<% end %>) do
+      <%= fields |> Enum.filter(&has_default?/1) |> Enum.map_join("\n  ", &handle_default/1) %>
+      {:ok, %__MODULE__{
+        <%= Enum.map_join(fields, ",\n    ", fn field -> from_avro_map_body_field(field, global) end)  %>
+      }}
+    end
+    """,
+    [
+      :fields,
+      :global
     ]
   )
 
@@ -842,6 +855,24 @@ defmodule Avrogen.CodeGenerator do
     end
   end
 
+  def handle_default(%{"default" => nil, "name" => name}), do: ~s'#{name} = avro_map["#{name}"]'
+
+  def handle_default(%{"default" => "null", "name" => name}),
+    do: ~s'#{name} = avro_map["#{name}"]'
+
+  def handle_default(%{"default" => _, "name" => name} = field),
+    do: ~s'#{name} = avro_map["#{name}"] || #{default_value(field)}'
+
+  def has_default?(%{"default" => _}), do: true
+  def has_default?(_), do: false
+
+  def default_value(%{"default" => value}) when is_number(value), do: value
+  def default_value(%{"default" => value}) when is_boolean(value), do: value
+  def default_value(%{"default" => []}), do: "[]"
+  def default_value(%{"default" => "null"}), do: "nil"
+  def default_value(%{"default" => nil}), do: "nil"
+  def default_value(%{"default" => value}) when is_binary(value), do: ~s'"#{value}"'
+
   def range_opts(%{"range" => range_info}, type) do
     Map.get(range_info, type, %{})
     |> Enum.to_list()
@@ -1276,7 +1307,7 @@ defmodule Avrogen.CodeGenerator do
   EEx.function_from_string(
     :def,
     :typedstruct_field,
-    ~s'field :<%= field["name"] %>, <%= typedstruct_field_type(field) %><%= if enforce(field["type"]) do %>, enforce: true<% end %>',
+    ~s'field :<%= field["name"] %>, <%= typedstruct_field_type(field) %><%= if enforce(field["type"]) do %>, enforce: true<% end %><%= if has_default?(field) do %>, default: <%= default_value(field)%><% end %>',
     [:field]
   )
 
