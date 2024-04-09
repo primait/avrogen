@@ -223,7 +223,7 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
     paths = CodeGenerator.filenames_from_schema(dest, schema)
 
     status =
-      case force || Mix.Utils.stale?(paths ++ deps ++ find_beam_files(), [paths]) do
+      case force || Mix.Utils.stale?(paths ++ deps ++ find_beam_files(), paths) do
         true -> :stale
         false -> :noop
       end
