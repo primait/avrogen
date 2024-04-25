@@ -1,7 +1,9 @@
 defmodule Avrogen.CodeGenerator.Test do
   use ExUnit.Case, async: true
 
-  alias Avrogen.CodeGenerator
+  alias Avrogen.Avro.Schema
+  alias Avrogen.Avro.Schema.CodeGenerator
+  alias Avrogen.Avro.Types
 
   @schema_file "test/example_schemas.json"
 
@@ -36,39 +38,40 @@ defmodule Avrogen.CodeGenerator.Test do
           ]
         })
 
-      assert CodeGenerator.externalise_inlined_types(schema["fields"], %{}, "parent_namespace") ==
-               {
-                 [
-                   %{"name" => "unit", "type" => "parent_namespace.Unit"},
-                   %{"name" => "fraction", "type" => "parent_namespace.Fraction"}
-                 ],
-                 %{
-                   "parent_namespace.Unit" => %{
-                     name: "Unit",
-                     schema: %{
-                       "default" => "years",
-                       "name" => "unit",
-                       "namespace" => "parent_namespace",
-                       "symbols" => ["years", "months", "miles"],
-                       "type" => "enum"
+      assert Schema.normalized_schemas(schema, "parent_namespace", false) ==
+               [
+                 %Types.Record{
+                   name: "Foo",
+                   fields: [
+                     %Types.Record.Field{
+                       name: "unit",
+                       type: %Types.Reference{name: "application_data.v2.Unit"}
                      },
-                     type: :enum
-                   },
-                   "parent_namespace.Fraction" => %{
-                     name: "Fraction",
-                     type: :record,
-                     schema: %{
-                       "fields" => [
-                         %{"name" => "numerator", "type" => "int"},
-                         %{"name" => "denominator", "type" => "int"}
-                       ],
-                       "name" => "fraction",
-                       "namespace" => "parent_namespace",
-                       "type" => "record"
+                     %Types.Record.Field{
+                       name: "fraction",
+                       type: %Types.Reference{name: "application_data.v2.Fraction"}
                      }
-                   }
+                   ],
+                   namespace: "application_data.v2",
+                   type: "record"
+                 },
+                 %Types.Record{
+                   name: "Fraction",
+                   fields: [
+                     %Types.Record.Field{name: "numerator", type: %Types.Primitive{type: :int}},
+                     %Types.Record.Field{name: "denominator", type: %Types.Primitive{type: :int}}
+                   ],
+                   namespace: "application_data.v2",
+                   type: "record"
+                 },
+                 %Types.Enum{
+                   name: "Unit",
+                   default: "years",
+                   namespace: "application_data.v2",
+                   symbols: ["years", "months", "miles"],
+                   type: "enum"
                  }
-               }
+               ]
     end
 
     test "externalise_inlined_types: in union" do
@@ -100,41 +103,42 @@ defmodule Avrogen.CodeGenerator.Test do
           ]
         })
 
-      assert CodeGenerator.externalise_inlined_types(schema["fields"], %{}, "parent_namespace") ==
-               {
-                 [
-                   %{
-                     "name" => "unit",
-                     "type" => ["null", "parent_namespace.Unit", "parent_namespace.Fraction"]
-                   }
-                 ],
-                 %{
-                   "parent_namespace.Unit" => %{
-                     name: "Unit",
-                     schema: %{
-                       "default" => "years",
-                       "name" => "unit",
-                       "namespace" => "parent_namespace",
-                       "symbols" => ["years", "months", "miles"],
-                       "type" => "enum"
-                     },
-                     type: :enum
-                   },
-                   "parent_namespace.Fraction" => %{
-                     name: "Fraction",
-                     schema: %{
-                       "fields" => [
-                         %{"name" => "numerator", "type" => "int"},
-                         %{"name" => "denominator", "type" => "int"}
-                       ],
-                       "name" => "fraction",
-                       "namespace" => "parent_namespace",
-                       "type" => "record"
-                     },
-                     type: :record
-                   }
+      assert Schema.normalized_schemas(schema, "parent_namespace", false) ==
+               [
+                 %Types.Record{
+                   name: "Foo",
+                   fields: [
+                     %Types.Record.Field{
+                       name: "unit",
+                       type: %Types.Union{
+                         types: [
+                           %Types.Primitive{type: :null},
+                           %Types.Reference{name: "parent_namespace.Unit"},
+                           %Types.Reference{name: "parent_namespace.Fraction"}
+                         ]
+                       }
+                     }
+                   ],
+                   namespace: "parent_namespace",
+                   type: "record"
+                 },
+                 %Types.Record{
+                   name: "Fraction",
+                   fields: [
+                     %Types.Record.Field{name: "numerator", type: %Types.Primitive{type: :int}},
+                     %Types.Record.Field{name: "denominator", type: %Types.Primitive{type: :int}}
+                   ],
+                   namespace: "parent_namespace",
+                   type: "record"
+                 },
+                 %Types.Enum{
+                   name: "Unit",
+                   default: "years",
+                   namespace: "parent_namespace",
+                   symbols: ["years", "months", "miles"],
+                   type: "enum"
                  }
-               }
+               ]
     end
 
     test "externalise_inlined_types: array in union" do
@@ -175,53 +179,46 @@ defmodule Avrogen.CodeGenerator.Test do
           ]
         })
 
-      assert CodeGenerator.externalise_inlined_types(schema["fields"], %{}, "parent_namespace") ==
-               {
-                 [
-                   %{
-                     "name" => "name",
-                     "type" => [
-                       "null",
-                       %{
-                         "type" => "array",
-                         "name" => "units",
-                         "items" => "parent_namespace.Unit"
-                       },
-                       %{
-                         "type" => "array",
-                         "name" => "fractions",
-                         "items" => "parent_namespace.Fraction"
+      assert Schema.normalized_schemas(schema, "parent_namespace", false) ==
+               [
+                 %Types.Record{
+                   name: "Foo",
+                   fields: [
+                     %Types.Record.Field{
+                       name: "name",
+                       type: %Types.Union{
+                         types: [
+                           %Types.Primitive{type: :null},
+                           %Types.Array{
+                             items_schema: %Types.Reference{name: "application_data.v2.Unit"}
+                           },
+                           %Types.Array{
+                             items_schema: %Types.Reference{name: "application_data.v2.Fraction"}
+                           }
+                         ]
                        }
-                     ]
-                   }
-                 ],
-                 %{
-                   "parent_namespace.Unit" => %{
-                     name: "Unit",
-                     schema: %{
-                       "default" => "years",
-                       "name" => "unit",
-                       "namespace" => "parent_namespace",
-                       "symbols" => ["years", "months", "miles"],
-                       "type" => "enum"
-                     },
-                     type: :enum
-                   },
-                   "parent_namespace.Fraction" => %{
-                     name: "Fraction",
-                     schema: %{
-                       "fields" => [
-                         %{"name" => "numerator", "type" => "int"},
-                         %{"name" => "denominator", "type" => "int"}
-                       ],
-                       "name" => "fraction",
-                       "namespace" => "parent_namespace",
-                       "type" => "record"
-                     },
-                     type: :record
-                   }
+                     }
+                   ],
+                   namespace: "application_data.v2",
+                   type: "record"
+                 },
+                 %Types.Record{
+                   name: "Fraction",
+                   fields: [
+                     %Types.Record.Field{name: "numerator", type: %Types.Primitive{type: :int}},
+                     %Types.Record.Field{name: "denominator", type: %Types.Primitive{type: :int}}
+                   ],
+                   namespace: "application_data.v2",
+                   type: "record"
+                 },
+                 %Types.Enum{
+                   name: "Unit",
+                   default: "years",
+                   namespace: "application_data.v2",
+                   symbols: ["years", "months", "miles"],
+                   type: "enum"
                  }
-               }
+               ]
     end
 
     test "externalise_inlined_types: in array" do
@@ -247,27 +244,30 @@ defmodule Avrogen.CodeGenerator.Test do
           ]
         })
 
-      assert CodeGenerator.externalise_inlined_types(schema["fields"], %{}, "parent_namespace") ==
-               {
-                 [
-                   %{
-                     "name" => "segments",
-                     "type" => %{"type" => "array", "items" => "parent_namespace.PolicySegment"}
-                   }
-                 ],
-                 %{
-                   "parent_namespace.PolicySegment" => %{
-                     name: "PolicySegment",
-                     schema: %{
-                       "name" => "PolicySegment",
-                       "namespace" => "parent_namespace",
-                       "fields" => [%{"name" => "starts_at", "type" => "string"}],
-                       "type" => "record"
-                     },
-                     type: :record
-                   }
+      assert Schema.normalized_schemas(schema, "parent_namespace", false) ==
+               [
+                 %Types.Record{
+                   name: "Foo",
+                   fields: [
+                     %Types.Record.Field{
+                       name: "segments",
+                       type: %Types.Array{
+                         items_schema: %Types.Reference{name: "application_data.v2.PolicySegment"}
+                       }
+                     }
+                   ],
+                   namespace: "application_data.v2",
+                   type: "record"
+                 },
+                 %Types.Record{
+                   name: "PolicySegment",
+                   fields: [
+                     %Types.Record.Field{name: "starts_at", type: %Types.Primitive{type: :string}}
+                   ],
+                   namespace: "application_data.v2",
+                   type: "record"
                  }
-               }
+               ]
     end
 
     test "get_references extracts from record fields in alphabetical order direct references, references in unions and in arrays" do
@@ -304,260 +304,141 @@ defmodule Avrogen.CodeGenerator.Test do
           ]
         })
 
-      assert CodeGenerator.get_references(schema) == [
+      assert schema |> Schema.parse() |> Schema.external_dependencies() == [
                "application_data.v2.OtherThing",
                "application_data.v2.Thing",
                "application_data.v2.Thingy"
              ]
     end
 
-    test "typedstruct_field: string" do
-      assert "field :field_name, String.t(), enforce: true" ==
-               CodeGenerator.typedstruct_field(%{"name" => "field_name", "type" => "string"})
+    test "elixir type: string" do
+      assert "String.t()" ==
+               "string"
+               |> Schema.parse()
+               |> CodeGenerator.elixir_type()
+               |> Macro.to_string()
     end
 
-    test "typedstruct_field: map" do
-      assert "field :field_name, %{String.t() => Decimal.t()}, enforce: true" ==
-               CodeGenerator.typedstruct_field(%{
-                 "name" => "field_name",
-                 "type" => %{
-                   "type" => "map",
-                   "values" => %{"type" => "string", "logicalType" => "decimal"}
-                 }
-               })
+    test "elixir type: map" do
+      assert "%{String.t() => Decimal.t()}" ==
+               %{"type" => "map", "values" => %{"type" => "string", "logicalType" => "decimal"}}
+               |> Schema.parse()
+               |> CodeGenerator.elixir_type()
+               |> Macro.to_string()
     end
 
-    test "typedstruct_field: [null, string]" do
-      assert "field :field_name, nil | String.t()" ==
-               CodeGenerator.typedstruct_field(%{
-                 "name" => "field_name",
-                 "type" => ["null", "string"]
-               })
+    test "elixir types unions: [null, string]" do
+      assert "nil | String.t()" ==
+               ["null", "string"]
+               |> Schema.parse()
+               |> CodeGenerator.elixir_type()
+               |> Macro.to_string()
     end
 
-    test "typedstruct_field: [null, bytes]" do
-      assert "field :field_name, nil | binary()" ==
-               CodeGenerator.typedstruct_field(%{
-                 "name" => "field_name",
-                 "type" => ["null", "bytes"]
-               })
+    test "elixir type union: [null, bytes]" do
+      assert "nil | binary()" ==
+               ["null", "bytes"]
+               |> Schema.parse()
+               |> CodeGenerator.elixir_type()
+               |> Macro.to_string()
     end
 
-    test "typedstruct_field: 'iso_date logical type'" do
-      assert "field :field_name, Date.t(), enforce: true" ==
-               CodeGenerator.typedstruct_field(%{
-                 "name" => "field_name",
-                 "type" => [%{"type" => "string", "logicalType" => "iso_date"}]
-               })
+    test "elixir type: 'iso_date logical type'" do
+      assert "Date.t()" ==
+               %{"type" => "string", "logicalType" => "iso_date"}
+               |> Schema.parse()
+               |> CodeGenerator.elixir_type()
+               |> Macro.to_string()
     end
 
-    test "typedstruct_field: 'date logical type'" do
-      assert "field :field_name, Date.t(), enforce: true" ==
-               CodeGenerator.typedstruct_field(%{
-                 "name" => "field_name",
-                 "type" => [%{"type" => "string", "logicalType" => "date"}]
-               })
+    test "elixir type: 'uuid logical type'" do
+      assert "String.t()" ==
+               %{"type" => "string", "logicalType" => "uuid"}
+               |> Schema.parse()
+               |> CodeGenerator.elixir_type()
+               |> Macro.to_string()
     end
 
-    test "typedstruct_field: 'decimal logical type'" do
-      assert "field :field_name, Decimal.t(), enforce: true" ==
-               CodeGenerator.typedstruct_field(%{
-                 "name" => "field_name",
-                 "type" => [%{"type" => "string", "logicalType" => "decimal"}]
-               })
+    test "elixir type: 'timestamp-millis logical type'" do
+      assert "DateTime.t()" ==
+               %{"type" => "long", "logicalType" => "timestamp-millis"}
+               |> Schema.parse()
+               |> CodeGenerator.elixir_type()
+               |> Macro.to_string()
     end
 
-    test "typedstruct_field: [null, 'iso_date logical type']" do
-      assert "field :field_name, nil | Date.t()" ==
-               CodeGenerator.typedstruct_field(%{
-                 "name" => "field_name",
-                 "type" => ["null", %{"type" => "string", "logicalType" => "iso_date"}]
-               })
-    end
-  end
-
-  describe "from_avro_map_main_clause" do
-    test "with no optional fields" do
-      fields = [
-        %{"name" => "first_name", "type" => "string"},
-        %{"name" => "surname", "type" => "string"},
-        %{"name" => "email", "type" => ["null", "string"]}
-      ]
-
-      assert """
-             @impl true
-             def from_avro_map(%{
-               "first_name" => first_name,
-               "surname" => surname,
-               "email" => email
-             }) do
-               
-               {:ok, %__MODULE__{
-                 first_name: first_name,
-                 surname: surname,
-                 email: email
-               }}
-             end
-             """ == CodeGenerator.from_avro_map_main_clause(fields, %{})
+    test "elixir type: 'date logical type'" do
+      assert "Date.t()" ==
+               %{"type" => "string", "logicalType" => "date"}
+               |> Schema.parse()
+               |> CodeGenerator.elixir_type()
+               |> Macro.to_string()
     end
 
-    test "with optional fields" do
-      fields = [
-        %{"name" => "first_name", "type" => "string"},
-        %{"name" => "surname", "type" => "string"},
-        %{"name" => "email", "type" => ["null", "string"], "default" => "null"},
-        %{"name" => "optin", "type" => "boolean", "default" => true}
-      ]
-
-      assert """
-             @impl true
-             def from_avro_map(%{
-               "first_name" => first_name,
-               "surname" => surname
-             } = avro_map) do
-               email = avro_map["email"]
-               optin = avro_map["optin"] || true
-               {:ok, %__MODULE__{
-                 first_name: first_name,
-                 surname: surname,
-                 email: email,
-                 optin: optin
-               }}
-             end
-             """ == CodeGenerator.from_avro_map_main_clause(fields, %{})
-    end
-  end
-
-  describe "to_avro_map_field" do
-    test "handling maps" do
-      map_type = %{
-        "name" => "premium_breakdown",
-        "type" => %{
-          "type" => "map",
-          "values" => %{"logicalType" => "decimal", "type" => "string"}
-        }
-      }
-
-      assert ~s'"premium_breakdown" => Enum.into(r.premium_breakdown, %{}, fn {k, v} -> {k, Decimal.to_string(v)} end)' ==
-               CodeGenerator.to_avro_map_field(map_type, %{})
+    test "elixir type: 'decimal logical type'" do
+      assert "Decimal.t()" ==
+               %{"type" => "string", "logicalType" => "decimal"}
+               |> Schema.parse()
+               |> CodeGenerator.elixir_type()
+               |> Macro.to_string()
     end
 
-    test "decimal types" do
-      decimal_type = %{
-        "name" => "price",
-        "type" => ["null", %{"type" => "string", "logicalType" => "decimal"}]
-      }
-
-      assert ~s'"price" => case r.price do\n %Decimal{} = d -> Decimal.to_string(d)\n_ -> r.price\nend' ==
-               CodeGenerator.to_avro_map_field(decimal_type, %{})
-    end
-  end
-
-  describe "from_avro_map_body_field" do
-    test "handling maps" do
-      map_type = %{
-        "name" => "premium_breakdown",
-        "type" => %{
-          "type" => "map",
-          "values" => %{"logicalType" => "decimal", "type" => "string"}
-        }
-      }
-
-      assert ~s'premium_breakdown: Enum.into(premium_breakdown, %{}, fn {k, v} -> {k, Decimal.new(v)} end)' ==
-               CodeGenerator.from_avro_map_body_field(map_type, %{})
-    end
-
-    test "decimal types" do
-      decimal_type = %{
-        "name" => "price",
-        "type" => ["null", %{"type" => "string", "logicalType" => "decimal"}]
-      }
-
-      assert ~s'price: if not is_nil(price) and (Decimal.parse(price) != :error) do\n  Decimal.new(price)\nelse\n  price\nend' ==
-               CodeGenerator.from_avro_map_body_field(decimal_type, %{})
-    end
-
-    test "date types" do
-      decimal_type = %{
-        "name" => "price",
-        "type" => ["null", %{"type" => "string", "logicalType" => "date"}]
-      }
-
-      assert ~s'price: if is_binary(price) and ( Date.from_iso8601(price) |> elem(0) == :ok) do\n  Date.from_iso8601(price) |> elem(1)\nelse\n  price\nend' ==
-               CodeGenerator.from_avro_map_body_field(decimal_type, %{})
-    end
-
-    test "datetime types" do
-      decimal_type = %{
-        "name" => "price",
-        "type" => ["null", %{"type" => "string", "logicalType" => "datetime"}]
-      }
-
-      assert ~s'price: if is_binary(price) and ( DateTime.from_iso8601(price) |> elem(0) == :ok) do\n  DateTime.from_iso8601(price) |> elem(1)\nelse\n  price\nend' ==
-               CodeGenerator.from_avro_map_body_field(decimal_type, %{})
+    test "elixir type: [null, 'iso_date logical type']" do
+      assert "nil | Date.t()" ==
+               ["null", %{"type" => "string", "logicalType" => "iso_date"}]
+               |> Schema.parse()
+               |> CodeGenerator.elixir_type()
+               |> Macro.to_string()
     end
   end
 
   describe "random_instance_field" do
     test "handling maps" do
       map_type = %{
-        "name" => "premium_breakdown",
-        "type" => %{
-          "type" => "map",
-          "values" => %{"logicalType" => "decimal", "type" => "string"}
-        }
+        "type" => "map",
+        "values" => %{"logicalType" => "decimal", "type" => "string"}
       }
 
-      assert ~s'Avrogen.Util.Random.Constructors.map(Avrogen.Util.Random.Constructors.decimal())' ==
-               CodeGenerator.random_instance_field(map_type, %{})
+      assert ~s'Constructors.map(Constructors.decimal())' ==
+               map_type
+               |> Schema.parse()
+               |> CodeGenerator.random_instance([], %{})
+               |> Macro.to_string()
     end
 
     test "handling maps, with custom types as values" do
-      map_type = %{
-        "name" => "premium_breakdown",
-        "type" => %{
-          "type" => "map",
-          "values" => "renewals.events.v1.Price"
+      map_type = %{"type" => "map", "values" => "renewals.events.v1.Price"}
+
+      global = %{
+        "renewals.events.v1.Price" => %Types.Record{
+          name: "Price",
+          fields: [
+            %Types.Record.Field{
+              name: "monthly",
+              type: ["null", "renewals.events.v1.MonthlyPrice"]
+            }
+          ],
+          namespace: "renewals.events.v1"
         }
       }
 
-      assert ~s'Avrogen.Util.Random.Constructors.map(fn rand_state -> Price.random_instance(rand_state) end)' ==
-               CodeGenerator.random_instance_field(map_type, %{
-                 "renewals.events.v1.Price" => %{
-                   name: "Price",
-                   referenced_schemas: ["renewals.events.v1.MonthlyPrice"],
-                   schema: %{
-                     "fields" => [
-                       %{
-                         "doc" => "The total cost when paying annually",
-                         "logicalType" => "decimal",
-                         "name" => "annual",
-                         "type" => "string"
-                       },
-                       %{
-                         "doc" => "The monthly payment plan details",
-                         "name" => "monthly",
-                         "type" => ["null", "renewals.events.v1.MonthlyPrice"]
-                       }
-                     ],
-                     "name" => "Price",
-                     "namespace" => "renewals.events.v1",
-                     "type" => "record"
-                   },
-                   type: :record
-                 }
-               })
+      assert ~s'Constructors.map(&Price.random_instance/1)' ==
+               map_type
+               |> Schema.parse()
+               |> CodeGenerator.random_instance([], global)
+               |> Macro.to_string()
     end
   end
 
-  describe "generate_schema" do
+  describe "generate_code" do
     test "Smoke test" do
       @schema_file
       |> File.read!()
       |> Jason.decode!()
-      |> Enum.each(fn schema ->
-        CodeGenerator.generate_schema(schema, [], "Test", scope_embedded_types: true)
-        |> Enum.each(fn {_filename, code} -> assert code =~ "defmodule" end)
+      |> Enum.flat_map(&Schema.generate_code(&1, [], "Test", scope_embedded_types: true))
+      |> Enum.each(fn {_filename, code} ->
+        code = IO.iodata_to_binary(code)
+        assert code =~ "defmodule"
       end)
     end
   end

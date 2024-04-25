@@ -236,6 +236,8 @@ AVRO Logical Type | AVRO Underlying Type | Elixir Type
 `iso_date` | `string` | `Date`
 `date` | `string` | `Date`
 `iso_datetime` | `string` | `DateTime`
+`timestamp-millis` | `string` | `DateTime`
+`uuid` | `string` | `String`
 `big_decimal` | `string` | `Decimal`
 `decimal` | `string` | `Decimal`
 

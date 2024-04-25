@@ -6,7 +6,7 @@ defmodule Avrogen.Test.Roundtrip do
   """
   use ExUnit.Case, async: true
 
-  alias Avrogen.CodeGenerator
+  alias Avrogen.Avro.Schema
   alias Avrogen.Schema.SchemaRegistry
 
   @schemas_dir "test/roundtrip_schemas"
@@ -32,11 +32,11 @@ defmodule Avrogen.Test.Roundtrip do
       |> Enum.map(fn schema ->
         schema
         |> Jason.decode!()
-        |> CodeGenerator.generate_schema([], "Test", scope_embedded_types: true)
+        |> Schema.generate_code([], "Test", scope_embedded_types: true)
         |> Enum.map(fn {_filename, code} ->
           # Shut up warnings
           Code.put_compiler_option(:ignore_already_consolidated, true)
-          compiled_code = Code.compile_string(code)
+          compiled_code = code |> IO.iodata_to_binary() |> Code.compile_string()
           mod_name = compiled_code |> tl() |> hd() |> elem(0)
           mod_name
         end)

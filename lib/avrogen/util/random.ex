@@ -100,10 +100,10 @@ defmodule Avrogen.Util.Random do
   Returns a tuple {new_rand_state, d}, where d is a decimal with min <= d <
   max.
   """
-  def decimal(rand_state, min, max) do
+  def decimal(rand_state, min, max, scale) do
     range = max - min - 1
     {f, s} = :rand.uniform_s(rand_state)
-    {s, Decimal.from_float(range * f + min)}
+    {s, Decimal.from_float(range * f + min) |> Decimal.round(scale)}
   end
 
   defp unicode_codepoint(rand_state, min, max) do
@@ -362,7 +362,8 @@ defmodule Avrogen.Util.Random do
     def decimal(opts \\ []) do
       min = Keyword.get(opts, :min, -2_147_483_648)
       max = Keyword.get(opts, :max, 2_147_483_648)
-      fn rand_state -> Random.decimal(rand_state, min, max) end
+      scale = Keyword.get(opts, :scale, 10)
+      fn rand_state -> Random.decimal(rand_state, min, max, scale) end
     end
 
     @spec string(Keyword.t()) :: constructor_fun()
@@ -378,6 +379,8 @@ defmodule Avrogen.Util.Random do
           fn rand_state -> Random.string(rand_state, max_length, min_codepoint, max_codepoint) end
       end
     end
+
+    def uuid(_opts \\ []), do: fn _ -> UUID.uuid4() end
 
     def map(value_constructor, opts \\ []) do
       max_length = Keyword.get(opts, :max_map_length, 10)

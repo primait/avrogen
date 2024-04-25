@@ -133,7 +133,6 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
 
   import HappyWith
 
-  alias Avrogen.CodeGenerator
   alias Avrogen.Schema
 
   # Note: This makes tasks run in the correct context when using an umbrella
@@ -220,7 +219,7 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
         Schema.path_from_fqn(schema_root, schema_fqn, schema_resolution_mode)
       end)
 
-    paths = CodeGenerator.filenames_from_schema(dest, schema)
+    paths = Avrogen.Avro.Schema.filenames_from_schema(dest, schema)
 
     status =
       case force || Mix.Utils.stale?(paths ++ deps ++ find_beam_files(), paths) do
@@ -248,7 +247,8 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
       |> Enum.map(fn schema -> File.read!(schema) |> Jason.decode!() end)
 
     files =
-      CodeGenerator.generate_schema(schema, deps_schemas, module_prefix,
+      schema
+      |> Avrogen.Avro.Schema.generate_code(deps_schemas, module_prefix,
         scope_embedded_types: scope,
         dest: dest
       )

@@ -1,0 +1,49 @@
+{
+  "type": "record",
+  "name": "TestRecord2",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "opt_string",
+      "type": [
+        "null",
+        "string"
+      ],
+      "default": null
+    },
+    {
+      "name": "empty_default_string",
+      "type": "string",
+      "default": ""
+    },
+    {
+      "name": "integer",
+      "type": "int"
+    },
+    {
+      "name": "bytes",
+      "type": {
+        "type": "bytes",
+        "logicalType": "decimal",
+        "precision": 38,
+        "scale": 2
+      }
+    },
+    {
+      "name": "opt_bytes",
+      "type": [
+        "null",
+        {
+          "type": "bytes",
+          "logicalType": "decimal",
+          "precision": 38,
+          "scale": 2
+        }
+      ],
+      "default": null
+    }
+  ]
+}

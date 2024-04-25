@@ -32,6 +32,8 @@ defmodule Avrogen.Schema do
   def fqn(%{"name" => name, "namespace" => namespace}), do: "#{namespace}.#{name}"
   def fqn(%{"name" => name}), do: name
   def fqn(%{name: _name, schema: schema}), do: fqn(schema)
+  def fqn(%{name: name, namespace: namespace}), do: "#{namespace}.#{name}"
+  def fqn(%{name: name}), do: name
 
   @doc """
   Get a schema's namespace.

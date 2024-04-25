@@ -1192,5 +1192,152 @@
     "name": "record28",
     "namespace": "test.namespace",
     "type": "record"
+  },
+  {
+    "type": "record",
+    "name": "record29",
+    "namespace": "test.namespace2",
+    "fields": [
+      {
+        "name": "field1",
+        "type": {
+          "type": "record",
+          "name": "record30",
+          "fields": [
+            {
+              "name": "field1",
+              "type": "string"
+            },
+            {
+              "name": "field2",
+              "type": {
+                "type": "long",
+                "logicalType": "timestamp-millis"
+              }
+            },
+            {
+              "name": "field3",
+              "type": {
+                "type": "string",
+                "logicalType": "uuid"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "field2",
+        "type": {
+          "type": "record",
+          "name": "record31",
+          "fields": [
+            {
+              "name": "field1",
+              "type": "string"
+            },
+            {
+              "name": "field2",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      {
+        "name": "field3",
+        "type": {
+          "type": "record",
+          "name": "record32",
+          "fields": [
+            {
+              "name": "field1",
+              "type": "string"
+            },
+            {
+              "name": "field2",
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": null
+            },
+            {
+              "name": "field3",
+              "type": "string",
+              "default": ""
+            },
+            {
+              "name": "field4",
+              "type": "int"
+            },
+            {
+              "name": "field5",
+              "type": {
+                "type": "bytes",
+                "logicalType": "decimal",
+                "precision": 38,
+                "scale": 2
+              }
+            },
+            {
+              "name": "field6",
+              "type": {
+                "type": "bytes",
+                "logicalType": "decimal",
+                "precision": 38,
+                "scale": 2
+              }
+            },
+            {
+              "name": "field7",
+              "type": {
+                "type": "bytes",
+                "logicalType": "decimal",
+                "precision": 38,
+                "scale": 2
+              }
+            },
+            {
+              "name": "field8",
+              "type": [
+                "null",
+                {
+                  "type": "bytes",
+                  "logicalType": "decimal",
+                  "precision": 38,
+                  "scale": 2
+                }
+              ],
+              "default": null
+            },
+            {
+              "name": "field9",
+              "type": [
+                "null",
+                {
+                  "type": "enum",
+                  "name": "enum1",
+                  "symbols": [
+                    "Symbol1",
+                    "Symbol2"
+                  ]
+                }
+              ],
+              "default": null
+            }
+          ]
+        }
+      },
+      {
+        "name": "field4",
+        "type": {
+          "type": "string",
+          "logicalType": "uuid"
+        }
+      },
+      {
+        "name": "field5",
+        "type": "string"
+      }
+    ]
   }
 ]

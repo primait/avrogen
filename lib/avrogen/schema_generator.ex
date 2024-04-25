@@ -3,7 +3,7 @@ defmodule Avrogen.SchemaGenerator do
   Generate avro schemas from .exs files.
   """
 
-  alias Avrogen.CodeGenerator
+  alias Avrogen.Avro.Schema
 
   @doc """
   Generates the avro schemas for a given .exs file, and returns a list of the
@@ -18,8 +18,7 @@ defmodule Avrogen.SchemaGenerator do
     list_of_schemas =
       schema_module.avro_schema_elixir()
       |> ensure_string_keys!()
-      |> CodeGenerator.traverse(%{}, nil, scope_embedded_types?(schema_module))
-      |> Enum.map(fn {_name, %{schema: schema}} -> schema end)
+      |> Schema.normalized_schemas(nil, scope_embedded_types?(schema_module))
 
     # Create the filename for each schema based on its name
     list_of_schemas
