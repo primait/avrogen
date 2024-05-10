@@ -60,20 +60,24 @@ defimpl CodeGenerator, for: Map do
     quote do
       unquote(inner)
 
-      defp unquote(function_name)(map) when is_map(map),
-        do: Enum.map(map, fn {key, value} -> {key, unquote(function_name)(value)} end)
+      defp unquote(function_name)(map) when is_map(map) do
+        Enum.reduce(map, %{}, fn {key, value}, acc ->
+          Elixir.Map.put(acc, key, unquote(function_name)(value))
+        end)
+      end
     end
   end
 
   def decode_function(%Map{value_schema: value_schema}, function_name, global) do
-    inner = CodeGenerator.decode_function(value_schema, function_name, global)
+    value_function_name = :"#{function_name}_values"
+    inner = CodeGenerator.decode_function(value_schema, value_function_name, global)
 
     quote do
       defp unquote(function_name)(value) when is_map(value),
         do:
           Enum.reduce_while(value, {:ok, %{}}, fn {key, value}, {:ok, acc} ->
-            case unquote(function_name)(value) do
-              {:ok, value} -> {:cont, {:ok, Map.put(acc, key, value)}}
+            case unquote(value_function_name)(value) do
+              {:ok, value} -> {:cont, {:ok, Elixir.Map.put(acc, key, value)}}
               {:error, _} = error -> {:halt, error}
             end
           end)
