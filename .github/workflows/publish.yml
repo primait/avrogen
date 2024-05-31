@@ -10,6 +10,6 @@ jobs:
     uses: primait/shared-github-actions/.github/workflows/elixir-hex-publish.yml@master
     with:
       version-file: ".tool-versions"
-      hex-organization: primauk
+      hex-organization: prima
     secrets:
       HEX_KEY: ${{ secrets.HEX_KEY }}

@@ -1,6 +1,6 @@
 # Avrogen
 
-[![Build Status](https://github.com/primait/avrogen/actions/workflows/elixir.yml/badge.svg)](https://github.com/primait/avrogen/actions/workflows/elixir.yml) [![Hex.pm](https://img.shields.io/badge/hex.pm-green)](https://hex.pm/packages/primauk/avrogen) [![Documentation](https://img.shields.io/badge/documentation-gray)](https://primauk.hexdocs.pm/avrogen/)
+[![Build Status](https://github.com/primait/avrogen/actions/workflows/elixir.yml/badge.svg)](https://github.com/primait/avrogen/actions/workflows/elixir.yml) [![Hex.pm](https://img.shields.io/badge/hex.pm-green)](https://hex.pm/packages/prima/avrogen) [![Documentation](https://img.shields.io/badge/documentation-gray)](https://prima.hexdocs.pm/avrogen/)
 
 Generate Elixir typedstructs and various useful helper functions from AVRO schemas at compile time.
 
@@ -65,7 +65,7 @@ by adding `avrogen` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:avrogen, "~> 0.4.3", organization: "primauk"}
+    {:avrogen, "~> 0.4.3", organization: "prima"}
   ]
 end
 ```
