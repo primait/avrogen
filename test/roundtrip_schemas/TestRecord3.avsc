@@ -1,0 +1,42 @@
+{
+  "name": "TestRecord4",
+  "type": "record",
+  "fields": [
+    {
+      "name": "string",
+      "type": "string"
+    },
+    {
+      "name": "string_date",
+      "type": "string"
+    },
+    {
+      "name": "enum",
+      "type": {
+        "name": "TestEnum",
+        "type": "enum",
+        "symbols": [
+          "Symbol1",
+          "Symbol2",
+          "Symbol3"
+        ]
+      }
+    },
+    {
+      "name": "array_of_records",
+      "type": {
+        "type": "array",
+        "items": {
+          "name": "InlineRecord",
+          "type": "record",
+          "fields": [
+            {
+              "name": "string",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

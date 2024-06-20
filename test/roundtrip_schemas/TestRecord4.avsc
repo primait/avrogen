@@ -1,0 +1,65 @@
+{
+  "name": "TestRecord3",
+  "type": "record",
+  "fields": [
+    {
+      "name": "string",
+      "type": "string"
+    },
+    {
+      "name": "uuid",
+      "type": {
+        "type": "string",
+        "logicalType": "uuid"
+      }
+    },
+    {
+      "name": "array_of_records",
+      "type": {
+        "type": "array",
+        "items": {
+          "name": "RecordWithInlineEnum",
+          "type": "record",
+          "fields": [
+            {
+              "name": "string",
+              "type": "string"
+            },
+            {
+              "name": "enum",
+              "type": {
+                "name": "TestEnum",
+                "type": "enum",
+                "symbols": [
+                  "Symbol1",
+                  "Symbol2",
+                  "Symbol3"
+                ]
+              }
+            },
+            {
+              "name": "string_date",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "array_of_records_with_references",
+      "type": {
+        "type": "array",
+        "items": {
+          "name": "RecordWithReference",
+          "type": "record",
+          "fields": [
+            {
+              "name": "test_enum",
+              "type": "TestEnum"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

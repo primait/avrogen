@@ -109,7 +109,7 @@ defmodule Avrogen.Avro.Schema do
   @spec filename_from_schema(Path.t(), Types.Record.t() | Types.Enum.t()) :: Path.t()
   def filename_from_schema(dest, schema) do
     dest
-    |> Path.join(String.replace(schema.namespace, ".", "/"))
+    |> Path.join(String.replace(schema.namespace || "", ".", "/"))
     |> Path.join(Macro.underscore(schema.name) <> ".ex")
   end
 

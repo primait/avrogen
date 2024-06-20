@@ -380,7 +380,7 @@ defmodule Avrogen.Util.Random do
       end
     end
 
-    def uuid(_opts \\ []), do: fn _ -> UUID.uuid4() end
+    def uuid(_opts \\ []), do: fn rand_state -> {rand_state, UUID.uuid4()} end
 
     def map(value_constructor, opts \\ []) do
       max_length = Keyword.get(opts, :max_map_length, 10)

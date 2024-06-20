@@ -11,57 +11,54 @@ defmodule Avrogen.Test.Roundtrip do
 
   @schemas_dir "test/roundtrip_schemas"
 
-  defp swap({a, b}), do: {b, a}
+  setup_all do
+    # Shut up warnings
+    Code.put_compiler_option(:ignore_already_consolidated, true)
+    Code.put_compiler_option(:ignore_module_conflict, true)
+    Code.put_compiler_option(:no_warn_undefined, :all)
+  end
 
-  test "roundtrip" do
-    # Read all schemas from the @schemas_dir
-    schemas =
-      @schemas_dir
-      |> File.ls!()
-      |> Enum.map(&File.read!(Path.join(@schemas_dir, &1)))
+  @schemas_dir
+  |> File.ls!()
+  |> Enum.map(fn schema_path ->
+    test "roundtrip #{schema_path}" do
+      schema = File.read!(Path.join(@schemas_dir, unquote(schema_path)))
 
-    # Generate and compile code for each example schema.
-    # This produces a list of compiled module names like
-    # [
-    #   Test.RecordWithBytes.RecordWithBytes,
-    #   Test.Events.V1.MidTermAdjustmentOfferFeesOverriden,
-    #   ...
-    # ]
-    mod_names =
-      schemas
-      |> Enum.map(fn schema ->
-        schema
-        |> Jason.decode!()
-        |> Schema.generate_code([], "Test", scope_embedded_types: true)
-        |> Enum.map(fn {_filename, code} ->
-          # Shut up warnings
-          Code.put_compiler_option(:ignore_already_consolidated, true)
-          compiled_code = code |> IO.iodata_to_binary() |> Code.compile_string()
-          mod_name = compiled_code |> tl() |> hd() |> elem(0)
-          mod_name
-        end)
-      end)
-      |> List.flatten()
+      schema
+      |> generate_code()
+      |> Enum.map(&compile_code/1)
+      |> Enum.map(&module_name/1)
+      |> Enum.reject(&is_nil/1)
+      |> Enum.map(&check_roundtrip(&1, schema))
+    end
+  end)
 
-    # For each schema module, generate a random instance of the schema.
-    initial_rand_state = :rand.seed(:default)
+  # Gets the module name of the record type generated code
+  defp module_name([_, {mod_name, _}]), do: mod_name
+  defp module_name(_), do: nil
 
-    {random_instances, _final_rand_state} =
-      mod_names
-      |> Enum.map_reduce(initial_rand_state, fn mod_name, rand_state ->
-        mod_name.random_instance(rand_state) |> swap()
-      end)
+  defp check_roundtrip(mod_name, schema) do
+    rand_state = :rand.seed(:default)
+    {_rand_state, random_instance} = mod_name.random_instance(rand_state)
+    encoder = SchemaRegistry.make_encoder(schema)
+    decoder = SchemaRegistry.make_decoder(schema)
 
-    # Check that each random instance roundtrips correctly.
-    Enum.zip([mod_names, schemas, random_instances])
-    |> Enum.map(fn {mod_name, schema, random_instance} ->
-      encoder = SchemaRegistry.make_encoder(schema)
-      decoder = SchemaRegistry.make_decoder(schema)
+    encoded = encoder.(mod_name.avro_fqn(), mod_name.to_avro_map(random_instance))
+    {:ok, decoded} = decoder.(mod_name.avro_fqn(), encoded) |> mod_name.from_avro_map()
 
-      encoded = encoder.(mod_name.avro_fqn(), mod_name.to_avro_map(random_instance))
-      {:ok, decoded} = decoder.(mod_name.avro_fqn(), encoded) |> mod_name.from_avro_map()
+    assert random_instance == decoded
+  end
 
-      assert random_instance == decoded
-    end)
+  defp compile_code(code) do
+    code
+    |> IO.iodata_to_binary()
+    |> Code.compile_string()
+  end
+
+  defp generate_code(schema) do
+    schema
+    |> Jason.decode!()
+    |> Schema.generate_code([], "Test")
+    |> Enum.map(&elem(&1, 1))
   end
 end

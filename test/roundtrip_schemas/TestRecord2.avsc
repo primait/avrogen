@@ -44,6 +44,14 @@
         }
       ],
       "default": null
+    },
+    {
+      "name": "source",
+      "type": {
+        "type": "enum",
+        "name": "source",
+        "symbols": ["CUSTOMER", "SYSTEM"]
+      }
     }
   ]
 }
