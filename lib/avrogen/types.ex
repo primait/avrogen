@@ -20,6 +20,10 @@ defmodule Avrogen.Types do
     dependencies(type)
   end
 
+  def dependencies(%{"type" => "map", "values" => type}) do
+    dependencies(type)
+  end
+
   def dependencies(type) when is_map(type) do
     # TODO: Extract properly from these complex types...
     []

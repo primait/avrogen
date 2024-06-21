@@ -56,7 +56,7 @@ defmodule Avrogen.Schema do
   @doc """
   Sort a list of avro schemas in topological order based on dependencies.
   """
-  @spec fqn([schema()]) :: [schema()]
+  @spec topological_sort([schema()]) :: {:ok, [schema()]} | {:error, any()}
   def topological_sort(elements) do
     dependencies =
       elements
