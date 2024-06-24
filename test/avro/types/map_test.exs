@@ -11,7 +11,15 @@ defmodule Avrogen.Avro.Types.MapTest.MacroSupport do
     fields: [%Types.Record.Field{name: "f1", type: %Types.Primitive{type: :int}}]
   }
 
+  @union_schema %Types.Union{
+    types: [
+      %Types.Primitive{type: :string},
+      %Types.Primitive{type: :int}
+    ]
+  }
+
   @map_schema_record %Types.Map{default: %{}, value_schema: @record_schema}
+  @map_schema_union %Types.Map{default: %{}, value_schema: @union_schema}
 
   defmacro gen_code do
     details =
@@ -19,7 +27,9 @@ defmodule Avrogen.Avro.Types.MapTest.MacroSupport do
         CodeGenerator.decode_function(@map_schema, :test_decode_map, %{}),
         CodeGenerator.encode_function(@map_schema, :test_encode_map, %{}),
         CodeGenerator.decode_function(@map_schema_record, :test_decode_record_map, %{}),
-        CodeGenerator.encode_function(@map_schema_record, :test_encode_record_map, %{})
+        CodeGenerator.encode_function(@map_schema_record, :test_encode_record_map, %{}),
+        CodeGenerator.decode_function(@map_schema_union, :test_decode_union_map, %{}),
+        CodeGenerator.encode_function(@map_schema_union, :test_encode_union_map, %{})
       ]
       |> Enum.flat_map(&MacroUtils.flatten_block/1)
 
@@ -58,6 +68,18 @@ defmodule Avrogen.Avro.Types.MapTest do
       initial_map = %{"a" => %{"f1" => 42}}
       assert {:ok, val} = test_decode_record_map(initial_map)
       assert initial_map == test_encode_record_map(val)
+    end
+  end
+
+  describe "Map.encode_function" do
+    test "record-valued map" do
+      initial_map = %{"a" => 1}
+      assert {:ok, val} = test_decode_union_map(initial_map)
+      assert initial_map == test_encode_union_map(val)
+
+      initial_map = %{"a" => "hello"}
+      assert {:ok, val} = test_decode_union_map(initial_map)
+      assert initial_map == test_encode_union_map(val)
     end
   end
 end

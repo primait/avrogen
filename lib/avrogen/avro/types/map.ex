@@ -55,14 +55,15 @@ defimpl CodeGenerator, for: Map do
     do: quote(do: %{String.t() => unquote(CodeGenerator.elixir_type(value_schema))})
 
   def encode_function(%Map{value_schema: value_schema}, function_name, global) do
-    inner = CodeGenerator.encode_function(value_schema, function_name, global)
+    value_function_name = :"#{function_name}_values"
+    inner = CodeGenerator.encode_function(value_schema, value_function_name, global)
 
     quote do
       unquote(inner)
 
       defp unquote(function_name)(map) when is_map(map) do
         Enum.reduce(map, %{}, fn {key, value}, acc ->
-          Elixir.Map.put(acc, key, unquote(function_name)(value))
+          Elixir.Map.put(acc, key, unquote(value_function_name)(value))
         end)
       end
     end
