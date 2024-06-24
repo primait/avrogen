@@ -35,6 +35,8 @@ defimpl Jason.Encoder, for: Map do
   end
 end
 
+alias Avrogen.Utils.MacroUtils
+
 defimpl CodeGenerator, for: Map do
   def external_dependencies(%Map{value_schema: value_schema}),
     do: CodeGenerator.external_dependencies(value_schema)
@@ -56,7 +58,11 @@ defimpl CodeGenerator, for: Map do
 
   def encode_function(%Map{value_schema: value_schema}, function_name, global) do
     value_function_name = :"#{function_name}_values"
-    inner = CodeGenerator.encode_function(value_schema, value_function_name, global)
+
+    inner =
+      value_schema
+      |> CodeGenerator.encode_function(value_function_name, global)
+      |> MacroUtils.flatten_block()
 
     quote do
       unquote(inner)
@@ -71,7 +77,11 @@ defimpl CodeGenerator, for: Map do
 
   def decode_function(%Map{value_schema: value_schema}, function_name, global) do
     value_function_name = :"#{function_name}_values"
-    inner = CodeGenerator.decode_function(value_schema, value_function_name, global)
+
+    inner =
+      value_schema
+      |> CodeGenerator.decode_function(value_function_name, global)
+      |> MacroUtils.flatten_block()
 
     quote do
       defp unquote(function_name)(value) when is_map(value),

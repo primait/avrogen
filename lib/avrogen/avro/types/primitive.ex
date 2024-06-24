@@ -127,9 +127,12 @@ defimpl CodeGenerator, for: Primitive do
     end
   end
 
-  def decode_function(%Primitive{}, function_name, _global) do
+  def decode_function(%Primitive{type: type}, function_name, _global) do
+    guard_clause = Primitive.guard_clause(type)
+
     quote do
-      defp unquote(function_name)(value), do: {:ok, value}
+      defp unquote(function_name)(value) when unquote(guard_clause)(value), do: {:ok, value}
+      defp unquote(function_name)(_), do: {:error, "Not value of type #{unquote(type)}"}
     end
   end
 

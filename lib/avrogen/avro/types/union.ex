@@ -81,7 +81,7 @@ defimpl CodeGenerator, for: Union do
       |> Enum.map(fn {type, i} ->
         CodeGenerator.decode_function(type, :"#{function_name}_#{i}", global)
       end)
-      |> MacroUtils.flatten_block()
+      |> Enum.flat_map(&MacroUtils.flatten_block/1)
 
     clauses =
       types
