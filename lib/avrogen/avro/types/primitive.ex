@@ -123,7 +123,7 @@ defimpl CodeGenerator, for: Primitive do
   def decode_function(%Primitive{type: :null}, function_name, _global) do
     quote do
       defp unquote(function_name)(nil), do: {:ok, nil}
-      defp unquote(function_name)(_), do: {:error, "Not a null value"}
+      defp unquote(function_name)(_), do: {:error, "[#{unquote(function_name)}] Not a null value"}
     end
   end
 
@@ -132,7 +132,9 @@ defimpl CodeGenerator, for: Primitive do
 
     quote do
       defp unquote(function_name)(value) when unquote(guard_clause)(value), do: {:ok, value}
-      defp unquote(function_name)(_), do: {:error, "Not value of type #{unquote(type)}"}
+
+      defp unquote(function_name)(_),
+        do: {:error, "[#{unquote(function_name)}] Not value of type #{unquote(type)}"}
     end
   end
 
