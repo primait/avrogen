@@ -1,18 +1,18 @@
-defmodule Avrogen.Avro.Types.Logical.TimestampMillis do
+defmodule Avrogen.Avro.Types.Logical.TimestampMicros do
   @moduledoc """
-    This type represents the [timestamp-millis](https://avro.apache.org/docs/1.11.1/specification/_print/#timestamp-millisecond-precision)
+    This type represents the [timestamp-micros](https://avro.apache.org/docs/1.11.1/specification/#timestamp-microsecond-precision)
     type according to the specification
 
-    The timestamp-millis logical type represents an instant on the global timeline, independent of a particular time
-    zone or calendar, with a precision of one millisecond.
+    The timestamp-micros logical type represents a date with a time and a reference to a particular
+    time zone, with a precision of one microsecond.
 
-    A timestamp-millis logical type annotates an Avro long, where the long stores the number of
-    milliseconds after midnight, 00:00:00.000.
+    A timestamp-micros logical type annotates an Avro long, where the long stores the number of
+    microseconds after midnight, 00:00:00.000.
   """
 
   use TypedStruct
 
-  @logical_type "timestamp-millis"
+  @logical_type "timestamp-micros"
   @avro_type "long"
 
   @derive Jason.Encoder
@@ -28,42 +28,42 @@ defmodule Avrogen.Avro.Types.Logical.TimestampMillis do
     do: %__MODULE__{logicalType: @logical_type, type: @avro_type}
 end
 
-alias Avrogen.Avro.Types.Logical.TimestampMillis
+alias Avrogen.Avro.Types.Logical.TimestampMicros
 alias Avrogen.Avro.Schema.CodeGenerator
 
-defimpl CodeGenerator, for: TimestampMillis do
+defimpl CodeGenerator, for: TimestampMicros do
   def external_dependencies(_), do: []
 
   def normalize(value, global, _parent_namespace, _scope_embedded_types), do: {value, global}
 
-  def elixir_type(%TimestampMillis{}), do: quote(do: DateTime.t())
+  def elixir_type(%TimestampMicros{}), do: quote(do: DateTime.t())
 
-  def encode_function(%TimestampMillis{}, function_name, _global) do
+  def encode_function(%TimestampMicros{}, function_name, _global) do
     quote do
       defp unquote(function_name)(%DateTime{} = timestamp),
-        do: DateTime.to_unix(timestamp, :millisecond)
+        do: DateTime.to_unix(timestamp, :microsecond)
     end
   end
 
-  def decode_function(%TimestampMillis{}, function_name, _global) do
+  def decode_function(%TimestampMicros{}, function_name, _global) do
     quote do
       defp unquote(function_name)(timestamp) when is_number(timestamp),
-        do: DateTime.from_unix(timestamp, :millisecond)
+        do: DateTime.from_unix(timestamp, :microsecond)
 
       defp unquote(function_name)(timestamp),
-        do: {:error, "Expected a long value, got: #{inspect(timestamp)}"}
+        do: {:error, "Expected a long, got: #{inspect(timestamp)}"}
     end
   end
 
-  def contains_pii?(%TimestampMillis{}, _global), do: false
+  def contains_pii?(%TimestampMicros{}, _global), do: false
 
-  def drop_pii(%TimestampMillis{}, function_name, _global) do
+  def drop_pii(%TimestampMicros{}, function_name, _global) do
     quote do
       def unquote(function_name)(%DateTime{}), do: DateTime.utc_now()
     end
   end
 
-  def random_instance(%TimestampMillis{logicalType: logicalType}, range_opts, _global) do
+  def random_instance(%TimestampMicros{logicalType: logicalType}, range_opts, _global) do
     range_opts
     |> Keyword.get(String.to_atom(logicalType), [])
     |> case do

@@ -23,24 +23,47 @@ defmodule Avrogen.Avro.Types.Logical do
   @type t ::
           __MODULE__.DecimalString.t()
           | __MODULE__.Decimal.t()
-          | __MODULE__.DateString.t()
-          | __MODULE__.DateTimeString.t()
-          | __MODULE__.TimestampMillis.t()
           | __MODULE__.UUID.t()
+          | __MODULE__.DateString.t()
+          | __MODULE__.Date.t()
+          | __MODULE__.DateTimeString.t()
+          | __MODULE__.TimeMillis.t()
+          | __MODULE__.TimeMicros.t()
+          | __MODULE__.TimestampMillis.t()
+          | __MODULE__.TimestampMicros.t()
+          | __MODULE__.LocalTimestampMillis.t()
+          | __MODULE__.LocalTimestampMicros.t()
 
   def parse(value), do: module(value).parse(value)
 
+  @spec module(map()) :: module()
   def module(%{"logicalType" => "decimal", "type" => "string"}), do: __MODULE__.DecimalString
-  def module(%{"logicalType" => "big_decimal", "type" => "string"}), do: __MODULE__.DecimalString
   def module(%{"logicalType" => "decimal", "type" => "bytes"}), do: __MODULE__.Decimal
-  def module(%{"logicalType" => "datetime", "type" => "string"}), do: __MODULE__.DateTimeString
-  def module(%{"logicalType" => "date", "type" => "string"}), do: __MODULE__.DateString
-  def module(%{"logicalType" => "iso_date", "type" => "string"}), do: __MODULE__.DateString
+  def module(%{"logicalType" => "big_decimal", "type" => "string"}), do: __MODULE__.DecimalString
+
   def module(%{"logicalType" => "uuid", "type" => "string"}), do: __MODULE__.UUID
+
+  def module(%{"logicalType" => "date", "type" => "string"}), do: __MODULE__.DateString
+  def module(%{"logicalType" => "date", "type" => "int"}), do: __MODULE__.Date
+
+  def module(%{"logicalType" => "datetime", "type" => "string"}), do: __MODULE__.DateTimeString
+  def module(%{"logicalType" => "iso_date", "type" => "string"}), do: __MODULE__.DateString
 
   def module(%{"logicalType" => "iso_datetime", "type" => "string"}),
     do: __MODULE__.DateTimeString
 
+  def module(%{"logicalType" => "time-millis", "type" => "int"}), do: __MODULE__.TimeMillis
+  def module(%{"logicalType" => "time-micros", "type" => "long"}), do: __MODULE__.TimeMicros
+
   def module(%{"logicalType" => "timestamp-millis", "type" => "long"}),
     do: __MODULE__.TimestampMillis
+
+  def module(%{"logicalType" => "timestamp-micros", "type" => "long"}),
+    do: __MODULE__.TimestampMicros
+
+  def module(%{"logicalType" => "local-timestamp-millis", "type" => "long"}),
+    do: __MODULE__.LocalTimestampMillis
+
+  def module(%{"logicalType" => "local-timestamp-micros", "type" => "long"}),
+    do: __MODULE__.LocalTimestampMicros
 end

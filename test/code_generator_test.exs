@@ -367,9 +367,63 @@ defmodule Avrogen.CodeGenerator.Test do
                |> Macro.to_string()
     end
 
+    test "elixir type: 'timestamp-micros logical type'" do
+      assert "DateTime.t()" ==
+               %{"type" => "long", "logicalType" => "timestamp-micros"}
+               |> Schema.parse()
+               |> CodeGenerator.elixir_type()
+               |> Macro.to_string()
+    end
+
     test "elixir type: 'date logical type'" do
       assert "Date.t()" ==
                %{"type" => "string", "logicalType" => "date"}
+               |> Schema.parse()
+               |> CodeGenerator.elixir_type()
+               |> Macro.to_string()
+
+      assert "Date.t()" ==
+               %{"type" => "int", "logicalType" => "date"}
+               |> Schema.parse()
+               |> CodeGenerator.elixir_type()
+               |> Macro.to_string()
+    end
+
+    test "elixir type: 'datetime logical type'" do
+      assert "DateTime.t()" ==
+               %{"type" => "string", "logicalType" => "datetime"}
+               |> Schema.parse()
+               |> CodeGenerator.elixir_type()
+               |> Macro.to_string()
+    end
+
+    test "elixir type: 'time-millis logical type'" do
+      assert "Time.t()" ==
+               %{"type" => "int", "logicalType" => "time-millis"}
+               |> Schema.parse()
+               |> CodeGenerator.elixir_type()
+               |> Macro.to_string()
+    end
+
+    test "elixir type: 'time-micros logical type'" do
+      assert "Time.t()" ==
+               %{"type" => "long", "logicalType" => "time-micros"}
+               |> Schema.parse()
+               |> CodeGenerator.elixir_type()
+               |> Macro.to_string()
+    end
+
+    test "elixir type: 'local-timestamp-millis logical type'" do
+      assert "NaiveDateTime.t()" ==
+               %{"type" => "long", "logicalType" => "local-timestamp-millis"}
+               |> Schema.parse()
+               |> CodeGenerator.elixir_type()
+               |> Macro.to_string()
+    end
+
+    test "elixir type: 'local-timestamp-micros logical type'" do
+      assert "NaiveDateTime.t()" ==
+               %{"type" => "long", "logicalType" => "local-timestamp-micros"}
                |> Schema.parse()
                |> CodeGenerator.elixir_type()
                |> Macro.to_string()

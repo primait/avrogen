@@ -1,6 +1,6 @@
 defmodule Avrogen.Avro.Types.Logical.Decimal do
   @moduledoc """
-    This represents the logical type of the [decimal](https://avro.apache.org/docs/1.11.0/spec.html#Decimal)
+    This represents the logical type of the [decimal](https://avro.apache.org/docs/1.11.1/specification/_print/#decimal)
     in the specification
 
     The decimal logical type represents an arbitrary-precision signed decimal number of
@@ -66,19 +66,19 @@ defmodule Avrogen.Avro.Types.Logical.Decimal do
   end
 end
 
-alias Avrogen.Avro.Types.Logical.Decimal
+alias Avrogen.Avro.Types.Logical
 alias Avrogen.Avro.Schema.CodeGenerator
 
-defimpl CodeGenerator, for: Decimal do
+defimpl CodeGenerator, for: Logical.Decimal do
   def external_dependencies(_), do: []
 
   def normalize(value, global, _parent_namespace, _scope_embedded_types), do: {value, global}
 
-  def elixir_type(%Decimal{}), do: quote(do: Decimal.t())
+  def elixir_type(%Logical.Decimal{}), do: quote(do: Decimal.t())
 
-  def encode_function(%Decimal{scale: scale} = decimal, function_name, _global) do
+  def encode_function(%Logical.Decimal{scale: scale} = decimal, function_name, _global) do
     scale = :math.pow(10, scale) |> trunc()
-    number_of_bytes = Decimal.number_of_bytes(decimal)
+    number_of_bytes = Logical.Decimal.number_of_bytes(decimal)
 
     quote do
       defp unquote(function_name)(%Decimal{} = decimal) do
@@ -89,9 +89,9 @@ defimpl CodeGenerator, for: Decimal do
     end
   end
 
-  def decode_function(%Decimal{scale: scale} = decimal, function_name, _global) do
+  def decode_function(%Logical.Decimal{scale: scale} = decimal, function_name, _global) do
     divisor = :math.pow(10, scale) |> trunc()
-    number_of_bytes = Decimal.number_of_bytes(decimal)
+    number_of_bytes = Logical.Decimal.number_of_bytes(decimal)
 
     quote do
       defp unquote(function_name)(<<value::unquote(number_of_bytes)-signed-integer-big>>) do
@@ -103,16 +103,20 @@ defimpl CodeGenerator, for: Decimal do
     end
   end
 
-  def contains_pii?(%Decimal{}, _global), do: false
+  def contains_pii?(%Logical.Decimal{}, _global), do: false
 
-  def drop_pii(%Decimal{scale: scale}, function_name, _global) do
+  def drop_pii(%Logical.Decimal{scale: scale}, function_name, _global) do
     quote do
-      def unquote(function_name)(%Decimal{}),
+      def unquote(function_name)(%Logical.Decimal{}),
         do: Decimal.new("0") |> Decimal.round(unquote(scale))
     end
   end
 
-  def random_instance(%Decimal{logicalType: logicalType, scale: scale}, range_opts, _global) do
+  def random_instance(
+        %Logical.Decimal{logicalType: logicalType, scale: scale},
+        range_opts,
+        _global
+      ) do
     range_opts
     |> Keyword.get(String.to_atom(logicalType), [])
     |> Keyword.merge(scale: scale)

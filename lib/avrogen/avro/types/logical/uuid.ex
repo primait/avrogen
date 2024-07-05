@@ -1,6 +1,6 @@
 defmodule Avrogen.Avro.Types.Logical.UUID do
   @moduledoc """
-    This represents the logical type of the [uuid](https://avro.apache.org/docs/1.11.0/spec.html#UUID)
+    This represents the logical type of the [uuid](https://avro.apache.org/docs/1.11.1/specification/_print/#uuid)
     in the specification.
 
     The uuid logical type represents a random generated universally unique identifier (UUID).
@@ -24,23 +24,28 @@ defmodule Avrogen.Avro.Types.Logical.UUID do
     do: %__MODULE__{logicalType: @logical_type, type: @avro_type}
 end
 
-alias Avrogen.Avro.Types.Logical.UUID
+alias Avrogen.Avro.Types.Logical
 alias Avrogen.Avro.Schema.CodeGenerator
 
-defimpl CodeGenerator, for: UUID do
+defimpl CodeGenerator, for: Logical.UUID do
   def external_dependencies(_), do: []
 
   def normalize(value, global, _parent_namespace, _scope_embedded_types), do: {value, global}
 
-  def elixir_type(%UUID{}), do: quote(do: String.t())
+  def elixir_type(%Logical.UUID{}), do: quote(do: String.t())
 
-  def encode_function(%UUID{}, function_name, _global) do
+  def encode_function(%Logical.UUID{}, function_name, _global) do
     quote do
-      defp unquote(function_name)(uuid) when is_binary(uuid), do: uuid
+      defp unquote(function_name)(uuid) do
+        case UUID.info(uuid) do
+          {:ok, _} -> uuid
+          {:error, error} -> raise ArgumentError, message: inspect(error)
+        end
+      end
     end
   end
 
-  def decode_function(%UUID{}, function_name, _global) do
+  def decode_function(%Logical.UUID{}, function_name, _global) do
     quote do
       defp unquote(function_name)(uuid) do
         case UUID.info(uuid) do
@@ -51,13 +56,13 @@ defimpl CodeGenerator, for: UUID do
     end
   end
 
-  def contains_pii?(%UUID{}, _global), do: false
+  def contains_pii?(%Logical.UUID{}, _global), do: false
 
-  def drop_pii(%UUID{}, function_name, _global) do
+  def drop_pii(%Logical.UUID{}, function_name, _global) do
     quote do
       def unquote(function_name)(value) when is_binary(value), do: UUID.uuid4()
     end
   end
 
-  def random_instance(%UUID{}, _range_opts, _global), do: quote(do: Constructors.uuid())
+  def random_instance(%Logical.UUID{}, _range_opts, _global), do: quote(do: Constructors.uuid())
 end

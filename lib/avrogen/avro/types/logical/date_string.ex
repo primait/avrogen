@@ -1,6 +1,6 @@
 defmodule Avrogen.Avro.Types.Logical.DateString do
   @moduledoc """
-    This type actually does not conform to the specification for a decimal.
+    This type actually does not conform to the specification for a date.
 
     However, this is in use in our code base. This type is when a string represents a
     date value as stored as an iso8601 string.
