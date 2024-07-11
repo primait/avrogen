@@ -36,7 +36,7 @@ defimpl CodeGenerator, for: Logical.UUID do
 
   def encode_function(%Logical.UUID{}, function_name, _global) do
     quote do
-      defp unquote(function_name)(uuid) do
+      defp unquote(function_name)(uuid) when is_binary(uuid) do
         case UUID.info(uuid) do
           {:ok, _} -> uuid
           {:error, error} -> raise ArgumentError, message: inspect(error)
