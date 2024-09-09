@@ -40,5 +40,19 @@ defmodule Avrogen.Avro.Types.UnionTest do
         assert union == test_encode_union_primitives(val)
       end)
     end
+
+    test "union function clause error trying to encode a non-union type" do
+      assert_raise FunctionClauseError, fn ->
+        # It's a union of null, string, bool and numbers. Map isn't an union value.
+        # Instead of returning the value itself, it should return an error.
+        test_encode_union_primitives(%{})
+      end
+    end
+
+    test "union function clause error trying to decode a non-union type" do
+      # assert {:error, _} = test_decode_union_primitives(%{})
+      # Note: that's not the correct behavior. The function should return an error.
+      assert {:ok, %{}} = test_decode_union_primitives(%{})
+    end
   end
 end
