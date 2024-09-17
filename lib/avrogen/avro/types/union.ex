@@ -66,11 +66,6 @@ defimpl CodeGenerator, for: Union do
 
     quote do
       (unquote_splicing(functions))
-
-      # This is not correct behaviour, but is the current behaviour of the library.
-      # We should remove this and return and error simply have a match failure in a
-      # future release
-      defp unquote(function_name)(value), do: value
     end
   end
 
