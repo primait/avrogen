@@ -617,12 +617,12 @@ map = module.to_avro_map(message)
 
 Update `mix.exs` with your version `x.y.z`, e.g. `0.4.1`.
 
-Tag master with the format `v[x.y.z]` after merging your changes to `mix.exs`:
+Tag master with the format `x.y.z` after merging your changes to `mix.exs`:
 
 ```bash
 git checkout master
 git pull
-git tag -a v[x.y.z]
+git tag -a x.y.z
 ```
 
 You should add the changes the new version introduces in the editor that opens
