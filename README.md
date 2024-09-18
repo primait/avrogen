@@ -612,25 +612,3 @@ map = module.to_avro_map(message)
 > `decode/1` rather than `decode/2` (omitting the `schema_name` option), but it
 > doesn't disclose the inferred schema name to the caller, which is not
 > particularly useful.
-
-## Publishing
-
-Update `mix.exs` with your version `x.y.z`, e.g. `0.4.1`.
-
-Tag master with the format `x.y.z` after merging your changes to `mix.exs`:
-
-```bash
-git checkout master
-git pull
-git tag -a x.y.z
-```
-
-You should add the changes the new version introduces in the editor that opens
-up, then push the new tag:
-
-```bash
-git push --tags
-```
-
-This will get picked up by the `Elixir CD` GitHub Action, which will build the
-package and publish it to Hex.
