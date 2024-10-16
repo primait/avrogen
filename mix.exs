@@ -62,8 +62,7 @@ defmodule Avrogen.MixProject do
     [
       organization: "prima",
       licenses: ["Apache-2.0"],
-      links: %{"GitHub" => @source_url},
-      files: ~w(.formatter.exs .credo.exs mix.exs README.md CHANGELOG.md LICENSE.md lib)
+      links: %{"GitHub" => @source_url}
     ]
   end
 
