@@ -61,8 +61,9 @@ defmodule Avrogen.MixProject do
   defp package do
     [
       organization: "prima",
-      licenses: [],
-      links: %{"GitHub" => @source_url}
+      licenses: ["Apache-2.0"],
+      links: %{"GitHub" => @source_url},
+      files: ~w(.formatter.exs .credo.exs mix.exs README.md CHANGELOG.md LICENSE.md lib)
     ]
   end
 
@@ -75,7 +76,7 @@ defmodule Avrogen.MixProject do
   defp docs do
     [
       main: "readme",
-      source_ref: "v#{@version}",
+      source_ref: @version,
       source_url: @source_url,
       extras: ["README.md"]
     ]
