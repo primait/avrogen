@@ -74,7 +74,7 @@ defmodule Avrogen.MixProject do
 
   defp docs do
     [
-      main: "readme",
+      main: "README.md",
       source_ref: @version,
       source_url: @source_url,
       extras: ["README.md"]
