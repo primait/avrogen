@@ -1,7 +1,7 @@
 defmodule Avrogen.MixProject do
   use Mix.Project
 
-  @version "0.7.0"
+  @version "0.7.1"
   @source_url "https://github.com/primait/avrogen"
 
   def project do
@@ -73,7 +73,6 @@ defmodule Avrogen.MixProject do
 
   defp docs do
     [
-      main: "README.md",
       source_ref: @version,
       source_url: @source_url,
       extras: ["README.md"]
