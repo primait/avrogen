@@ -60,7 +60,6 @@ defmodule Avrogen.MixProject do
 
   defp package do
     [
-      organization: "prima",
       licenses: ["Apache-2.0"],
       links: %{"GitHub" => @source_url}
     ]
