@@ -36,7 +36,7 @@ defmodule Avrogen.MixProject do
   defp deps do
     [
       {:accessible, "~> 0.3"},
-      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:credo, "== 1.7.1", only: [:dev, :test], runtime: false},
       {:decimal, "~> 2.0"},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:erlavro, "~> 2.9"},
