@@ -17,7 +17,6 @@ defmodule Avrogen do
   investigated. It might require some small schema tweaks to avoid this kind of
   situation.
   """
-  import HappyWith
 
   alias Avrogen.Schema.SchemaRegistry
 
@@ -49,12 +48,9 @@ defmodule Avrogen do
   end
 
   def decode_schemaless_base64(module, base64_schemaless_avro_bytes) do
-    happy_with do
-      {:ok, binary} <- Base.decode64(base64_schemaless_avro_bytes)
-      decode_schemaless(module, binary)
-    else
-      :error ->
-        {:error, :invalid_base64}
+    case Base.decode64(base64_schemaless_avro_bytes) do
+      {:ok, binary} -> decode_schemaless(module, binary)
+      :error -> {:error, :invalid_base64}
     end
   end
 end
