@@ -43,7 +43,6 @@ defmodule Avrogen.MixProject do
       {:elixir_uuid, "~> 1.2"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:excribe, "~> 0.1"},
-      {:happy_with, "~> 1.0"},
       {:jason, "~> 1.0"},
       {:libgraph, "~> 0.16"},
       {:noether, "~> 0.2"},
