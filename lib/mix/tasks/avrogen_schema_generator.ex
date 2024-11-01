@@ -268,8 +268,8 @@ defmodule Mix.Tasks.Compile.AvroSchemaGenerator do
 
   defp load_manifest(path) do
     with {:ok, content} <- File.read(path),
-      data <- :erlang.binary_to_term(content),
-      {@manifest_version, %Manifest{} = manifest} <- data do
+         data <- :erlang.binary_to_term(content),
+         {@manifest_version, %Manifest{} = manifest} <- data do
       manifest
     else
       _ -> %Manifest{}
