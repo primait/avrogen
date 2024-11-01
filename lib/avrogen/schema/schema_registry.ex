@@ -5,7 +5,7 @@ defmodule Avrogen.Schema.SchemaRegistry do
   """
 
   use GenServer
-  use Logger
+  require Logger
 
   @ets_name "all"
 
@@ -49,13 +49,13 @@ defmodule Avrogen.Schema.SchemaRegistry do
         e ->
           formatted_error = Exception.format(:error, e, __STACKTRACE__)
 
-          Logger.error("Error when attempting to make encoder/decoder.",
+          Logger.error("Error when attempting to make encoder/decoder: #{formatted_error}",
             error: formatted_error,
             schemas: schemas,
-            schemas_json: json
+            schemas_json: Jason.encode(schemas)
           )
 
-          reraise(e)
+          reraise e, __STACKTRACE__
       end
     end)
 
