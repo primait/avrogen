@@ -5,6 +5,7 @@ defmodule Avrogen.Schema.SchemaRegistry do
   """
 
   use GenServer
+  use Logger
 
   @ets_name "all"
 
@@ -39,10 +40,23 @@ defmodule Avrogen.Schema.SchemaRegistry do
     end)
     |> Avrogen.Schema.topological_sort()
     |> Noether.Either.map(fn schemas ->
-      json = Jason.encode!(schemas)
-      encoder = make_encoder(json)
-      decoder = make_decoder(json)
-      :ets.insert(__MODULE__, {@ets_name, json, encoder, decoder})
+      try do
+        json = Jason.encode!(schemas)
+        encoder = make_encoder(json)
+        decoder = make_decoder(json)
+        :ets.insert(__MODULE__, {@ets_name, json, encoder, decoder})
+      rescue
+        e ->
+          formatted_error = Exception.format(:error, e, __STACKTRACE__)
+
+          Logger.error("Error when attempting to make encoder/decoder.",
+            error: formatted_error,
+            schemas: schemas,
+            schemas_json: json
+          )
+
+          reraise(e)
+      end
     end)
 
     {:ok, table}
