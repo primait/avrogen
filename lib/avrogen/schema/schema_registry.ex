@@ -49,11 +49,11 @@ defmodule Avrogen.Schema.SchemaRegistry do
         e ->
           formatted_error = Exception.format(:error, e, __STACKTRACE__)
 
-          Logger.error("Error when attempting to make encoder/decoder: #{formatted_error}",
+          Logger.error("Error when attempting to make encoder/decoder: #{formatted_error}", %{
             error: formatted_error,
             schemas: schemas,
             schemas_json: Jason.encode(schemas)
-          )
+          })
 
           reraise e, __STACKTRACE__
       end
