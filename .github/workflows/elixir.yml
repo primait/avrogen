@@ -11,13 +11,29 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: [
+          { elixir: '1.14', otp: '23' },
+          { elixir: '1.14', otp: '24' },
+          { elixir: '1.14', otp: '25' },
+          { elixir: '1.15', otp: '24' },
+          { elixir: '1.15', otp: '25' },
+          { elixir: '1.15', otp: '26' },
+          { elixir: '1.16', otp: '24' },
+          { elixir: '1.16', otp: '25' },
+          { elixir: '1.16', otp: '26' },
+          { elixir: '1.17', otp: '25' },
+          { elixir: '1.17', otp: '26' },
+          { elixir: '1.17', otp: '27' }
+        ]
     env:
       MIX_ENV: test
     steps:
       - uses: erlef/setup-beam@v1
         with:
-          elixir-version: 1.16
-          otp-version: 26
+          elixir-version: ${{ matrix.version.elixir }}
+          otp-version: ${{ matrix.version.otp }}
 
       # Check out the code.
       - name: Checkout
@@ -31,9 +47,9 @@ jobs:
           cache-name: cache-elixir-deps
         with:
           path: deps
-          key: ${{ runner.os }}-mix-${{ env.cache-name }}-${{ hashFiles('**/mix.lock') }}
+          key: ${{ runner.os }}-otp-${{ matrix.version.otp }}-mix-${{ env.cache-name }}-${{ hashFiles('**/mix.lock') }}
           restore-keys: |
-            ${{ runner.os }}-mix-${{ env.cache-name }}-
+            ${{ runner.os }}-otp-${{ matrix.version.otp }}-mix-${{ env.cache-name }}-
       # Define how to cache the `_build` directory.
       # After the first run, this speeds up tests runs a lot.
       # This includes not re-compiling our project's downloaded deps every run.
@@ -44,10 +60,10 @@ jobs:
           cache-name: cache-compiled-build
         with:
           path: _build
-          key: ${{ runner.os }}-mix-${{ env.cache-name }}-${{ hashFiles('**/mix.lock') }}
+          key: ${{ runner.os }}-otp-${{ matrix.version.otp }}-mix-${{ env.cache-name }}-${{ hashFiles('**/mix.lock') }}
           restore-keys: |
-            ${{ runner.os }}-mix-${{ env.cache-name }}-
-            ${{ runner.os }}-mix-
+            ${{ runner.os }}-otp-${{ matrix.version.otp }}-mix-${{ env.cache-name }}-
+            ${{ runner.os }}-otp-${{ matrix.version.otp }}-mix-
       # Conditionally bust the cache when job is re-run.
       # Sometimes, we may have issues with incremental builds that are fixed by doing a full recompile.
       # In order to not waste dev time on such trivial issues force a full recompile only on builds that are retried.
