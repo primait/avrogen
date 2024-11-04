@@ -51,7 +51,7 @@ defmodule Avrogen.Schema.SchemaRegistry do
           formatted_error = Exception.format(:error, e, __STACKTRACE__)
 
           Logger.error(
-            "Error when attempting to make encoder/decoder: #{formatted_error}; schemas: #{inspect(schemas, limit: :infinity, pretty: true, printable_limit: :infinity)} schemas_json: #{elem(json, 1)}",
+            "Error when attempting to make encoder/decoder: #{formatted_error}; schemas: #{inspect(schemas, limit: :infinity, pretty: true, printable_limit: :infinity)} schemas_json: #{json}",
             %{
               error: formatted_error,
               schemas: schemas,
