@@ -40,18 +40,18 @@ defmodule Avrogen.Schema.SchemaRegistry do
     end)
     |> Avrogen.Schema.topological_sort()
     |> Noether.Either.map(fn schemas ->
+      json = Jason.encode!(schemas)
+
       try do
-        json = Jason.encode!(schemas)
         encoder = make_encoder(json)
         decoder = make_decoder(json)
         :ets.insert(__MODULE__, {@ets_name, json, encoder, decoder})
       rescue
         e ->
           formatted_error = Exception.format(:error, e, __STACKTRACE__)
-          json = Jason.encode(schemas) |> elem(1)
 
           Logger.error(
-            "Error when attempting to make encoder/decoder: #{formatted_error}; schemas: #{inspect(schemas)} schemas_json: #{json}",
+            "Error when attempting to make encoder/decoder: #{formatted_error}; schemas: #{inspect(schemas, limit: :infinity, pretty: true, printable_limit: :infinity)} schemas_json: #{elem(json, 1)}",
             %{
               error: formatted_error,
               schemas: schemas,
