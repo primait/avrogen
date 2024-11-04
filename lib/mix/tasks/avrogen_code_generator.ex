@@ -131,8 +131,6 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
 
   use Mix.Task.Compiler
 
-  import HappyWith
-
   alias Avrogen.Schema
 
   # Note: This makes tasks run in the correct context when using an umbrella
@@ -347,10 +345,9 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
   end
 
   defp load_manifest(path) do
-    happy_with do
-      {:ok, content} <- File.read(path)
-      data <- :erlang.binary_to_term(content)
-      {@manifest_version, %Manifest{} = manifest} <- data
+    with {:ok, content} <- File.read(path),
+         data <- :erlang.binary_to_term(content),
+         {@manifest_version, %Manifest{} = manifest} <- data do
       manifest
     else
       _ -> %Manifest{}
