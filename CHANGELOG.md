@@ -10,6 +10,14 @@ and this project adheres to
 
 ---
 
+## [0.8.0] - 2025-01-22
+
+### Changed
+
+- Replaced `elixir_uuid` with `uniq`
+
+---
+
 ## [0.7.0] - 2024-09-18
 
 ### Changed
