@@ -40,14 +40,14 @@ defmodule Avrogen.MixProject do
       {:decimal, "~> 2.0"},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:erlavro, "~> 2.9"},
-      {:elixir_uuid, "~> 1.2"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:excribe, "~> 0.1"},
       {:jason, "~> 1.0"},
       {:libgraph, "~> 0.16"},
       {:noether, "~> 0.2"},
       {:timex, "~> 3.6"},
-      {:typed_struct, "~> 0.3"}
+      {:typed_struct, "~> 0.3"},
+      {:uniq, "~> 0.1"}
     ]
   end
 
