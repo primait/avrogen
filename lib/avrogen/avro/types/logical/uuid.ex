@@ -37,7 +37,7 @@ defimpl CodeGenerator, for: Logical.UUID do
   def encode_function(%Logical.UUID{}, function_name, _global) do
     quote do
       defp unquote(function_name)(uuid) when is_binary(uuid) do
-        case UUID.info(uuid) do
+        case Uniq.UUID.info(uuid) do
           {:ok, _} -> uuid
           {:error, error} -> raise ArgumentError, message: inspect(error)
         end
@@ -48,7 +48,7 @@ defimpl CodeGenerator, for: Logical.UUID do
   def decode_function(%Logical.UUID{}, function_name, _global) do
     quote do
       defp unquote(function_name)(uuid) do
-        case UUID.info(uuid) do
+        case Uniq.UUID.info(uuid) do
           {:ok, _} -> {:ok, uuid}
           {:error, error} -> {:error, error}
         end
@@ -60,7 +60,7 @@ defimpl CodeGenerator, for: Logical.UUID do
 
   def drop_pii(%Logical.UUID{}, function_name, _global) do
     quote do
-      def unquote(function_name)(value) when is_binary(value), do: UUID.uuid4()
+      def unquote(function_name)(value) when is_binary(value), do: Uniq.UUID.uuid4()
     end
   end
 

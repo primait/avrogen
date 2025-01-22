@@ -66,7 +66,7 @@ defmodule Avrogen.Avro.Types.LogicalTypesTest do
     test "a uuid value expressed as string" do
       assert {:error, _} = decode_uuid("test")
 
-      uuid = UUID.uuid4()
+      uuid = Uniq.UUID.uuid4()
       assert {:ok, ^uuid} = decode_uuid(uuid)
 
       assert_raise ArgumentError, fn ->
