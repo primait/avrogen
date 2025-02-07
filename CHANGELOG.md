@@ -14,6 +14,7 @@ and this project adheres to
 
 ### Changed
 
+- Set defaults for record fields to null if explicitly requested
 - Correct generated `from_avro_map` behaviour for optional fields
 
 ---
