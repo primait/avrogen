@@ -60,7 +60,7 @@ defmodule Avrogen.Avro.Types.Record.Field do
   # The only way to differentiate between "default is nil because there isn't one" and "default is actually null" is to
   # check if the type is also a union with null.
   def has_default?(%__MODULE__{default: nil, type: %Types.Union{} = union}),
-    do: Types.Union.has_member?(union, Types.Primitive.null())
+    do: Types.Union.optional_by_convention?(union)
 
   def has_default?(%__MODULE__{default: nil}), do: false
   def has_default?(%__MODULE__{}), do: true
