@@ -15,6 +15,7 @@ defmodule Avrogen.Avro.Types.Union do
   """
 
   alias Avrogen.Avro.Schema
+  alias Avrogen.Avro.Types.Primitive
   use TypedStruct
 
   typedstruct do
@@ -25,6 +26,10 @@ defmodule Avrogen.Avro.Types.Union do
   def parse(value) when is_list(value), do: %__MODULE__{types: Enum.map(value, &Schema.parse/1)}
 
   def has_member?(%__MODULE__{types: types}, type), do: Enum.member?(types, type)
+
+  # A union with null listed first is optional by convention (see moduledoc).
+  def optional_by_convention?(%__MODULE__{types: [first_type | _]}),
+    do: first_type == Primitive.null()
 end
 
 alias Avrogen.Avro.Schema.CodeGenerator
