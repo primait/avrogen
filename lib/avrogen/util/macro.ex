@@ -36,9 +36,8 @@ defmodule Avrogen.Utils.MacroUtils do
           |> Map.from_struct()
           |> Map.reject(fn {_k, v} -> is_nil(v) end)
           |> then(fn map ->
-            # TODO get from config?
             case Map.get(map, :default) do
-              "explicitly_null_default" ->
+              :explicitly_null_default ->
                 Map.put(map, :default, nil)
 
               _other ->
