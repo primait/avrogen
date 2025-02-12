@@ -10,7 +10,7 @@ defmodule Avrogen.Avro.Types.Record.Field do
 
   @type order :: :ascending | :descending | :ignore
 
-  @explicitly_null_default :explicitly_null_default
+  @explicitly_null_default "explicitly_null_default"
 
   typedstruct do
     # A JSON string providing the name of the enum (required).
