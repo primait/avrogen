@@ -10,6 +10,15 @@ and this project adheres to
 
 ---
 
+## [0.8.1] - 2025-02-10
+
+### Changed
+
+- Set defaults for record fields to null if explicitly requested
+- Correct generated `from_avro_map` behaviour for optional fields
+
+---
+
 ## [0.8.0] - 2025-01-22
 
 ### Changed

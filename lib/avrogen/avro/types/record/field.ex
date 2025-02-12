@@ -10,6 +10,8 @@ defmodule Avrogen.Avro.Types.Record.Field do
 
   @type order :: :ascending | :descending | :ignore
 
+  @explicitly_null_default "explicitly_null_default"
+
   typedstruct do
     # A JSON string providing the name of the enum (required).
     field :name, String.t(), enforce: true
@@ -40,11 +42,20 @@ defmodule Avrogen.Avro.Types.Record.Field do
   end
 
   def parse(%{"name" => name, "type" => type} = field) do
+    # We must be able to differentiate between default=nil and default not set.
+    default =
+      case Map.fetch(field, "default") do
+        :error -> nil
+        {:ok, "null"} -> @explicitly_null_default
+        {:ok, nil} -> @explicitly_null_default
+        {:ok, other} -> other
+      end
+
     %__MODULE__{
       name: name,
       doc: field["doc"],
       type: Schema.parse(type),
-      default: parse_default_value(field["default"]),
+      default: default,
       order: field["order"],
       aliases: field["aliases"],
       pii: field["pii"] || false,
@@ -77,7 +88,7 @@ defmodule Avrogen.Avro.Types.Record.Field do
     variable_name = Code.string_to_quoted!(name)
 
     case default do
-      default when is_nil(default) or default == "null" ->
+      default when default == @explicitly_null_default ->
         quote(do: unquote(variable_name) = avro_map[unquote(name)])
 
       default ->
@@ -85,7 +96,8 @@ defmodule Avrogen.Avro.Types.Record.Field do
     end
   end
 
-  def typed_struct_field(%__MODULE__{name: name, type: type, default: nil} = field) do
+  def typed_struct_field(%__MODULE__{name: name, type: type, default: default} = field)
+      when default == @explicitly_null_default do
     name = String.to_atom(name)
 
     quote do
@@ -103,10 +115,6 @@ defmodule Avrogen.Avro.Types.Record.Field do
         default: unquote(default)
     end
   end
-
-  def parse_default_value(nil), do: nil
-  def parse_default_value("null"), do: nil
-  def parse_default_value(value), do: value
 
   def enforce?(%__MODULE__{type: %Types.Union{} = union}),
     do: not Types.Union.has_member?(union, Types.Primitive.null())

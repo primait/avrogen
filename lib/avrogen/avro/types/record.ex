@@ -75,12 +75,7 @@ defmodule Avrogen.Avro.Types.Record do
         @impl true
         unquote(from_avro_map(record))
 
-        @required_keys MapSet.new(unquote(required_keys(record)))
-        def from_avro_map(%{} = invalid) do
-          actual = Map.keys(invalid) |> MapSet.new()
-          missing = MapSet.difference(@required_keys, actual) |> Enum.join(", ")
-          {:error, "Missing keys: " <> missing}
-        end
+        unquote_splicing(from_avro_map_invalid_clause(record))
 
         def from_avro_map(_) do
           {:error, "Expected a map."}
@@ -150,6 +145,27 @@ defmodule Avrogen.Avro.Types.Record do
         {:ok, %__MODULE__{unquote_splicing(record_fields)}}
       end
     end
+  end
+
+  defp from_avro_map_invalid_clause(record) do
+    required_keys = required_keys(record)
+
+    case required_keys do
+      [] ->
+        quote do
+        end
+
+      _ ->
+        quote do
+          @required_keys MapSet.new(unquote(required_keys))
+          def from_avro_map(%{} = invalid) do
+            actual = Map.keys(invalid) |> MapSet.new()
+            missing = MapSet.difference(@required_keys, actual) |> Enum.join(", ")
+            {:error, "Missing keys: " <> missing}
+          end
+        end
+    end
+    |> MacroUtils.flatten_block()
   end
 
   defp encoding_functions(%__MODULE__{fields: fields}, global) do
