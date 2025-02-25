@@ -318,6 +318,13 @@ defmodule Avrogen.Util.Random do
     {s, d}
   end
 
+  def time(rand_state, start_time, end_time) do
+    {int_start_time, _} = Time.to_seconds_after_midnight(start_time)
+    {int_end_time, _} = Time.to_seconds_after_midnight(end_time)
+    {s, t} = integer(rand_state, int_start_time, int_end_time)
+    {s, Time.from_seconds_after_midnight(t)}
+  end
+
   defmodule Constructors do
     @moduledoc """
     Provides functions that return "constructor functions". A constructor
@@ -422,6 +429,16 @@ defmodule Avrogen.Util.Random do
 
       fn rand_state ->
         Random.datetime(rand_state, min_datetime, max_datetime)
+      end
+    end
+
+    @spec time(Keyword.t()) :: constructor_fun()
+    def time(opts \\ []) do
+      min_time = Keyword.get(opts, :min_time, ~T[00:00:00])
+      max_time = Keyword.get(opts, :max_time, ~T[23:59:59])
+
+      fn rand_state ->
+        Random.time(rand_state, min_time, max_time)
       end
     end
 
