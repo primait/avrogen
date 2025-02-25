@@ -62,9 +62,9 @@ and this project adheres to
   - `LocalTimestampMillis` (`long`).
   - `LocalTimestampMicros` (`long`).
 
-
 [Unreleased]: https://github.com/primait/avrogen/compare/0.8.1...HEAD
 [0.8.1]: https://github.com/primait/avrogen/compare/0.8.0...0.8.1
+[0.8.0]: https://github.com/primait/avrogen/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/primait/avrogen/compare/0.6.6...0.7.0
 [0.6.6]: https://github.com/primait/avrogen/compare/0.6.5...0.6.6
 [0.6.5]: https://github.com/primait/avrogen/compare/0.6.4...0.6.5
