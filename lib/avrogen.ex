@@ -19,6 +19,7 @@ defmodule Avrogen do
   """
 
   alias Avrogen.Schema.SchemaRegistry
+  alias Avrogen.Util.Either
 
   def encode_schemaless(%module{} = record) do
     encoder = SchemaRegistry.get_encoder()
@@ -32,7 +33,7 @@ defmodule Avrogen do
   def encode_schemaless_base64(%_{} = record) do
     record
     |> encode_schemaless()
-    |> Noether.Either.map(fn iodata ->
+    |> Either.map(fn iodata ->
       iodata
       |> IO.iodata_to_binary()
       |> Base.encode64()

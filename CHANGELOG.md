@@ -10,6 +10,14 @@ and this project adheres to
 
 ---
 
+## [0.8.2] - 2025-03-27
+
+### Fixed
+
+- Removed Noether dependency to avoid conflicts.
+
+---
+
 ## [0.8.1] - 2025-02-25
 
 ### Fixed
@@ -62,7 +70,9 @@ and this project adheres to
   - `LocalTimestampMillis` (`long`).
   - `LocalTimestampMicros` (`long`).
 
-[Unreleased]: https://github.com/primait/avrogen/compare/0.8.1...HEAD
+
+[Unreleased]: https://github.com/primait/avrogen/compare/0.8.2...HEAD
+[0.8.2]: https://github.com/primait/avrogen/compare/0.8.1...0.8.2
 [0.8.1]: https://github.com/primait/avrogen/compare/0.8.0...0.8.1
 [0.8.0]: https://github.com/primait/avrogen/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/primait/avrogen/compare/0.6.6...0.7.0
