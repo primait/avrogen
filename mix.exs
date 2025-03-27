@@ -44,7 +44,6 @@ defmodule Avrogen.MixProject do
       {:excribe, "~> 0.1"},
       {:jason, "~> 1.0"},
       {:libgraph, "~> 0.16"},
-      {:noether, "~> 0.2"},
       {:timex, "~> 3.6"},
       {:typed_struct, "~> 0.3"},
       {:uniq, "~> 0.1"}

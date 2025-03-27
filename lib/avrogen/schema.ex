@@ -4,6 +4,8 @@ defmodule Avrogen.Schema do
   Schemas can be records or enums.
   """
 
+  alias Avrogen.Util.Either
+
   @type schema() :: map()
 
   @doc """
@@ -83,7 +85,7 @@ defmodule Avrogen.Schema do
       false -> {:error, :cyclic_dependencies}
       sorted -> {:ok, sorted}
     end
-    |> Noether.Either.map(fn sorted ->
+    |> Either.map(fn sorted ->
       sorted
       |> Enum.map(fn name ->
         {_, item, _} = List.keyfind!(dependencies, name, 0)

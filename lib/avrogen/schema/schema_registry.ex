@@ -4,6 +4,8 @@ defmodule Avrogen.Schema.SchemaRegistry do
   schema name. Initialized on startup with schemas from priv directory.
   """
 
+  alias Avrogen.Util.Either
+
   use GenServer
 
   @ets_name "all"
@@ -38,7 +40,7 @@ defmodule Avrogen.Schema.SchemaRegistry do
       |> Jason.decode!()
     end)
     |> Avrogen.Schema.topological_sort()
-    |> Noether.Either.map(fn schemas ->
+    |> Either.map(fn schemas ->
       json = Jason.encode!(schemas)
       encoder = make_encoder(json)
       decoder = make_decoder(json)
