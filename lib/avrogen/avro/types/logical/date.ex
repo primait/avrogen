@@ -59,7 +59,7 @@ defimpl CodeGenerator, for: Logical.Date do
 
   def drop_pii(%Logical.Date{}, function_name, _global) do
     quote do
-      def unquote(function_name)(%Date{}), do: Date.utc_now()
+      def unquote(function_name)(%Date{}), do: Date.utc_today()
     end
   end
 
