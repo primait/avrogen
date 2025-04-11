@@ -10,6 +10,14 @@ and this project adheres to
 
 ---
 
+## [0.8.3] - 2025-04-11
+
+### Fixed
+
+- Using `Date.utc_today` instead of `Date.utc_now` which doesn't exist
+
+---
+
 ## [0.8.2] - 2025-03-27
 
 ### Fixed
@@ -71,7 +79,8 @@ and this project adheres to
   - `LocalTimestampMicros` (`long`).
 
 
-[Unreleased]: https://github.com/primait/avrogen/compare/0.8.2...HEAD
+[Unreleased]: https://github.com/primait/avrogen/compare/0.8.3...HEAD
+[0.8.3]: https://github.com/primait/avrogen/compare/0.8.2...0.8.3
 [0.8.2]: https://github.com/primait/avrogen/compare/0.8.1...0.8.2
 [0.8.1]: https://github.com/primait/avrogen/compare/0.8.0...0.8.1
 [0.8.0]: https://github.com/primait/avrogen/compare/0.7.0...0.8.0
