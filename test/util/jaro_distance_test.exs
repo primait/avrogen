@@ -29,5 +29,7 @@ defmodule Avrogen.Util.JaroDistance.Test do
     assert JaroDistance.jaro_distance("jon", "john") == 0.9166666666666666
     assert JaroDistance.jaro_distance("jon", "jan") == 0.7777777777777777
     assert JaroDistance.jaro_distance("семена", "стремя") == 0.6666666666666666
+    # differs from String.jaro_distance/2 after Elixir 1.17.1 in this case:
+    assert JaroDistance.jaro_distance("__barstaff_", "__bar_staff_") == 0.9419191919191919
   end
 end
