@@ -1,6 +1,6 @@
 defmodule Avrogen.Util.JaroDistance do
   @moduledoc """
-  This is Elixir's implementation of `String.jaro_distance/2` before Elixir 1.17.1 when it was
+  This is Elixir's implementation of `String.jaro_distance/2` before Elixir 1.17.1, when it was
   "fixed" for certain edge cases. Unfortunately, that fix broke a common case that we relied on
   (see issue 31 for examples).
   The simplest solution is just to keep using the old implementation.
