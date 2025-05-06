@@ -2,6 +2,9 @@ defmodule Avrogen.Util.FuzzyEnumMatch do
   @moduledoc """
   Fuzzy enum matching.
   """
+
+  alias Avrogen.Util.JaroDistance
+
   def preprocess(s) when is_binary(s) do
     normalised =
       s
@@ -45,7 +48,7 @@ defmodule Avrogen.Util.FuzzyEnumMatch do
     Enum.reduce(trigrams, MapSet.new(), fn trigram, candidates ->
       MapSet.union(candidates, Map.get(index, trigram, @empty))
     end)
-    |> Enum.map(fn {c, orig} -> {c, String.jaro_distance(canonical, c), orig} end)
+    |> Enum.map(fn {c, orig} -> {c, JaroDistance.jaro_distance(canonical, c), orig} end)
     |> Enum.sort_by(fn {_, similarity, _} -> similarity end, :desc)
   end
 
