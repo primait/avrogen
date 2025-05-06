@@ -88,7 +88,7 @@ and this project adheres to
 
 
 [Unreleased]: https://github.com/primait/avrogen/compare/0.8.4...HEAD
-[0.8.3]: https://github.com/primait/avrogen/compare/0.8.3...0.8.4
+[0.8.4]: https://github.com/primait/avrogen/compare/0.8.3...0.8.4
 [0.8.3]: https://github.com/primait/avrogen/compare/0.8.2...0.8.3
 [0.8.2]: https://github.com/primait/avrogen/compare/0.8.1...0.8.2
 [0.8.1]: https://github.com/primait/avrogen/compare/0.8.0...0.8.1
