@@ -10,6 +10,14 @@ and this project adheres to
 
 ---
 
+## [0.8.4] - 2025-05-06
+
+### Fixed
+
+- In-line the old version of `String.jaro_distance/2`, since the one introduced in Elixir 1.17.1 changes the behaviour
+
+---
+
 ## [0.8.3] - 2025-04-11
 
 ### Fixed
@@ -79,7 +87,8 @@ and this project adheres to
   - `LocalTimestampMicros` (`long`).
 
 
-[Unreleased]: https://github.com/primait/avrogen/compare/0.8.3...HEAD
+[Unreleased]: https://github.com/primait/avrogen/compare/0.8.4...HEAD
+[0.8.4]: https://github.com/primait/avrogen/compare/0.8.3...0.8.4
 [0.8.3]: https://github.com/primait/avrogen/compare/0.8.2...0.8.3
 [0.8.2]: https://github.com/primait/avrogen/compare/0.8.1...0.8.2
 [0.8.1]: https://github.com/primait/avrogen/compare/0.8.0...0.8.1
