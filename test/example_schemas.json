@@ -1319,7 +1319,8 @@
                   "symbols": [
                     "Symbol1",
                     "Symbol2"
-                  ]
+                  ],
+                  "default": "Symbol1"
                 }
               ],
               "default": null

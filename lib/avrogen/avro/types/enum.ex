@@ -32,6 +32,8 @@ defmodule Avrogen.Avro.Types.Enum do
   end
 
   def parse(%{"type" => @identifier, "name" => name, "symbols" => symbols} = enum) do
+    validate_default_value(enum["default"], symbols)
+
     %__MODULE__{
       name: Macro.camelize(name),
       namespace: enum["namespace"],
@@ -71,6 +73,7 @@ defmodule Avrogen.Avro.Types.Enum do
         @type t() :: unquote(type(enum))
         @values MapSet.new(unquote(values(enum)))
         @values_string MapSet.new(unquote(enum.symbols))
+        @default unquote(default(enum))
 
         def values, do: @values
 
@@ -86,8 +89,15 @@ defmodule Avrogen.Avro.Types.Enum do
 
         defp do_value(value, accepted_values) do
           case MapSet.member?(accepted_values, value) do
-            true -> {:ok, ensure_atom!(value)}
-            false -> {:error, "#{inspect(value)} is not a value of " <> unquote(enum.name)}
+            true ->
+              {:ok, ensure_atom!(value)}
+
+            false ->
+              if @default do
+                {:ok, ensure_atom!(@default)}
+              else
+                {:error, "#{inspect(value)} is not a value of " <> unquote(enum.name)}
+              end
           end
         end
 
@@ -111,7 +121,18 @@ defmodule Avrogen.Avro.Types.Enum do
     end
   end
 
+  defp validate_default_value(nil, _symbols), do: :ok
+
+  defp validate_default_value(default, symbols) do
+    unless default in symbols do
+      raise ArgumentError,
+            "Default value #{inspect(default)} is not in the symbols list: #{inspect(symbols)}"
+    end
+  end
+
   defp values(%__MODULE__{symbols: symbols}), do: Enum.map(symbols, &String.to_atom/1)
+
+  defp default(%__MODULE__{default: default}), do: default
 
   defp type_doc(%__MODULE__{name: name}), do: "Enum values for #{name}."
 

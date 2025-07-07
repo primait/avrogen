@@ -270,6 +270,32 @@ defmodule Avrogen.CodeGenerator.Test do
                ]
     end
 
+    test "externalise_inlined_types: non-existing default in enum" do
+      schema =
+        ensure_string_keys(%{
+          type: :record,
+          name: "Foo",
+          fields: [
+            %{
+              name: :unit,
+              type: [
+                :null,
+                %{
+                  name: :unit,
+                  type: :enum,
+                  symbols: [:years, :months, :miles],
+                  default: :non_existing_default
+                }
+              ]
+            }
+          ]
+        })
+
+      assert_raise ArgumentError, fn ->
+        Schema.normalized_schemas(schema, "parent_namespace", false)
+      end
+    end
+
     test "get_references extracts from record fields in alphabetical order direct references, references in unions and in arrays" do
       schema =
         ensure_string_keys(%{
