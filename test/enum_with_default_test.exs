@@ -2,7 +2,7 @@ defmodule Avrogen.EnumWithDefaultTest do
   @moduledoc """
   Tests enum default value behavior during schema evolution.
   """
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias Avrogen.Avro.Schema
   alias Avrogen.Schema.SchemaRegistry
