@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "RecordWithEnumDefault2",
+  "fields": [
+    {
+      "name": "source",
+      "type": {
+        "type": "enum",
+        "name": "source",
+        "symbols": ["customer", "system", "external", "unknown"],
+        "default": "unknown"
+      }
+    }
+  ]
+}
