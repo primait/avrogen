@@ -10,6 +10,14 @@ and this project adheres to
 
 ---
 
+## [0.8.5] - 2025-07-18
+
+### Changed
+
+- Enhanced enum decoding to handle schema evolution gracefully. When `from_avro_map/1` encounters an unknown enum symbol and the enum defines a default value, it now uses the default instead of returning an error. This enables forward compatibility when new enum symbols are added in newer schema versions.
+
+---
+
 ## [0.8.4] - 2025-05-06
 
 ### Fixed
@@ -86,8 +94,8 @@ and this project adheres to
   - `LocalTimestampMillis` (`long`).
   - `LocalTimestampMicros` (`long`).
 
-
-[Unreleased]: https://github.com/primait/avrogen/compare/0.8.4...HEAD
+[Unreleased]: https://github.com/primait/avrogen/compare/0.8.5...HEAD
+[0.8.5]: https://github.com/primait/avrogen/compare/0.8.4...0.8.5
 [0.8.4]: https://github.com/primait/avrogen/compare/0.8.3...0.8.4
 [0.8.3]: https://github.com/primait/avrogen/compare/0.8.2...0.8.3
 [0.8.2]: https://github.com/primait/avrogen/compare/0.8.1...0.8.2
