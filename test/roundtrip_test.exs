@@ -4,7 +4,7 @@ defmodule Avrogen.Test.Roundtrip do
 
   Doesn't work for .avsc files with nested record types (yet?).
   """
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias Avrogen.Avro.Schema
   alias Avrogen.Schema.SchemaRegistry
