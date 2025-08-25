@@ -10,6 +10,14 @@ and this project adheres to
 
 ---
 
+## [0.8.6] - 2025-08-25
+
+### Fixed
+
+- Fix dialyzer issue for enum default values.
+
+---
+
 ## [0.8.5] - 2025-07-18
 
 ### Changed
@@ -94,7 +102,8 @@ and this project adheres to
   - `LocalTimestampMillis` (`long`).
   - `LocalTimestampMicros` (`long`).
 
-[Unreleased]: https://github.com/primait/avrogen/compare/0.8.5...HEAD
+[Unreleased]: https://github.com/primait/avrogen/compare/0.8.6...HEAD
+[0.8.6]: https://github.com/primait/avrogen/compare/0.8.5...0.8.6
 [0.8.5]: https://github.com/primait/avrogen/compare/0.8.4...0.8.5
 [0.8.4]: https://github.com/primait/avrogen/compare/0.8.3...0.8.4
 [0.8.3]: https://github.com/primait/avrogen/compare/0.8.2...0.8.3
