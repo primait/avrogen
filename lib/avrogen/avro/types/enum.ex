@@ -73,7 +73,6 @@ defmodule Avrogen.Avro.Types.Enum do
         @type t() :: unquote(type(enum))
         @values MapSet.new(unquote(values(enum)))
         @values_string MapSet.new(unquote(enum.symbols))
-        @default unquote(default(enum))
 
         def values, do: @values
 
@@ -93,11 +92,7 @@ defmodule Avrogen.Avro.Types.Enum do
               {:ok, ensure_atom!(value)}
 
             false ->
-              if @default do
-                {:ok, ensure_atom!(@default)}
-              else
-                {:error, "#{inspect(value)} is not a value of " <> unquote(enum.name)}
-              end
+              unquote(default_fallback(enum))
           end
         end
 
@@ -132,8 +127,6 @@ defmodule Avrogen.Avro.Types.Enum do
 
   defp values(%__MODULE__{symbols: symbols}), do: Enum.map(symbols, &String.to_atom/1)
 
-  defp default(%__MODULE__{default: default}), do: default
-
   defp type_doc(%__MODULE__{name: name}), do: "Enum values for #{name}."
 
   defp module_doc(%__MODULE__{doc: nil}), do: ""
@@ -162,6 +155,18 @@ defmodule Avrogen.Avro.Types.Enum do
     quote do
       @preferred_subset MapSet.new(unquote(preferred_subset))
       def preferred_values, do: @preferred_subset
+    end
+  end
+
+  defp default_fallback(%__MODULE__{default: nil, name: name}) do
+    quote do
+      {:error, "#{inspect(value)} is not a value of " <> unquote(name)}
+    end
+  end
+
+  defp default_fallback(%__MODULE__{default: default}) do
+    quote do
+      {:ok, ensure_atom!(unquote(default))}
     end
   end
 end
