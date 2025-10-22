@@ -471,7 +471,7 @@ defmodule Avrogen.CodeGenerator.Test do
                |> Macro.to_string()
     end
 
-    test "elixir type: 'big decimal logical type' standard, annotates string" do
+    test "elixir type: 'big decimal logical type' non-standard, with hyphen, annotates string" do
       assert "Decimal.t()" ==
                %{"type" => "string", "logicalType" => "big-decimal"}
                |> Schema.parse()
