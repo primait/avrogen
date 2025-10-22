@@ -41,6 +41,7 @@ defmodule Avrogen.Avro.Types.Logical do
   def module(%{"logicalType" => "decimal", "type" => "bytes"}), do: __MODULE__.Decimal
   def module(%{"logicalType" => "big_decimal", "type" => "string"}), do: __MODULE__.DecimalString
   def module(%{"logicalType" => "big-decimal", "type" => "string"}), do: __MODULE__.DecimalString
+  def module(%{"logicalType" => "big-decimal", "type" => "bytes"}), do: __MODULE__.BigDecimal
 
   def module(%{"logicalType" => "uuid", "type" => "string"}), do: __MODULE__.UUID
 
