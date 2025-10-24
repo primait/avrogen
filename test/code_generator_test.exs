@@ -463,6 +463,30 @@ defmodule Avrogen.CodeGenerator.Test do
                |> Macro.to_string()
     end
 
+    test "elixir type: 'big decimal logical type'" do
+      assert "Decimal.t()" ==
+               %{"type" => "bytes", "logicalType" => "big-decimal"}
+               |> Schema.parse()
+               |> CodeGenerator.elixir_type()
+               |> Macro.to_string()
+    end
+
+    test "elixir type: 'big decimal logical type' non-standard, with hyphen, annotates string" do
+      assert "Decimal.t()" ==
+               %{"type" => "string", "logicalType" => "big-decimal"}
+               |> Schema.parse()
+               |> CodeGenerator.elixir_type()
+               |> Macro.to_string()
+    end
+
+    test "elixir type: 'big decimal logical type' non-standard, with underscore, annotates string" do
+      assert "Decimal.t()" ==
+               %{"type" => "string", "logicalType" => "big_decimal"}
+               |> Schema.parse()
+               |> CodeGenerator.elixir_type()
+               |> Macro.to_string()
+    end
+
     test "elixir type: [null, 'iso_date logical type']" do
       assert "nil | Date.t()" ==
                ["null", %{"type" => "string", "logicalType" => "iso_date"}]

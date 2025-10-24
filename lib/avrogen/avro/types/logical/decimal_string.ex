@@ -8,7 +8,7 @@ defmodule Avrogen.Avro.Types.Logical.DecimalString do
 
   use TypedStruct
 
-  @logical_types ["decimal", "big_decimal"]
+  @logical_types ["decimal", "big_decimal", "big-decimal"]
   @avro_type "string"
 
   @derive Jason.Encoder

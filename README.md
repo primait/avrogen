@@ -286,9 +286,9 @@ The following logical types are also supported:
 | AVRO Logical Type        | AVRO Underlying Type | Elixir Type     |
 | ------------------------ | -------------------- | --------------- |
 | `uuid`                   | `string`             | `String`        |
-| `big_decimal`            | `string`             | `Decimal`       |
 | `decimal`                | `string`             | `Decimal`       |
 | `decimal`                | `bytes`              | `Decimal`       |
+| `big-decimal`            | `bytes`              | `Decimal`       |
 | `date`                   | `int`                | `Date`          |
 | `date`                   | `string`             | `Date`          |
 | `iso_date`               | `string`             | `Date`          |
@@ -391,7 +391,7 @@ The various types produce random values according to the following rules:
 | `null`                                        | Always produces `nil`.                                                                                              |
 | `union`                                       | Random instance of any of the types within the union, where each type is equally likely to be chosen.               |
 | `string`                                      | Random utf8 binary of up to 1000 codepoints, where each codepoint lies in the range `0 <= codepoint < 10,000`.      |
-| `int`, `double`, `big_decimal` (logical type) | Random value in the range `-2,147,483,648 <= value < 2,147,483,648`.                                                |
+| `int`, `double`, `big-decimal` (logical type) | Random value in the range `-2,147,483,648 <= value < 2,147,483,648`.                                                |
 | `iso_date` and `iso_datetime` (logical types) | Random value in the range `1970-01-01T00:00:00 <= value < 2045-01-01T00:00:00`.                                     |
 | `enum`                                        | One of the symbols selected at random, with each symbol having an equal probability of showing up.                  |
 | `array`                                       | Random list of up to 10 elements, where the value of each element is a random instance of the array's element type. |

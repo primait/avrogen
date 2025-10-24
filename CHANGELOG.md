@@ -10,6 +10,14 @@ and this project adheres to
 
 ---
 
+## [0.9.0] - 2025-10-22
+
+### Added
+
+- Support for the `bytes`-backed `big-decimal` scalable precision decimal type added in v1.12.0. The non-standard, `string`-backed [`big_decimal`](lib/avrogen/avro/types/logical/decimal_string.ex) is still supported and now also accepts `big-decimal` as the logical type name.
+
+---
+
 ## [0.8.6] - 2025-08-25
 
 ### Fixed
@@ -102,7 +110,8 @@ and this project adheres to
   - `LocalTimestampMillis` (`long`).
   - `LocalTimestampMicros` (`long`).
 
-[Unreleased]: https://github.com/primait/avrogen/compare/0.8.6...HEAD
+[Unreleased]: https://github.com/primait/avrogen/compare/0.9.0...HEAD
+[0.9.0]: https://github.com/primait/avrogen/compare/0.8.6...0.9.0
 [0.8.6]: https://github.com/primait/avrogen/compare/0.8.5...0.8.6
 [0.8.5]: https://github.com/primait/avrogen/compare/0.8.4...0.8.5
 [0.8.4]: https://github.com/primait/avrogen/compare/0.8.3...0.8.4
