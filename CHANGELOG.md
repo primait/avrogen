@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix issue where `Avrogen.Schema.external_dependencies` was wrongly identifying references to previously defined types as external dependencies.
+
 ---
 
 ## [0.9.0] - 2025-10-22
