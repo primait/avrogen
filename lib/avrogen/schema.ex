@@ -67,8 +67,7 @@ defmodule Avrogen.Schema do
         fqn(%{name: name})
       end
 
-    updated_previously_defined_types =
-      MapSet.put(previously_defined_types, fully_qualified_name)
+    updated_previously_defined_types = MapSet.put(previously_defined_types, fully_qualified_name)
 
     {[], updated_previously_defined_types}
   end
