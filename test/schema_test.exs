@@ -23,6 +23,75 @@ defmodule Avrogen.Schema.Test do
 
       assert Avrogen.Schema.external_dependencies(input) == []
     end
+
+    test "doesn't identify previously defined types as external dependencies (with namespace)" do
+      input = %{
+        "namespace" => "internal",
+        "type" => "record",
+        "fields" => [
+          %{
+            "name" => "foo1",
+            "type" => %{
+              "name" => "Foo",
+              "type" => "enum",
+              "symbols" => ["A", "B"]
+            }
+          },
+          %{
+            "name" => "foo2",
+            "type" => "internal.Foo"
+          },
+          %{
+            "name" => "foo3",
+            "type" => ["null", "internal.Foo"]
+          },
+          %{
+            "name" => "bar1",
+            "type" => "external.Bar"
+          },
+          %{
+            "name" => "bar2",
+            "type" => ["null", "external.Bar"]
+          }
+        ]
+      }
+
+      assert Avrogen.Schema.external_dependencies(input) == ["external.Bar"]
+    end
+
+    test "doesn't identify previously defined types as external dependencies (without namespace)" do
+      input = %{
+        "type" => "record",
+        "fields" => [
+          %{
+            "name" => "foo1",
+            "type" => %{
+              "name" => "Foo",
+              "type" => "enum",
+              "symbols" => ["A", "B"]
+            }
+          },
+          %{
+            "name" => "foo2",
+            "type" => "Foo"
+          },
+          %{
+            "name" => "foo3",
+            "type" => ["null", "Foo"]
+          },
+          %{
+            "name" => "bar1",
+            "type" => "Bar"
+          },
+          %{
+            "name" => "bar2",
+            "type" => ["null", "Bar"]
+          }
+        ]
+      }
+
+      assert Avrogen.Schema.external_dependencies(input) == ["Bar"]
+    end
   end
 
   describe "fqn" do
