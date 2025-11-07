@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+---
+
+## [0.10.0] - 2025-11-07
+
 ### Fixed
 
 - Fix issue where `Avrogen.Schema.external_dependencies` was wrongly identifying references to previously defined types as external dependencies.
@@ -114,7 +118,9 @@ and this project adheres to
   - `LocalTimestampMillis` (`long`).
   - `LocalTimestampMicros` (`long`).
 
-[Unreleased]: https://github.com/primait/avrogen/compare/0.9.0...HEAD
+
+[Unreleased]: https://github.com/primait/avrogen/compare/0.10.0...HEAD
+[0.10.0]: https://github.com/primait/avrogen/compare/0.10.0...0.10.0
 [0.9.0]: https://github.com/primait/avrogen/compare/0.8.6...0.9.0
 [0.8.6]: https://github.com/primait/avrogen/compare/0.8.5...0.8.6
 [0.8.5]: https://github.com/primait/avrogen/compare/0.8.4...0.8.5
