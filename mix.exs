@@ -21,7 +21,8 @@ defmodule Avrogen.MixProject do
       aliases: aliases(),
       deps: deps(),
       docs: docs(),
-      dialyzer: [plt_add_apps: [:mix]]
+      dialyzer: [plt_add_apps: [:mix]],
+      elixirc_paths: elixirc_paths(Mix.env())
     ]
   end
 
@@ -77,4 +78,8 @@ defmodule Avrogen.MixProject do
       extras: ["README.md"]
     ]
   end
+
+  # Specifies which paths to compile per environment.
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
 end
