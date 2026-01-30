@@ -4,8 +4,8 @@ defmodule Avrogen.EnumWithDefaultTest do
   """
   use ExUnit.Case, async: false
 
-  alias Avrogen.Test.SchemaHelpers
   alias Avrogen.Schema.SchemaRegistry
+  alias Avrogen.Test.SchemaHelpers
 
   @schemas_dir "test/enum_default_schemas"
 
