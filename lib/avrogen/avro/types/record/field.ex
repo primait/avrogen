@@ -60,6 +60,13 @@ defmodule Avrogen.Avro.Types.Record.Field do
   def has_default?(%__MODULE__{default: nil}), do: false
   def has_default?(%__MODULE__{}), do: true
 
+  def is_nullable?(%__MODULE__{type: %Avrogen.Avro.Types.Union{types: types}}),
+    do: Enum.any?(types, &(&1 == Types.Primitive.null()))
+
+  def is_nullable?(%__MODULE__{}), do: false
+
+  def is_required?(%__MODULE__{} = field), do: not has_default?(field) and not is_nullable?(field)
+
   def is_pii?(%__MODULE__{pii: pii}), do: pii
 
   def range_opts(%__MODULE__{range: nil}), do: []
@@ -73,15 +80,15 @@ defmodule Avrogen.Avro.Types.Record.Field do
 
   def to_keywords(val), do: val
 
-  def bind_with_default(%__MODULE__{name: name, default: default}) do
+  def bind_with_default(%__MODULE__{name: name, default: default}, map_var) do
     variable_name = Code.string_to_quoted!(name)
 
     case default do
       default when is_nil(default) or default == "null" ->
-        quote(do: unquote(variable_name) = avro_map[unquote(name)])
+        quote(do: unquote(variable_name) = unquote(map_var)[unquote(name)])
 
       default ->
-        quote(do: unquote(variable_name) = avro_map[unquote(name)] || unquote(default))
+        quote(do: unquote(variable_name) = unquote(map_var)[unquote(name)] || unquote(default))
     end
   end
 
