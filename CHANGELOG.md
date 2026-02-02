@@ -10,6 +10,14 @@ and this project adheres to
 
 ---
 
+## [0.11.0] - 2026-02-02
+
+### Changed
+
+- Enhanced `from_avro_map/1` to support backwards compatibility when schemas evolve. Nullable fields are no longer matched in the function signature, allowing newer versions of modules to successfully decode payloads encoded with older schema versions that don't include newly added nullable fields.
+
+---
+
 ## [0.10.0] - 2025-11-07
 
 ### Fixed
@@ -118,8 +126,8 @@ and this project adheres to
   - `LocalTimestampMillis` (`long`).
   - `LocalTimestampMicros` (`long`).
 
-
-[Unreleased]: https://github.com/primait/avrogen/compare/0.10.0...HEAD
+[Unreleased]: https://github.com/primait/avrogen/compare/0.11.0...HEAD
+[0.11.0]: https://github.com/primait/avrogen/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/primait/avrogen/compare/0.10.0...0.10.0
 [0.9.0]: https://github.com/primait/avrogen/compare/0.8.6...0.9.0
 [0.8.6]: https://github.com/primait/avrogen/compare/0.8.5...0.8.6
