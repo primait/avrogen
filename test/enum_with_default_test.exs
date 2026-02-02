@@ -4,8 +4,8 @@ defmodule Avrogen.EnumWithDefaultTest do
   """
   use ExUnit.Case, async: false
 
-  alias Avrogen.Avro.Schema
   alias Avrogen.Schema.SchemaRegistry
+  alias Avrogen.Test.SchemaHelpers
 
   @schemas_dir "test/enum_default_schemas"
 
@@ -20,8 +20,8 @@ defmodule Avrogen.EnumWithDefaultTest do
     schema_1 = File.read!(Path.join(@schemas_dir, "RecordWithEnumDefault1.avsc"))
     schema_2 = File.read!(Path.join(@schemas_dir, "RecordWithEnumDefault2.avsc"))
 
-    module_1 = generate_module_from_schema(schema_1)
-    module_2 = generate_module_from_schema(schema_2)
+    module_1 = SchemaHelpers.generate_module_from_schema(schema_1)
+    module_2 = SchemaHelpers.generate_module_from_schema(schema_2)
 
     encoder = SchemaRegistry.make_encoder(schema_2)
     decoder = SchemaRegistry.make_decoder(schema_1)
@@ -36,31 +36,5 @@ defmodule Avrogen.EnumWithDefaultTest do
 
     assert {:ok, %^module_1{source: :unknown}} =
              decoder.(module_1.avro_fqn(), encoded) |> module_1.from_avro_map()
-  end
-
-  defp generate_module_from_schema(schema) do
-    schema
-    |> generate_code()
-    |> Enum.map(&compile_code/1)
-    |> Enum.map(&module_name/1)
-    |> Enum.reject(&is_nil/1)
-    |> List.first()
-  end
-
-  # Gets the module name of the record type generated code
-  defp module_name([_, {mod_name, _}]), do: mod_name
-  defp module_name(_), do: nil
-
-  defp compile_code(code) do
-    code
-    |> IO.iodata_to_binary()
-    |> Code.compile_string()
-  end
-
-  defp generate_code(schema) do
-    schema
-    |> Jason.decode!()
-    |> Schema.generate_code([], "Test")
-    |> Enum.map(&elem(&1, 1))
   end
 end
