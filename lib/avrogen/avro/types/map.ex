@@ -65,13 +65,13 @@ defimpl CodeGenerator, for: Map do
       |> MacroUtils.flatten_block()
 
     quote do
-      unquote(inner)
-
       defp unquote(function_name)(map) when is_map(map) do
         Enum.reduce(map, %{}, fn {key, value}, acc ->
           Elixir.Map.put(acc, key, unquote(value_function_name)(value))
         end)
       end
+
+      unquote(inner)
     end
   end
 
