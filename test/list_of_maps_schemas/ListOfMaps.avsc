@@ -1,0 +1,17 @@
+{
+    "type": "record",
+    "name": "ListOfMaps",
+    "namespace": "list_of_maps_schemas",
+    "fields": [
+        {
+      "name": "recipients",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "map",
+          "values": ["null", "string"]
+        }
+      }
+    }
+    ]
+}
