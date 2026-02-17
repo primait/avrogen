@@ -26,21 +26,19 @@ defmodule Avrogen.MapNoWarningsTest do
       # Generate code
       generated_code = SchemaHelpers.generate_code_from_schema(schema)
 
-      # Compile with diagnostics to capture warnings
-      {_result, diagnostics} =
-        Code.with_diagnostics(fn -> Code.compile_string(generated_code) end)
-
-      # Check for clause grouping warnings
-      clause_warnings =
-        Enum.filter(diagnostics, fn diagnostic ->
-          String.contains?(
-            diagnostic.message,
-            "clauses with the same name and arity (number of arguments) should be grouped together,"
-          )
+      # Compile and capture warnings
+      warnings =
+        ExUnit.CaptureIO.capture_io(:stderr, fn ->
+          Code.compile_string(generated_code)
         end)
 
-      assert clause_warnings == [],
-             "Expected no clause grouping warnings, but got:\n#{inspect(clause_warnings, pretty: true)}"
+      # Check for clause grouping warnings
+      assert warnings == "" or
+               not String.contains?(
+                 warnings,
+                 "clauses with the same name and arity (number of arguments) should be grouped together"
+               ),
+             "Expected no clause grouping warnings, but got:\n#{warnings}"
     end
   end
 end
