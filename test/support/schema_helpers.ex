@@ -26,8 +26,7 @@ defmodule Avrogen.Test.SchemaHelpers do
   def generate_code_from_schema(schema) do
     schema
     |> generate_code()
-    |> Enum.map(&IO.iodata_to_binary/1)
-    |> Enum.join("\n")
+    |> Enum.map_join("\n", &IO.iodata_to_binary/1)
   end
 
   # Gets the module name of the record type generated code
