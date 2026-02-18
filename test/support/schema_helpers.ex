@@ -19,6 +19,16 @@ defmodule Avrogen.Test.SchemaHelpers do
     |> List.first()
   end
 
+  @doc """
+  Generates code from an Avro schema string.
+  The schema is parsed and code is generated but not compiled.
+  """
+  def generate_code_from_schema(schema) do
+    schema
+    |> generate_code()
+    |> Enum.map_join("\n", &IO.iodata_to_binary/1)
+  end
+
   # Gets the module name of the record type generated code
   defp module_name([_, {mod_name, _}]), do: mod_name
   defp module_name(_), do: nil
