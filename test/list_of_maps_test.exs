@@ -1,4 +1,4 @@
-defmodule Avrogen.MapNoWarningsTest do
+defmodule Avrogen.ListOfMapsTest do
   @moduledoc """
   Tests that array fields containing maps with union type values don't generate compilation warnings.
 
@@ -23,7 +23,6 @@ defmodule Avrogen.MapNoWarningsTest do
     test "compiles without clause grouping warnings" do
       schema = File.read!(Path.join(@schemas_dir, "ListOfMaps.avsc"))
 
-      # Generate code
       generated_code = SchemaHelpers.generate_code_from_schema(schema)
 
       # Compile and capture warnings
@@ -33,11 +32,10 @@ defmodule Avrogen.MapNoWarningsTest do
         end)
 
       # Check for clause grouping warnings
-      assert warnings == "" or
-               not String.contains?(
-                 warnings,
-                 "clauses with the same name and arity (number of arguments) should be grouped together"
-               ),
+      refute String.contains?(
+               warnings,
+               "clauses with the same name and arity (number of arguments) should be grouped together"
+             ),
              "Expected no clause grouping warnings, but got:\n#{warnings}"
     end
   end
