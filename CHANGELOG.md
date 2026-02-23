@@ -10,6 +10,10 @@ and this project adheres to
 
 ---
 
+## [0.11.1] - 2026-02-18
+
+---
+
 ## [0.11.0] - 2026-02-02
 
 ### Changed
@@ -126,7 +130,9 @@ and this project adheres to
   - `LocalTimestampMillis` (`long`).
   - `LocalTimestampMicros` (`long`).
 
-[Unreleased]: https://github.com/primait/avrogen/compare/0.11.0...HEAD
+
+[Unreleased]: https://github.com/primait/avrogen/compare/0.11.1...HEAD
+[0.11.1]: https://github.com/primait/avrogen/compare/0.11.0...0.11.1
 [0.11.0]: https://github.com/primait/avrogen/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/primait/avrogen/compare/0.10.0...0.10.0
 [0.9.0]: https://github.com/primait/avrogen/compare/0.8.6...0.9.0
