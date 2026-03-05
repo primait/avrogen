@@ -10,6 +10,14 @@ and this project adheres to
 
 ---
 
+## [0.11.2] - 2026-03-05
+
+### Fixed
+
+- Reverted the `from_avro_map/1` changes introduced in 0.11.0. The previous implementation incorrectly decoded union fields when all union member types had only nullable fields, always selecting the first type.
+
+---
+
 ## [0.11.1] - 2026-02-18
 
 ---
@@ -130,8 +138,8 @@ and this project adheres to
   - `LocalTimestampMillis` (`long`).
   - `LocalTimestampMicros` (`long`).
 
-
-[Unreleased]: https://github.com/primait/avrogen/compare/0.11.1...HEAD
+[Unreleased]: https://github.com/primait/avrogen/compare/0.11.2...HEAD
+[0.11.2]: https://github.com/primait/avrogen/compare/0.11.1...0.11.2
 [0.11.1]: https://github.com/primait/avrogen/compare/0.11.0...0.11.1
 [0.11.0]: https://github.com/primait/avrogen/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/primait/avrogen/compare/0.10.0...0.10.0

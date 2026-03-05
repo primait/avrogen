@@ -73,7 +73,18 @@ defmodule Avrogen.Avro.Types.Record do
         unquote(to_avro_map(record))
 
         @impl true
-        unquote_splicing(from_avro_map(record))
+        unquote(from_avro_map(record))
+
+        @required_keys MapSet.new(unquote(required_keys(record)))
+        def from_avro_map(%{} = invalid) do
+          actual = Map.keys(invalid) |> MapSet.new()
+          missing = MapSet.difference(@required_keys, actual) |> Enum.join(", ")
+          {:error, "Missing keys: " <> missing}
+        end
+
+        def from_avro_map(_) do
+          {:error, "Expected a map."}
+        end
 
         @pii_fields MapSet.new(unquote(pii_keys(record)))
         def pii_fields, do: @pii_fields
@@ -107,98 +118,36 @@ defmodule Avrogen.Avro.Types.Record do
     end
   end
 
-  @doc false
-  # Generates the `from_avro_map/1` function clauses for decoding Avro maps into structs.
-  #
-  # This function generates up to three function clauses:
-  # 1. The main clause that pattern matches on required fields and decodes the map
-  # 2. A clause that handles missing required keys (only if the record has required fields)
-  # 3. A catch-all clause that returns an error when a non-map is passed (only if there are required fields)
-  defp from_avro_map(%__MODULE__{} = record) do
-    [
-      from_avro_map_main_clause(record),
-      from_avro_map_missing_keys_clause(record),
-      from_avro_map_catch_all_clause()
-    ]
-    |> Enum.reject(&is_nil/1)
-    |> MacroUtils.flatten_block()
-  end
-
-  # Generates the main `from_avro_map/1` clause that pattern matches on required fields
-  # and decodes the Avro map into a struct, handling optional and default fields.
-  defp from_avro_map_main_clause(%__MODULE__{fields: fields}) do
-    # Choose the variable name for the map parameter in the function signature.
-    # If all fields are required, use "_avro_map" (underscore prefix) because the map
-    # is only used for pattern matching and not referenced in the function body.
-    # If there are optional/default fields, use "avro_map" (no underscore) because
-    # we'll need to access the map to extract those fields.
-    map_var_name =
+  defp from_avro_map(%__MODULE__{fields: fields}) do
+    name =
       fields
-      |> Enum.all?(&Field.is_required?/1)
+      |> Enum.any?(&Field.has_default?/1)
       |> case do
-        true -> "_avro_map"
-        false -> "avro_map"
+        true -> "avro_map"
+        false -> "_avro_map"
       end
       |> Code.string_to_quoted!()
 
-    # Build pattern bindings for required fields that will be matched in the function signature
-    # e.g., %{"id" => id, "name" => name}
-    pattern_bindings =
+    required_fields =
       fields
-      |> Enum.filter(&Field.is_required?/1)
+      |> Enum.reject(&Field.has_default?/1)
       |> Enum.map(fn field -> {field.name, Code.string_to_quoted!(field.name)} end)
 
-    # Build variable bindings for optional/default fields that will be set in the function body
-    # These fields are extracted from the map with their default values if not present
-    body_bindings =
-      Enum.flat_map(fields, fn field ->
-        if Field.is_required?(field) do
-          []
-        else
-          [Field.bind_with_default(field, map_var_name)]
-        end
-      end)
+    optional_fields =
+      fields
+      |> Enum.filter(&Field.has_default?/1)
+      |> Enum.map(&Field.bind_with_default/1)
 
-    # Build the struct field assignments, applying decode functions to each field value
     record_fields =
       Enum.map(fields, fn field ->
         {String.to_atom(field.name), __MODULE__.Field.from_avro_map_clause(field)}
       end)
 
     quote do
-      def from_avro_map(%{unquote_splicing(pattern_bindings)} = unquote(map_var_name)) do
-        unquote_splicing(body_bindings)
+      def from_avro_map(%{unquote_splicing(required_fields)} = unquote(name)) do
+        unquote_splicing(optional_fields)
 
         {:ok, %__MODULE__{unquote_splicing(record_fields)}}
-      end
-    end
-  end
-
-  # Generates a `from_avro_map/1` clause that returns an error when required keys are missing.
-  # Returns `nil` if the record has no required fields (clause not needed).
-  defp from_avro_map_missing_keys_clause(record) do
-    req_keys = required_keys(record)
-
-    if Enum.empty?(req_keys) do
-      nil
-    else
-      quote do
-        @required_keys MapSet.new(unquote(req_keys))
-        def from_avro_map(%{} = invalid) do
-          actual = Map.keys(invalid) |> MapSet.new()
-          missing = MapSet.difference(@required_keys, actual) |> Enum.join(", ")
-          {:error, "Missing keys: " <> missing}
-        end
-      end
-    end
-  end
-
-  # Generates a catch-all `from_avro_map/1` clause that returns an error when a non-map is passed.
-  # Only generated when the record has required fields, as it would be unreachable otherwise.
-  defp from_avro_map_catch_all_clause do
-    quote do
-      def from_avro_map(_) do
-        {:error, "Expected a map."}
       end
     end
   end
@@ -224,7 +173,7 @@ defmodule Avrogen.Avro.Types.Record do
 
   defp required_keys(%__MODULE__{fields: fields}) do
     fields
-    |> Enum.filter(&Field.is_required?/1)
+    |> Enum.reject(&Field.has_default?/1)
     |> Enum.map(&Field.name/1)
   end
 
