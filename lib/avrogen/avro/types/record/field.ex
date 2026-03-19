@@ -81,7 +81,7 @@ defmodule Avrogen.Avro.Types.Record.Field do
         quote(do: unquote(variable_name) = avro_map[unquote(name)])
 
       default ->
-        quote(do: unquote(variable_name) = avro_map[unquote(name)] || unquote(default))
+        quote(do: unquote(variable_name) = Map.get(avro_map, unquote(name), unquote(default)))
     end
   end
 
