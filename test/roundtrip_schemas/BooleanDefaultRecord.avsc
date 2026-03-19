@@ -1,0 +1,16 @@
+{
+  "type": "record",
+  "name": "BooleanDefaultRecord",
+  "namespace": "events.v1",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "is_active",
+      "type": "boolean",
+      "default": true
+    }
+  ]
+}

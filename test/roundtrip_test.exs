@@ -33,6 +33,28 @@ defmodule Avrogen.Test.Roundtrip do
     end
   end)
 
+  test "roundtrip preserves explicit false for boolean fields with default true" do
+    schema = File.read!(Path.join(@schemas_dir, "BooleanDefaultRecord.avsc"))
+
+    module =
+      schema
+      |> generate_code()
+      |> Enum.map(&compile_code/1)
+      |> Enum.map(&module_name/1)
+      |> Enum.reject(&is_nil/1)
+      |> List.first()
+
+    input = struct(module, id: "test_id", is_active: false)
+    encoder = SchemaRegistry.make_encoder(schema)
+    decoder = SchemaRegistry.make_decoder(schema)
+
+    encoded = encoder.(module.avro_fqn(), module.to_avro_map(input))
+    {:ok, decoded} = decoder.(module.avro_fqn(), encoded) |> module.from_avro_map()
+
+    assert decoded.is_active == false
+    assert input == decoded
+  end
+
   # Gets the module name of the record type generated code
   defp module_name([_, {mod_name, _}]), do: mod_name
   defp module_name(_), do: nil
