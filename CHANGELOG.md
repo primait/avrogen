@@ -10,6 +10,13 @@ and this project adheres to
 
 ---
 
+## [0.11.3] - 2026-03-19
+
+### Fixed
+- A bug in the code generation causing boolean properties with default value == true to deserialize always as true
+
+---
+
 ## [0.11.2] - 2026-03-05
 
 ### Fixed
@@ -138,7 +145,9 @@ and this project adheres to
   - `LocalTimestampMillis` (`long`).
   - `LocalTimestampMicros` (`long`).
 
-[Unreleased]: https://github.com/primait/avrogen/compare/0.11.2...HEAD
+
+[Unreleased]: https://github.com/primait/avrogen/compare/0.11.3...HEAD
+[0.11.3]: https://github.com/primait/avrogen/compare/0.11.2...0.11.3
 [0.11.2]: https://github.com/primait/avrogen/compare/0.11.1...0.11.2
 [0.11.1]: https://github.com/primait/avrogen/compare/0.11.0...0.11.1
 [0.11.0]: https://github.com/primait/avrogen/compare/0.10.0...0.11.0
