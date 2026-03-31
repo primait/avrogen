@@ -40,11 +40,12 @@ defmodule Avro.Types.EnumTest do
 
     instance = struct(module, monthly_payment_plan_identifier: :CB2010)
 
-    assert {:error, _} =
-             instance
-             |> module.to_avro_map()
-             |> Map.put("monthly_payment_plan_identifier", "SomethingElse")
-             |> module.from_avro_map()
+    assert_raise RuntimeError, fn ->
+      instance
+      |> module.to_avro_map()
+      |> Map.put("monthly_payment_plan_identifier", "SomethingElse")
+      |> module.from_avro_map()
+    end
   end
 
   defp generate_code(schema) do
