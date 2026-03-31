@@ -70,29 +70,34 @@ defimpl CodeGenerator, for: Union do
   end
 
   def decode_function(%Union{types: types}, function_name, global) do
+    indexed_types = Enum.with_index(types)
+
     functions =
-      types
-      |> Enum.with_index()
+      indexed_types
       |> Enum.map(fn {type, i} ->
         CodeGenerator.decode_function(type, :"#{function_name}_#{i}", global)
       end)
       |> Enum.flat_map(&MacroUtils.flatten_block/1)
 
     clauses =
-      types
-      |> Enum.with_index()
+      indexed_types
+      |> Enum.drop(-1)
       |> Enum.map(fn {_type, i} ->
         quote(do: {:error, _} <- unquote(:"#{function_name}_#{i}")(value))
+      end)
+
+    final_clause =
+      indexed_types
+      |> List.last()
+      |> then(fn {_type, i} ->
+        quote(do: unquote(:"#{function_name}_#{i}")(value))
       end)
 
     # credo:disable-for-lines:3
     quote do
       defp unquote(function_name)(value) do
         with unquote_splicing(clauses) do
-          # This is not correct behaviour, but is the current behaviour of the library.
-          # We should remove this and return an error here instead but too many tests
-          # in pricing depended on this behaviour.
-          {:ok, value}
+          unquote(final_clause)
         end
       end
 
