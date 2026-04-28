@@ -1,0 +1,25 @@
+{
+  "type": "record",
+  "name": "PersonWithPii",
+  "namespace": "events.v1",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "full_name",
+      "type": ["null", "string"],
+      "pii": true
+    },
+    {
+      "name": "email",
+      "type": ["null", "string"],
+      "pii": true
+    },
+    {
+      "name": "age",
+      "type": "int"
+    }
+  ]
+}
