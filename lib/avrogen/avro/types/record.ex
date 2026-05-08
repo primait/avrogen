@@ -61,6 +61,8 @@ defmodule Avrogen.Avro.Types.Record do
           (unquote_splicing(Enum.map(record.fields, &__MODULE__.Field.typed_struct_field/1)))
         end
 
+        unquote(inspect_impl(record))
+
         @behaviour Avrogen.AvroModule
 
         @impl true
@@ -181,6 +183,36 @@ defmodule Avrogen.Avro.Types.Record do
     fields
     |> Enum.filter(&Field.is_pii?/1)
     |> Enum.map(&Field.name/1)
+  end
+
+  defp inspect_impl(%__MODULE__{} = record) do
+    pii_atoms = record |> pii_keys() |> Enum.map(&String.to_atom/1)
+
+    case pii_atoms do
+      [] ->
+        quote do
+        end
+
+      _ ->
+        quote do
+          defimpl Inspect do
+            defp redact_field({k, _v}) when k in unquote(pii_atoms), do: {k, "**REDACTED**"}
+            defp redact_field(pair), do: pair
+
+            def inspect(struct, opts) do
+              redacted = struct |> Map.from_struct() |> Enum.map(&redact_field/1)
+
+              Inspect.Algebra.concat([
+                "#",
+                Kernel.to_string(unquote(record.name)),
+                "<",
+                Inspect.Algebra.to_doc(redacted, opts),
+                ">"
+              ])
+            end
+          end
+        end
+    end
   end
 
   defp drop_pii(%__MODULE__{fields: fields}, global) do
