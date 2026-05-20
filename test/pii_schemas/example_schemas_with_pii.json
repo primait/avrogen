@@ -1,0 +1,74 @@
+{
+  "type": "record",
+  "name": "PersonWithPii",
+  "namespace": "events.v1",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "full_name",
+      "type": [
+        "null",
+        "string"
+      ],
+      "pii": true
+    },
+    {
+      "name": "email",
+      "type": [
+        "null",
+        "string"
+      ],
+      "pii": true
+    },
+    {
+      "name": "age",
+      "type": "int"
+    },
+    {
+      "name": "address_lines",
+      "type": {
+        "type": "array",
+        "items": "string"
+      },
+      "pii": true
+    },
+    {
+      "name": "pets",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "record",
+          "name": "PetWithPii",
+          "namespace": "events.v1",
+          "fields": [
+            {
+              "name": "name",
+              "type": "string",
+              "pii": true
+            },
+            {
+              "name": "vet_name",
+              "type": ["null", "string"],
+              "pii": true
+            },
+            {
+              "name": "species",
+              "type": {
+                "name": "Species",
+                "type": "enum",
+                "symbols": [
+                  "cat",
+                  "dog",
+                  "goldfish"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
