@@ -21,6 +21,7 @@ defmodule Avrogen.Avro.Types.Array do
     do: %__MODULE__{items_schema: Schema.parse(items)}
 end
 
+alias Avrogen.Avro.Types
 alias Avrogen.Avro.Types.Array
 alias Avrogen.Avro.Schema.CodeGenerator
 
@@ -88,11 +89,25 @@ defimpl CodeGenerator, for: Array do
     end
   end
 
-  def contains_pii?(%Array{}, _global), do: false
+  def contains_pii?(%Array{items_schema: items_schema}, global),
+    do: CodeGenerator.contains_pii?(items_schema, global)
 
-  def drop_pii(%Array{}, function_name, _global) do
+  def drop_pii(%Array{items_schema: items_schema}, function_name, global) do
+    resolved = with %Types.Reference{name: name} <- items_schema, do: Map.get(global, name)
+    drop_pii_for_items(resolved, function_name)
+  end
+
+  defp drop_pii_for_items(%Types.Record{name: record_name}, function_name) do
+    mod = Code.string_to_quoted!(record_name)
+
     quote do
-      def unquote(function_name)(value) when is_list(value), do: []
+      def unquote(function_name)(value) when is_list(value),
+        do: Enum.map(value, &unquote(mod).drop_pii/1)
+    end
+  end
+
+  defp drop_pii_for_items(_, _) do
+    quote do
     end
   end
 
