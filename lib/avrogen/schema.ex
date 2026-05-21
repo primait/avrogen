@@ -5,6 +5,7 @@ defmodule Avrogen.Schema do
   """
 
   alias Avrogen.Util.Either
+  alias Avrogen.Util.TopologicalSort
 
   @type schema() :: map()
 
@@ -135,17 +136,9 @@ defmodule Avrogen.Schema do
         Enum.map(deps, fn dep -> {dep, name} end)
       end)
 
-    Graph.new()
-    |> Graph.add_vertices(verts)
-    |> Graph.add_edges(edges)
-    |> Graph.topsort()
-    |> case do
-      false -> {:error, :cyclic_dependencies}
-      sorted -> {:ok, sorted}
-    end
+    TopologicalSort.topological_sort(verts, edges)
     |> Either.map(fn sorted ->
-      sorted
-      |> Enum.map(fn name ->
+      Enum.map(sorted, fn name ->
         {_, item, _} = List.keyfind!(dependencies, name, 0)
         item
       end)

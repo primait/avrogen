@@ -8,6 +8,7 @@ defmodule Avrogen.Avro.Schema do
 
   alias Avrogen.Avro.Schema.CodeGenerator
   alias Avrogen.Avro.Types
+  alias Avrogen.Util.TopologicalSort
   import Types.Primitive, only: [is_primitive: 1]
 
   @type raw_schema :: map() | [map()]
@@ -115,11 +116,8 @@ defmodule Avrogen.Avro.Schema do
     |> Path.join(Macro.underscore(schema.name) <> ".ex")
   end
 
-  # Sort normalized schemas so that dependencies are emitted before the schemas that
-  # reference them. Mirrors the approach used in Avrogen.Schema.topological_sort/1 but
-  # applied to the typed structs produced by normalization rather than raw JSON maps.
   defp topological_sort_schemas(schemas) do
-    names = Map.keys(schemas)
+    vertices = Map.keys(schemas)
 
     edges =
       Enum.flat_map(schemas, fn {name, schema} ->
@@ -129,9 +127,9 @@ defmodule Avrogen.Avro.Schema do
         |> Enum.map(fn dep -> {dep, name} end)
       end)
 
-    case Graph.new() |> Graph.add_vertices(names) |> Graph.add_edges(edges) |> Graph.topsort() do
-      false -> Map.to_list(schemas)
-      sorted -> Enum.map(sorted, fn name -> {name, Map.fetch!(schemas, name)} end)
+    case TopologicalSort.topological_sort(vertices, edges) do
+      {:error, _} -> Map.to_list(schemas)
+      {:ok, sorted} -> Enum.map(sorted, fn name -> {name, Map.fetch!(schemas, name)} end)
     end
   end
 
