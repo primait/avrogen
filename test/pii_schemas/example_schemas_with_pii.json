@@ -1,0 +1,132 @@
+{
+  "type": "record",
+  "name": "PersonWithPii",
+  "namespace": "events.v1",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "full_name",
+      "type": [
+        "null",
+        "string"
+      ],
+      "pii": true
+    },
+    {
+      "name": "email",
+      "type": [
+        "null",
+        "string"
+      ],
+      "pii": true
+    },
+    {
+      "name": "age",
+      "type": "int"
+    },
+    {
+      "name": "secret_number",
+      "type": "int",
+      "pii": true
+    },
+    {
+      "name": "optional_secret_number",
+      "type": [
+        "null",
+        "int"
+      ],
+      "pii": true
+    },
+    {
+      "name": "address_lines",
+      "type": {
+        "type": "array",
+        "items": "string"
+      },
+      "pii": true
+    },
+    {
+      "name": "options_with_nested_secrets",
+      "type": {
+        "type": "map",
+        "values": [
+          "null",
+          "string",
+          "boolean",
+          "double",
+          "int",
+          {
+            "type": "record",
+            "name": "OptionWithPii",
+            "namespace": "events.v1",
+            "fields": [
+              {
+                "name": "name",
+                "type": ["null", "string"],
+                "pii": true
+              }
+            ]
+          }
+        ]
+      },
+      "pii": false
+    },
+    {
+      "name": "secret_options",
+      "type": {
+        "type": "map",
+        "values": ["string"]
+      },
+      "pii": true
+    },
+    {
+      "name": "optional_secret_options",
+      "type": ["null", {
+        "type": "map",
+        "values": ["string"]
+      }],
+      "pii": true
+    },
+    {
+      "name": "pets",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "record",
+          "name": "PetWithPii",
+          "namespace": "events.v1",
+          "fields": [
+            {
+              "name": "name",
+              "type": "string",
+              "pii": true
+            },
+            {
+              "name": "vet_name",
+              "type": [
+                "null",
+                "string"
+              ],
+              "pii": true
+            },
+            {
+              "name": "species",
+              "type": {
+                "name": "Species",
+                "type": "enum",
+                "symbols": [
+                  "cat",
+                  "dog",
+                  "goldfish"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

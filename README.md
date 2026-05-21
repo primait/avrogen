@@ -342,7 +342,9 @@ ex> Avro.Example.Person.drop_pii(person)
 %Avro.Example.Person{age: 38, name: nil}
 ```
 
-> Note: Fields marked as PII must be of a union type containing a null.
+> Note: If fields marked as PII are not optional (a union type containing a
+null), they are replaced with a default value for that type, e.g. an empty 
+string or 0. It is therefore recommended to always make PII fields optional.
 
 The AVRO spec specifies that any extra fields in schemas are ignored, so schemas
 containing this extension are backwards compatible with other AVRO parsers, as

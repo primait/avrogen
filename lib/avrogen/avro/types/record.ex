@@ -217,12 +217,6 @@ defmodule Avrogen.Avro.Types.Record do
 
   defp drop_pii(%__MODULE__{fields: fields}, global) do
     may_contain_pii = Enum.filter(fields, &CodeGenerator.contains_pii?(&1, global))
-    clauses = Enum.map(may_contain_pii, &drop_pii_clauses/1)
-
-    functions =
-      may_contain_pii
-      |> Enum.map(&CodeGenerator.drop_pii(&1, nil, global))
-      |> MacroUtils.flatten_block()
 
     case may_contain_pii do
       [] ->
@@ -231,6 +225,15 @@ defmodule Avrogen.Avro.Types.Record do
         end
 
       _ ->
+        tagged = Enum.map(may_contain_pii, fn field -> {field, drop_pii_clauses(field)} end)
+        clauses = Enum.map(tagged, fn {_field, {_tag, clause}} -> clause end)
+
+        helper_functions =
+          tagged
+          |> Enum.filter(fn {_field, {tag, _clause}} -> tag == :with_helper end)
+          |> Enum.map(fn {field, _} -> CodeGenerator.drop_pii(field, nil, global) end)
+          |> MacroUtils.flatten_block()
+
         quote do
           def drop_pii(%__MODULE__{} = value) do
             value = Map.from_struct(value)
@@ -238,25 +241,40 @@ defmodule Avrogen.Avro.Types.Record do
             Kernel.struct(__MODULE__, value)
           end
 
-          unquote_splicing(functions)
+          unquote_splicing(helper_functions)
         end
     end
     |> MacroUtils.flatten_block()
   end
 
+  @spec drop_pii_clauses(Field.t()) :: {:inline | :with_helper, Macro.t()}
   defp drop_pii_clauses(%Field{
          name: name,
          pii: true,
          type: %Types.Union{types: [%Types.Primitive{type: :null} | _]}
        }) do
     name = String.to_atom(name)
-    quote(do: value = Map.replace!(value, unquote(name), nil))
+    {:inline, quote(do: value = Map.replace!(value, unquote(name), nil))}
+  end
+
+  defp drop_pii_clauses(%Field{name: name, pii: true, type: %Types.Array{}}) do
+    name = String.to_atom(name)
+    {:inline, quote(do: value = Map.replace!(value, unquote(name), []))}
+  end
+
+  defp drop_pii_clauses(%Field{name: name, pii: true, type: %Types.Map{}}) do
+    name = String.to_atom(name)
+    {:inline, quote(do: value = Map.replace!(value, unquote(name), %{}))}
   end
 
   defp drop_pii_clauses(%Field{name: name} = field) do
     name = String.to_atom(name)
     function_name = field |> Field.drop_pii_function_name()
-    quote(do: value = Map.update!(value, unquote(name), &(__MODULE__.unquote(function_name) / 1)))
+
+    {:with_helper,
+     quote(
+       do: value = Map.update!(value, unquote(name), &(__MODULE__.unquote(function_name) / 1))
+     )}
   end
 
   defp random_instance(%__MODULE__{fields: fields}, global) do

@@ -4,6 +4,7 @@ defmodule Avrogen.Avro.Types.Map do
   """
 
   alias Avrogen.Avro.Schema
+  alias Avrogen.Avro.Schema
   use TypedStruct
   @identifier "map"
 
@@ -20,6 +21,7 @@ defmodule Avrogen.Avro.Types.Map do
     do: %__MODULE__{value_schema: Schema.parse(values)}
 end
 
+alias Avrogen.Avro.Types
 alias Avrogen.Avro.Types.Map
 alias Avrogen.Avro.Schema.CodeGenerator
 
@@ -97,13 +99,35 @@ defimpl CodeGenerator, for: Map do
     end
   end
 
-  def contains_pii?(%Map{}, _global), do: false
+  def contains_pii?(%Map{value_schema: value_schema}, global),
+    do: CodeGenerator.contains_pii?(value_schema, global)
 
-  def drop_pii(%Map{}, function_name, _global) do
+  def drop_pii(%Map{value_schema: value_schema}, function_name, global) do
+    values_fn = :"#{function_name}_values"
+
+    value_clauses =
+      pii_types_in(value_schema, global)
+      |> Enum.map(&CodeGenerator.drop_pii(&1, values_fn, global))
+      |> MacroUtils.flatten_block()
+
     quote do
-      def unquote(function_name)(value) when is_map(value), do: %{}
+      def unquote(function_name)(value) when is_map(value) do
+        Enum.reduce(value, %{}, fn {k, v}, acc ->
+          Elixir.Map.put(acc, k, unquote(values_fn)(v))
+        end)
+      end
+
+      unquote_splicing(value_clauses)
+
+      def unquote(values_fn)(value), do: value
     end
   end
+
+  defp pii_types_in(%Types.Union{types: types}, global),
+    do: Enum.filter(types, &CodeGenerator.contains_pii?(&1, global))
+
+  defp pii_types_in(schema, global),
+    do: if(CodeGenerator.contains_pii?(schema, global), do: [schema], else: [])
 
   def random_instance(%Map{value_schema: value_schema}, range_opts, global) do
     inner = CodeGenerator.random_instance(value_schema, range_opts, global)
