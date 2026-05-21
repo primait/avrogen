@@ -35,15 +35,7 @@ defmodule Avrogen.Test.DropPii do
   end
 
   describe "drop_pii replaces values of fields marked with `pii: true` with nil or appropriate value for type" do
-    test "basic record case", %{pet_module: pet_module, species_module: species_module} do
-      pet = struct(pet_module, name: "Roger", vet_name: "Mike", species: species_module._cat())
-      dropped = pet_module.drop_pii(pet)
-
-      assert dropped ==
-               struct(pet_module, name: "", vet_name: nil, species: species_module._cat())
-    end
-
-    test "array case", %{
+    test "complex case", %{
       person_module: person_module,
       pet_module: pet_module,
       species_module: species_module
@@ -54,6 +46,8 @@ defmodule Avrogen.Test.DropPii do
           full_name: "Brian Smithson",
           email: "bribri@smithson.org",
           age: 45,
+          secret_number: 123,
+          optional_secret_number: 456,
           address_lines: ["1 Marrow Lane", "Preston"],
           pets: [
             struct(pet_module, name: "Roger", vet_name: "Mike", species: species_module._cat())
@@ -68,6 +62,8 @@ defmodule Avrogen.Test.DropPii do
                  full_name: nil,
                  email: nil,
                  age: 45,
+                 secret_number: 0,
+                 optional_secret_number: nil,
                  address_lines: [],
                  pets: [
                    struct(pet_module,

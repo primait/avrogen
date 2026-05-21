@@ -28,6 +28,19 @@
       "type": "int"
     },
     {
+      "name": "secret_number",
+      "type": "int",
+      "pii": true
+    },
+    {
+      "name": "optional_secret_number",
+      "type": [
+        "null",
+        "int"
+      ],
+      "pii": true
+    },
+    {
       "name": "address_lines",
       "type": {
         "type": "array",
@@ -51,7 +64,10 @@
             },
             {
               "name": "vet_name",
-              "type": ["null", "string"],
+              "type": [
+                "null",
+                "string"
+              ],
               "pii": true
             },
             {
