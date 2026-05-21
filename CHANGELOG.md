@@ -10,6 +10,13 @@ and this project adheres to
 
 ---
 
+## [0.11.5] - 2026-06-01
+
+### Added
+- Implemented drop_pii for values of arrays and maps.
+
+---
+
 ## [0.11.4] - 2026-05-08
 
 ### Added
@@ -154,7 +161,8 @@ and this project adheres to
 
 
 
-[Unreleased]: https://github.com/primait/avrogen/compare/0.11.4...HEAD
+[Unreleased]: https://github.com/primait/avrogen/compare/0.11.5...HEAD
+[0.11.5]: https://github.com/primait/avrogen/compare/0.11.4...0.11.5
 [0.11.4]: https://github.com/primait/avrogen/compare/0.11.3...0.11.4
 [0.11.3]: https://github.com/primait/avrogen/compare/0.11.2...0.11.3
 [0.11.2]: https://github.com/primait/avrogen/compare/0.11.1...0.11.2
