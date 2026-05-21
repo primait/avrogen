@@ -49,6 +49,48 @@
       "pii": true
     },
     {
+      "name": "options_with_nested_secrets",
+      "type": {
+        "type": "map",
+        "values": [
+          "null",
+          "string",
+          "boolean",
+          "double",
+          "int",
+          {
+            "type": "record",
+            "name": "OptionWithPii",
+            "namespace": "events.v1",
+            "fields": [
+              {
+                "name": "name",
+                "type": ["null", "string"],
+                "pii": true
+              }
+            ]
+          }
+        ]
+      },
+      "pii": false
+    },
+    {
+      "name": "secret_options",
+      "type": {
+        "type": "map",
+        "values": ["string"]
+      },
+      "pii": true
+    },
+    {
+      "name": "optional_secret_options",
+      "type": ["null", {
+        "type": "map",
+        "values": ["string"]
+      }],
+      "pii": true
+    },
+    {
       "name": "pets",
       "type": {
         "type": "array",

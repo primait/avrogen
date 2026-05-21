@@ -262,6 +262,11 @@ defmodule Avrogen.Avro.Types.Record do
     {:inline, quote(do: value = Map.replace!(value, unquote(name), []))}
   end
 
+  defp drop_pii_clauses(%Field{name: name, pii: true, type: %Types.Map{}}) do
+    name = String.to_atom(name)
+    {:inline, quote(do: value = Map.replace!(value, unquote(name), %{}))}
+  end
+
   defp drop_pii_clauses(%Field{name: name} = field) do
     name = String.to_atom(name)
     function_name = field |> Field.drop_pii_function_name()

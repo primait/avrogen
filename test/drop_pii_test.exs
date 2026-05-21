@@ -22,7 +22,8 @@ defmodule Avrogen.Test.DropPii do
       MapSet.new([
         Test.Events.V1.PersonWithPii,
         Test.Events.V1.PetWithPii,
-        Test.Events.V1.Species
+        Test.Events.V1.Species,
+        Test.Events.V1.OptionWithPii
       ])
 
     assert MapSet.subset?(expected_modules, modules)
@@ -30,7 +31,8 @@ defmodule Avrogen.Test.DropPii do
     %{
       person_module: Test.Events.V1.PersonWithPii,
       pet_module: Test.Events.V1.PetWithPii,
-      species_module: Test.Events.V1.Species
+      species_module: Test.Events.V1.Species,
+      option_module: Test.Events.V1.OptionWithPii
     }
   end
 
@@ -38,7 +40,8 @@ defmodule Avrogen.Test.DropPii do
     test "complex case", %{
       person_module: person_module,
       pet_module: pet_module,
-      species_module: species_module
+      species_module: species_module,
+      option_module: option_module
     } do
       person =
         struct(person_module,
@@ -49,6 +52,16 @@ defmodule Avrogen.Test.DropPii do
           secret_number: 123,
           optional_secret_number: 456,
           address_lines: ["1 Marrow Lane", "Preston"],
+          secret_options: %{"secret_key" => "secret_value"},
+          optional_secret_options: %{"secret_key" => "secret_value"},
+          options_with_nested_secrets: %{
+            "1" => nil,
+            "2" => "str",
+            "3" => false,
+            "4" => 1.0,
+            "5" => 1,
+            "6" => struct(option_module, name: "secret")
+          },
           pets: [
             struct(pet_module, name: "Roger", vet_name: "Mike", species: species_module._cat())
           ]
@@ -65,6 +78,16 @@ defmodule Avrogen.Test.DropPii do
                  secret_number: 0,
                  optional_secret_number: nil,
                  address_lines: [],
+                 secret_options: %{},
+                 optional_secret_options: nil,
+                 options_with_nested_secrets: %{
+                   "1" => nil,
+                   "2" => "str",
+                   "3" => false,
+                   "4" => 1.0,
+                   "5" => 1,
+                   "6" => struct(option_module, name: nil)
+                 },
                  pets: [
                    struct(pet_module,
                      name: "",
