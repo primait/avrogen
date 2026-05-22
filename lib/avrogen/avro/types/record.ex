@@ -61,7 +61,7 @@ defmodule Avrogen.Avro.Types.Record do
           (unquote_splicing(Enum.map(record.fields, &__MODULE__.Field.typed_struct_field/1)))
         end
 
-        unquote(inspect_impl(record))
+        unquote_splicing(inspect_impl(record))
 
         @behaviour Avrogen.AvroModule
 
@@ -190,28 +190,29 @@ defmodule Avrogen.Avro.Types.Record do
 
     case pii_atoms do
       [] ->
-        quote do
-        end
+        []
 
       _ ->
-        quote do
-          defimpl Inspect do
-            defp redact_field({k, _v}) when k in unquote(pii_atoms), do: {k, "**REDACTED**"}
-            defp redact_field(pair), do: pair
+        [
+          quote do
+            defimpl Inspect do
+              defp redact_field({k, _v}) when k in unquote(pii_atoms), do: {k, "**REDACTED**"}
+              defp redact_field(pair), do: pair
 
-            def inspect(struct, opts) do
-              redacted = struct |> Map.from_struct() |> Enum.map(&redact_field/1)
+              def inspect(struct, opts) do
+                redacted = struct |> Map.from_struct() |> Enum.map(&redact_field/1)
 
-              Inspect.Algebra.concat([
-                "#",
-                Kernel.to_string(unquote(record.name)),
-                "<",
-                Inspect.Algebra.to_doc(redacted, opts),
-                ">"
-              ])
+                Inspect.Algebra.concat([
+                  "#",
+                  Kernel.to_string(unquote(record.name)),
+                  "<",
+                  Inspect.Algebra.to_doc(redacted, opts),
+                  ">"
+                ])
+              end
             end
           end
-        end
+        ]
     end
   end
 
