@@ -92,6 +92,10 @@ defimpl CodeGenerator, for: Array do
   def contains_pii?(%Array{items_schema: items_schema}, global),
     do: CodeGenerator.contains_pii?(items_schema, global)
 
+  # Example:
+  # def drop_pii_<function_name>(value) when is_list(value) do
+  #   Enum.map(value, &<RecordType>.drop_pii/1)
+  # end
   def drop_pii(%Array{items_schema: items_schema}, function_name, global) do
     resolved = with %Types.Reference{name: name} <- items_schema, do: Map.get(global, name)
     drop_pii_for_items(resolved, function_name)

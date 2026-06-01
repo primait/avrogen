@@ -215,6 +215,13 @@ defmodule Avrogen.Avro.Types.Record do
     end
   end
 
+  # Example:
+  # def drop_pii(%__MODULE__{} = value) do
+  #   value = Map.from_struct(value)
+  #   value = Map.replace!(value, :full_name, nil)
+  #   ... (for all PII record fields)
+  #   Kernel.struct(__MODULE__, value)
+  # end
   defp drop_pii(%__MODULE__{fields: fields}, global) do
     may_contain_pii = Enum.filter(fields, &CodeGenerator.contains_pii?(&1, global))
 

@@ -102,6 +102,21 @@ defimpl CodeGenerator, for: Map do
   def contains_pii?(%Map{value_schema: value_schema}, global),
     do: CodeGenerator.contains_pii?(value_schema, global)
 
+  # Example:
+  # def drop_pii_<function_name>(value) when is_map(value) do
+  #   Enum.reduce(value, %{}, fn {k, v}, acc ->
+  #     Elixir.Map.put(acc, k, drop_pii_<function_name>_values(v))
+  #   end)
+  # end
+  #
+  # def drop_pii_<function_name>_values(%<RecordType>{} = value) do
+  #   <RecordType>.drop_pii(value)
+  # end
+  #
+  # def drop_pii_<function_name>_values(value) do
+  #   value
+  # end
+
   def drop_pii(%Map{value_schema: value_schema}, function_name, global) do
     values_fn = :"#{function_name}_values"
 
