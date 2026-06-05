@@ -45,7 +45,7 @@ defmodule Avrogen.Avro.Types.Record do
   defdelegate fullname(record, namespace), to: Avrogen.Avro.Types.Utils
   defdelegate namespace(record, namespace, scope_embedded_types), to: Avrogen.Avro.Types.Utils
 
-  def generate_module(%__MODULE__{} = record, global, name, module_prefix) do
+  def generate_module(%__MODULE__{} = record, global, name, module_prefix, pii_masking_on_inspect) do
     quote do
       defmodule unquote(Schema.module_path(module_prefix, name, record.name)) do
         @moduledoc unquote(module_doc(record))
@@ -61,7 +61,7 @@ defmodule Avrogen.Avro.Types.Record do
           (unquote_splicing(Enum.map(record.fields, &__MODULE__.Field.typed_struct_field/1)))
         end
 
-        unquote_splicing(inspect_impl(record))
+        unquote_splicing(inspect_impl(record, pii_masking_on_inspect))
 
         @behaviour Avrogen.AvroModule
 
@@ -185,7 +185,10 @@ defmodule Avrogen.Avro.Types.Record do
     |> Enum.map(&Field.name/1)
   end
 
-  defp inspect_impl(%__MODULE__{} = record) do
+  # disabled by option `pii_masking_on_inspect=false`
+  defp inspect_impl(_, false), do: []
+
+  defp inspect_impl(%__MODULE__{} = record, _) do
     pii_atoms = record |> pii_keys() |> Enum.map(&String.to_atom/1)
 
     case pii_atoms do

@@ -118,7 +118,8 @@ avro_code_generator_opts: [
   schema_root: "schema",
   module_prefix: "Avro",
   scoped_embed_paths: ["priv/schema/events.*.avsc"],
-  schema_resolution_mode: :flat
+  schema_resolution_mode: :flat,
+  pii_masking_on_inspect: true
 ]
 ```
 
@@ -137,6 +138,8 @@ The options are:
   schemas to a filename. Defaults to `:flat`.
 - `scope_embed_paths` - the glob patterns of the files where any embedded scopes
   should have the generated module path contain the encompasing types.
+- `pii_masking_on_inspect` - Boolean for whether or not to mask PII fields when
+  records are inspected/logged. Defaults to true.
 
   For example, for the following schema
 

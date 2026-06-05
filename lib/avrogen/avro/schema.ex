@@ -59,6 +59,7 @@ defmodule Avrogen.Avro.Schema do
   def generate_code(schema, dependencies, module_prefix, opts \\ []) do
     scope_embedded_types = Keyword.get(opts, :scope_embedded_types, false)
     dest = Keyword.get(opts, :dest, "")
+    pii_masking_on_inspect = Keyword.get(opts, :pii_masking_on_inspect, true)
 
     {_, schemas} = schema |> parse() |> CodeGenerator.normalize(%{}, nil, scope_embedded_types)
     {_, global} = dependencies |> parse() |> CodeGenerator.normalize(schemas, nil)
@@ -70,7 +71,7 @@ defmodule Avrogen.Avro.Schema do
 
       code =
         schema
-        |> generate_module(global, name, module_prefix)
+        |> generate_module(global, name, module_prefix, pii_masking_on_inspect)
         |> Macro.to_string()
         |> Code.format_string!(locals_without_parens: [field: 2, field: 3], file: filename)
 
@@ -133,10 +134,17 @@ defmodule Avrogen.Avro.Schema do
     end
   end
 
-  defp generate_module(%Types.Record{} = record, global, name, module_prefix),
-    do: Types.Record.generate_module(record, global, name, module_prefix)
+  defp generate_module(
+         %Types.Record{} = record,
+         global,
+         name,
+         module_prefix,
+         pii_masking_on_inspect
+       ),
+       do:
+         Types.Record.generate_module(record, global, name, module_prefix, pii_masking_on_inspect)
 
-  defp generate_module(%Types.Enum{} = enum, _global, name, module_prefix),
+  defp generate_module(%Types.Enum{} = enum, _global, name, module_prefix, _),
     do: Types.Enum.generate_module(enum, module_path(module_prefix, name, enum.name))
 
   def module_path(module_prefix, dep_name, %{} = global) do
