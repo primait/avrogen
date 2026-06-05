@@ -71,8 +71,7 @@
             ]
           }
         ]
-      },
-      "pii": false
+      }
     },
     {
       "name": "secret_options",
@@ -125,6 +124,48 @@
               }
             }
           ]
+        }
+      }
+    },
+    {
+      "name": "array_of_arrays",
+      "type": {
+        "type": "array",
+        "items": ["null", {
+          "type": "array",
+          "items": "events.v1.OptionWithPii"
+        }]
+      },
+      "default": []
+    },
+    {
+      "name": "array_of_maps",
+      "type": {
+        "type": "array",
+        "items": ["null", {
+          "type": "map",
+          "values": "events.v1.OptionWithPii"
+        }]
+      },
+      "default": []
+    },
+    {
+      "name": "map_of_arrays",
+      "type": {
+        "type": "map",
+        "values": {
+          "type": "array",
+          "items": "events.v1.OptionWithPii"
+        }
+      }
+    },
+    {
+      "name": "map_of_maps",
+      "type": {
+        "type": "map",
+        "values": {
+          "type": "map",
+          "values": "events.v1.OptionWithPii"
         }
       }
     }

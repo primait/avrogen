@@ -64,7 +64,11 @@ defmodule Avrogen.Test.DropPii do
           },
           pets: [
             struct(pet_module, name: "Roger", vet_name: "Mike", species: species_module._cat())
-          ]
+          ],
+          array_of_arrays: [[struct(option_module, name: "very_nested_secret")]],
+          array_of_maps: [%{"1" => struct(option_module, name: "very_nested_secret")}],
+          map_of_arrays: %{"1" => [struct(option_module, name: "very_nested_secret")]},
+          map_of_maps: %{"1" => %{"1" => struct(option_module, name: "very_nested_secret")}}
         )
 
       dropped = person_module.drop_pii(person)
@@ -94,7 +98,11 @@ defmodule Avrogen.Test.DropPii do
                      vet_name: nil,
                      species: species_module._cat()
                    )
-                 ]
+                 ],
+                 array_of_arrays: [[struct(option_module, name: nil)]],
+                 array_of_maps: [%{"1" => struct(option_module, name: nil)}],
+                 map_of_arrays: %{"1" => [struct(option_module, name: nil)]},
+                 map_of_maps: %{"1" => %{"1" => struct(option_module, name: nil)}}
                )
     end
   end
