@@ -107,34 +107,49 @@ defimpl CodeGenerator, for: Map do
   #   Enum.reduce(value, %{}, fn {k, v}, acc ->
   #     Elixir.Map.put(acc, k, drop_pii_<function_name>_values(v))
   #   end)
-  # end
-  #
-  # def drop_pii_<function_name>_values(%<RecordType>{} = value) do
-  #   <RecordType>.drop_pii(value)
-  # end
-  #
-  # def drop_pii_<function_name>_values(value) do
-  #   value
-  # end
-
   def drop_pii(%Map{value_schema: value_schema}, function_name, global) do
     values_fn = :"#{function_name}_values"
 
-    value_clauses =
-      pii_types_in(value_schema, global)
-      |> Enum.map(&CodeGenerator.drop_pii(&1, values_fn, global))
-      |> MacroUtils.flatten_block()
-
     quote do
-      def unquote(function_name)(value) when is_map(value) do
+      unquote(map_reduce_clause(function_name, values_fn))
+      unquote_splicing(values_fn_clauses(pii_types_in(value_schema, global), values_fn, global))
+    end
+  end
+
+  # Generates all clauses for `values_fn` in the correct order:
+  #   specific match clauses (one per PII type)
+  #   catch-all
+  #   nested helpers (for values_fn_values and deeper)
+  defp values_fn_clauses(pii_types, values_fn, global) do
+    direct = Enum.map(pii_types, &direct_value_clause(&1, values_fn, global))
+    nested = Enum.flat_map(pii_types, &nested_value_helpers(&1, values_fn, global))
+
+    catch_all =
+      quote do
+        def unquote(values_fn)(value), do: value
+      end
+
+    direct ++ [catch_all] ++ nested
+  end
+
+  defp direct_value_clause(%Types.Map{}, values_fn, _global),
+    do: map_reduce_clause(values_fn, :"#{values_fn}_values")
+
+  defp direct_value_clause(schema, values_fn, global),
+    do: CodeGenerator.drop_pii(schema, values_fn, global)
+
+  defp nested_value_helpers(%Types.Map{value_schema: inner_schema}, values_fn, global),
+    do: values_fn_clauses(pii_types_in(inner_schema, global), :"#{values_fn}_values", global)
+
+  defp nested_value_helpers(_, _, _), do: []
+
+  defp map_reduce_clause(fn_name, values_fn) do
+    quote do
+      def unquote(fn_name)(value) when is_map(value) do
         Enum.reduce(value, %{}, fn {k, v}, acc ->
           Elixir.Map.put(acc, k, unquote(values_fn)(v))
         end)
       end
-
-      unquote_splicing(value_clauses)
-
-      def unquote(values_fn)(value), do: value
     end
   end
 
