@@ -8,6 +8,7 @@ defmodule Avrogen.Avro.Schema do
 
   alias Avrogen.Avro.Schema.CodeGenerator
   alias Avrogen.Avro.Types
+  alias Avrogen.Util.TopologicalSort
   import Types.Primitive, only: [is_primitive: 1]
 
   @type raw_schema :: map() | [map()]
@@ -62,7 +63,9 @@ defmodule Avrogen.Avro.Schema do
     {_, schemas} = schema |> parse() |> CodeGenerator.normalize(%{}, nil, scope_embedded_types)
     {_, global} = dependencies |> parse() |> CodeGenerator.normalize(schemas, nil)
 
-    Enum.map(schemas, fn {name, schema} ->
+    schemas
+    |> topological_sort_schemas()
+    |> Enum.map(fn {name, schema} ->
       filename = filename_from_schema(dest, schema)
 
       code =
@@ -111,6 +114,23 @@ defmodule Avrogen.Avro.Schema do
     dest
     |> Path.join(String.replace(schema.namespace || "", ".", "/"))
     |> Path.join(Macro.underscore(schema.name) <> ".ex")
+  end
+
+  defp topological_sort_schemas(schemas) do
+    vertices = Map.keys(schemas)
+
+    edges =
+      Enum.flat_map(schemas, fn {name, schema} ->
+        schema
+        |> CodeGenerator.external_dependencies()
+        |> Enum.filter(&Map.has_key?(schemas, &1))
+        |> Enum.map(fn dep -> {dep, name} end)
+      end)
+
+    case TopologicalSort.topological_sort(vertices, edges) do
+      {:error, _} -> Map.to_list(schemas)
+      {:ok, sorted} -> Enum.map(sorted, fn name -> {name, Map.fetch!(schemas, name)} end)
+    end
   end
 
   defp generate_module(%Types.Record{} = record, global, name, module_prefix),

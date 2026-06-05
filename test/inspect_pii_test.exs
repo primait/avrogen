@@ -3,7 +3,7 @@ defmodule Avrogen.Test.InspectPii do
 
   alias Avrogen.Avro.Schema
 
-  @schema_file "test/roundtrip_schemas/PersonWithPii.avsc"
+  @schema_file "test/pii_schemas/PersonWithPii.avsc"
 
   setup_all do
     Code.put_compiler_option(:ignore_already_consolidated, true)
