@@ -172,6 +172,7 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
     module_prefix = Keyword.get(options, :module_prefix, "Avro")
     scoped_embed_paths = Keyword.get(options, :scoped_embed_paths, [])
     schema_resolution_mode = Keyword.get(options, :schema_resolution_mode, :flat)
+    pii_masking_on_inspect = Keyword.get(options, :pii_masking_on_inspect, true)
 
     scoped_embed_files = Enum.flat_map(scoped_embed_paths, &Path.wildcard/1)
 
@@ -189,7 +190,7 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
         )
       end)
       |> tap(&report/1)
-      |> Enum.map(&run_task!(&1, module_prefix, dest))
+      |> Enum.map(&run_task!(&1, module_prefix, dest, pii_masking_on_inspect))
       |> tap(&cleanup_dest!(&1, dest))
       |> Enum.map_reduce(:noop, fn
         {:ok, path_to_code}, _status -> {path_to_code, :ok}
@@ -239,7 +240,12 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
     end
   end
 
-  defp run_task!({:stale, path_to_schema, deps, _paths, scope}, module_prefix, dest) do
+  defp run_task!(
+         {:stale, path_to_schema, deps, _paths, scope},
+         module_prefix,
+         dest,
+         pii_masking_on_inspect
+       ) do
     [schema | deps_schemas] =
       [path_to_schema | deps]
       |> Enum.map(fn schema -> File.read!(schema) |> Jason.decode!() end)
@@ -248,7 +254,8 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
       schema
       |> Avrogen.Avro.Schema.generate_code(deps_schemas, module_prefix,
         scope_embedded_types: scope,
-        dest: dest
+        dest: dest,
+        pii_masking_on_inspect: pii_masking_on_inspect
       )
       |> Enum.map(fn {file_name, code} ->
         File.mkdir_p!(Path.dirname(file_name))
@@ -259,7 +266,7 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
     {:ok, files}
   end
 
-  defp run_task!({:noop, _, _, paths, _scope}, _, _) do
+  defp run_task!({:noop, _, _, paths, _scope}, _, _, _) do
     {:noop, paths}
   end
 

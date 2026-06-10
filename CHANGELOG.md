@@ -10,6 +10,12 @@ and this project adheres to
 
 ---
 
+## [0.12.1] - 2026-06-09
+
+- Add `pii_masking_on_inspect` option to toggle custom `Inspect` protocol
+
+---
+
 ## [0.12.0] - 2026-06-05
 
 - Implemented drop_pii for items of arrays and maps
@@ -170,7 +176,9 @@ and this project adheres to
 
 
 
-[Unreleased]: https://github.com/primait/avrogen/compare/0.12.0...HEAD
+
+[Unreleased]: https://github.com/primait/avrogen/compare/0.12.1...HEAD
+[0.12.1]: https://github.com/primait/avrogen/compare/0.12.0...0.12.1
 [0.12.0]: https://github.com/primait/avrogen/compare/0.11.5...0.12.0
 [0.11.5]: https://github.com/primait/avrogen/compare/0.11.4...0.11.5
 [0.11.4]: https://github.com/primait/avrogen/compare/0.11.3...0.11.4
