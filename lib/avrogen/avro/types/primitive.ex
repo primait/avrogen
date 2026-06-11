@@ -82,8 +82,8 @@ defmodule Avrogen.Avro.Types.Primitive do
   def default_value(:string), do: ""
 end
 
-alias Avrogen.Avro.Types.Primitive
 alias Avrogen.Avro.Schema.CodeGenerator
+alias Avrogen.Avro.Types.Primitive
 
 defimpl Jason.Encoder, for: Primitive do
   def encode(%Primitive{type: type}, opts) do

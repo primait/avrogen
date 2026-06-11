@@ -66,8 +66,8 @@ defmodule Avrogen.Avro.Types.Logical.Decimal do
   end
 end
 
-alias Avrogen.Avro.Types.Logical
 alias Avrogen.Avro.Schema.CodeGenerator
+alias Avrogen.Avro.Types.Logical
 
 defimpl CodeGenerator, for: Logical.Decimal do
   def external_dependencies(_), do: []
