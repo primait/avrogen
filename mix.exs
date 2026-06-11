@@ -66,6 +66,7 @@ defmodule Avrogen.MixProject do
 
   defp aliases do
     [
+      check: ["format", "credo --strict", "dialyzer"],
       setup: ["deps.get"]
     ]
   end
