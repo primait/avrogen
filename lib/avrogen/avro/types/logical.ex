@@ -43,7 +43,9 @@ defmodule Avrogen.Avro.Types.Logical do
   def module(%{"logicalType" => "big_decimal", "type" => "string"}), do: __MODULE__.DecimalString
   def module(%{"logicalType" => "big-decimal", "type" => "string"}), do: __MODULE__.DecimalString
   def module(%{"logicalType" => "big-decimal", "type" => "bytes"}), do: __MODULE__.BigDecimal
-  def module(%{"logicalType" => "duration_string", "type" => "string"}), do: __MODULE__.DurationString
+
+  def module(%{"logicalType" => "duration_string", "type" => "string"}),
+    do: __MODULE__.DurationString
 
   def module(%{"logicalType" => "uuid", "type" => "string"}), do: __MODULE__.UUID
 
