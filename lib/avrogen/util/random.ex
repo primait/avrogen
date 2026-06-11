@@ -444,21 +444,18 @@ defmodule Avrogen.Util.Random do
 
     @spec duration(Keyword.t()) :: constructor_fun()
     def duration(opts \\ []) do
-      max_months = Keyword.get(opts, :max_months, 120)
       max_days = Keyword.get(opts, :max_days, 365)
-      max_microseconds = Keyword.get(opts, :max_microseconds, 86_399_999_000)
+      # 24 hours minus 1 microsecond
+      max_microseconds = Keyword.get(opts, :max_microseconds, 86_399_999_999)
 
       fn rand_state ->
-        {rand_state, months} = Random.integer(rand_state, 0, max_months + 1)
         {rand_state, days} = Random.integer(rand_state, 0, max_days + 1)
         {rand_state, microseconds} = Random.integer(rand_state, 0, max_microseconds + 1)
 
         {rand_state,
          Duration.new!(
-           month: months,
            day: days,
-            second: div(microseconds, 1_000_000),
-            microsecond: {rem(microseconds, 1_000_000), 6}
+           microsecond: {microseconds, 6}
          )}
       end
     end
