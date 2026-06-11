@@ -6,7 +6,7 @@ updates:
   cooldown:
     default-days: 7
   directory: /
-- package-ecosystem: hex
+- package-ecosystem: mix
   schedule:
     interval: weekly
   cooldown:
