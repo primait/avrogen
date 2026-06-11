@@ -10,6 +10,13 @@ and this project adheres to
 
 ---
 
+## [0.13.0]
+
+- Bump elixir to 1.17
+- Add support for ISO 8601 duration strings with duration_string logicalType
+
+---
+
 ## [0.12.1] - 2026-06-09
 
 - Add `pii_masking_on_inspect` option to toggle custom `Inspect` protocol
