@@ -6,6 +6,7 @@ defmodule Avrogen.Avro.Types.LogicalTypesTest.MacroSupport do
   @logical_types_map %{
     :decimal => %Logical.Decimal{precision: 2, scale: 1},
     :decimal_string => %Logical.DecimalString{},
+    :duration_string => %Logical.DurationString{},
     :uuid => %Logical.UUID{},
     :date_string => %Logical.DateString{},
     :date => %Logical.Date{},
@@ -74,6 +75,18 @@ defmodule Avrogen.Avro.Types.LogicalTypesTest do
       end
 
       assert ^uuid = encode_uuid(uuid)
+    end
+
+    test "a duration value expressed as a string" do
+      duration = Duration.new!(month: 12, day: 3, second: 4, microsecond: {567_000, 3})
+      duration_string = "P12M3DT4.567S"
+
+      assert {:error, _} = decode_duration_string("not a duration")
+      assert {:ok, ^duration} = decode_duration_string(duration_string)
+
+      assert_raise FunctionClauseError, fn -> encode_duration_string("test") end
+
+      assert ^duration_string = encode_duration_string(duration)
     end
 
     test "a date value expressed as a string" do
