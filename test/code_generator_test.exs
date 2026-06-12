@@ -550,6 +550,22 @@ defmodule Avrogen.CodeGenerator.Test do
                |> CodeGenerator.random_instance([], %{})
                |> Macro.to_string()
     end
+
+    test "handling duration string logical types with range opts from schema" do
+      field =
+        Types.Record.Field.parse(%{
+          "name" => "duration",
+          "type" => %{"type" => "string", "logicalType" => "duration_string"},
+          "range" => %{
+            "duration_string" => %{"max_days" => 5, "max_microseconds" => 2_000_000}
+          }
+        })
+
+      assert ~s'Constructors.duration(max_days: 5, max_microseconds: 2_000_000)' ==
+               field
+               |> CodeGenerator.random_instance([], %{})
+               |> Macro.to_string()
+    end
   end
 
   describe "generate_code" do

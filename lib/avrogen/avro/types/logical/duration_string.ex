@@ -55,6 +55,12 @@ defimpl CodeGenerator, for: DurationString do
     end
   end
 
-  def random_instance(%DurationString{}, _range_opts, _global),
-    do: quote(do: Constructors.duration())
+  def random_instance(%DurationString{logicalType: logicalType}, range_opts, _global) do
+    range_opts
+    |> Keyword.get(String.to_atom(logicalType), [])
+    |> case do
+      [] -> quote(do: Constructors.duration())
+      opts -> quote(do: Constructors.duration(unquote(opts)))
+    end
+  end
 end
