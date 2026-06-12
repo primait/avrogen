@@ -451,7 +451,7 @@ defmodule Avrogen.Util.Random do
       max_days = Keyword.get(opts, :max_days, 3650)
       # 10 days
       max_hours = Keyword.get(opts, :max_hours, 240)
-      max_minutes = Keyword.get(opts, :max_minutes, 14400)
+      max_minutes = Keyword.get(opts, :max_minutes, 14_400)
       max_seconds = Keyword.get(opts, :max_seconds, 864_000)
       max_microseconds = Keyword.get(opts, :max_microseconds, 864_000_000_000)
 
