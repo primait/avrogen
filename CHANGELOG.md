@@ -12,7 +12,7 @@ and this project adheres to
 
 ## [1.0.0]
 
-- Bump elixir to 1.17
+- Add support for elixir 1.17 and drop support for lower elixir versions
 - Add support for ISO 8601 duration strings with duration_string logicalType
 
 ---
