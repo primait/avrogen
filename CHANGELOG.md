@@ -10,7 +10,7 @@ and this project adheres to
 
 ---
 
-## [0.13.0]
+## [1.0.0]
 
 - Bump elixir to 1.17
 - Add support for ISO 8601 duration strings with duration_string logicalType
