@@ -1,6 +1,7 @@
 defmodule Avrogen.Avro.Types.Logical.DurationString do
   @moduledoc """
     This type does not conform to the Avro duration specification.
+    The Avro duration specification represents a duration with three unsigned integers: months, days, and milliseconds.
 
     This is useful when the Avro value is stored as an ISO 8601 duration string,
     but the generated Elixir type should be `Duration`.
