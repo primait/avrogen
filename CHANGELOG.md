@@ -10,9 +10,10 @@ and this project adheres to
 
 ---
 
-## [1.0.0]
+## [1.0.0] - 2026-06-18 
 
-- Add support for elixir 1.17 and drop support for lower elixir versions
+- [BREAKING CHANGE] Add support for elixir 1.17 and drop support for lower elixir versions
+- [BREAKING CHANGE] Restrict union decoding to valid types only
 - Add support for ISO 8601 duration strings with duration_string logicalType
 
 ---
