@@ -1,7 +1,7 @@
 defmodule Avrogen.MixProject do
   use Mix.Project
 
-  @version "1.0.0"
+  @version "1.0.1"
   @source_url "https://github.com/primait/avrogen"
 
   def project do

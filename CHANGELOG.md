@@ -10,6 +10,12 @@ and this project adheres to
 
 ---
 
+## [1.0.1] - 2026-06-19
+
+- Update Elixir and Erlang version in publish workflow
+
+---
+
 ## [1.0.0] - 2026-06-18 
 
 - [BREAKING CHANGE] Add support for elixir 1.17 and drop support for lower elixir versions
