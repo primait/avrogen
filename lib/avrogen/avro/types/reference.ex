@@ -17,9 +17,9 @@ defmodule Avrogen.Avro.Types.Reference do
     do: name |> String.split(".") |> List.last() |> Macro.camelize()
 end
 
+alias Avrogen.Avro.Schema.CodeGenerator
 alias Avrogen.Avro.Types
 alias Avrogen.Avro.Types.Reference
-alias Avrogen.Avro.Schema.CodeGenerator
 
 defimpl Jason.Encoder, for: Reference do
   def encode(%Reference{name: name}, opts), do: Jason.Encode.string(name, opts)

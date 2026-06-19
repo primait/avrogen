@@ -33,8 +33,8 @@ defmodule Avrogen.Avro.Types.Logical.BigDecimal do
   end
 end
 
-alias Avrogen.Avro.Types.Logical.BigDecimal
 alias Avrogen.Avro.Schema.CodeGenerator
+alias Avrogen.Avro.Types.Logical.BigDecimal
 
 defimpl CodeGenerator, for: BigDecimal do
   def external_dependencies(_), do: []

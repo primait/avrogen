@@ -24,8 +24,8 @@ defmodule Avrogen.Avro.Types.Logical.DateTimeString do
       do: %__MODULE__{logicalType: logical_type, type: @avro_type}
 end
 
-alias Avrogen.Avro.Types.Logical.DateTimeString
 alias Avrogen.Avro.Schema.CodeGenerator
+alias Avrogen.Avro.Types.Logical.DateTimeString
 
 defimpl CodeGenerator, for: DateTimeString do
   def external_dependencies(_), do: []

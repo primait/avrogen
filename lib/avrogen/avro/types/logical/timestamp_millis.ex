@@ -28,8 +28,8 @@ defmodule Avrogen.Avro.Types.Logical.TimestampMillis do
     do: %__MODULE__{logicalType: @logical_type, type: @avro_type}
 end
 
-alias Avrogen.Avro.Types.Logical.TimestampMillis
 alias Avrogen.Avro.Schema.CodeGenerator
+alias Avrogen.Avro.Types.Logical.TimestampMillis
 
 defimpl CodeGenerator, for: TimestampMillis do
   def external_dependencies(_), do: []

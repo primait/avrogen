@@ -50,9 +50,7 @@ defmodule Avrogen.Avro.Types.UnionTest do
     end
 
     test "union function clause error trying to decode a non-union type" do
-      # assert {:error, _} = test_decode_union_primitives(%{})
-      # Note: that's not the correct behavior. The function should return an error.
-      assert {:ok, %{}} = test_decode_union_primitives(%{})
+      assert {:error, _} = test_decode_union_primitives(%{})
     end
   end
 end

@@ -89,10 +89,7 @@ defimpl CodeGenerator, for: Union do
     quote do
       defp unquote(function_name)(value) do
         with unquote_splicing(clauses) do
-          # This is not correct behaviour, but is the current behaviour of the library.
-          # We should remove this and return an error here instead but too many tests
-          # in pricing depended on this behaviour.
-          {:ok, value}
+          {:error, "Failed to decode union value #{inspect(value)}"}
         end
       end
 

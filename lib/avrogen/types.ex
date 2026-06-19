@@ -10,7 +10,7 @@ defmodule Avrogen.Types do
   """
   def external_dependencies(type) do
     dependencies(type)
-    |> Enum.reject(&is_primitive?/1)
+    |> Enum.reject(&primitive?/1)
   end
 
   @doc """
@@ -41,13 +41,13 @@ defmodule Avrogen.Types do
   @doc """
   Returns true if the given type is a primitive.
   """
-  def is_primitive?(%{"logicalType" => _, "type" => type}) do
-    is_primitive?(type)
+  def primitive?(%{"logicalType" => _, "type" => type}) do
+    primitive?(type)
   end
 
-  def is_primitive?(%{"type" => "array"}), do: false
+  def primitive?(%{"type" => "array"}), do: false
 
-  def is_primitive?(type), do: type in @primitives
+  def primitive?(type), do: type in @primitives
 
   defguard is_primitive(type) when type in @primitives
 end

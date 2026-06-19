@@ -1,7 +1,7 @@
 defmodule Avrogen.MixProject do
   use Mix.Project
 
-  @version "0.12.1"
+  @version "1.0.0"
   @source_url "https://github.com/primait/avrogen"
 
   def project do
@@ -14,7 +14,7 @@ defmodule Avrogen.MixProject do
       config_path: "config/config.exs",
       deps_path: "deps",
       lockfile: "mix.lock",
-      elixir: "~> 1.13",
+      elixir: "~> 1.17",
       start_permanent: Mix.env() == :prod,
       description: description(),
       package: package(),
@@ -37,7 +37,7 @@ defmodule Avrogen.MixProject do
   defp deps do
     [
       {:accessible, "~> 0.3"},
-      {:credo, "== 1.7.1", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.7.0", only: [:dev, :test], runtime: false},
       {:decimal, "~> 2.0"},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:erlavro, "~> 2.9"},
@@ -66,6 +66,7 @@ defmodule Avrogen.MixProject do
 
   defp aliases do
     [
+      check: ["format", "credo --strict", "dialyzer"],
       setup: ["deps.get"]
     ]
   end

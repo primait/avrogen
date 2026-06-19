@@ -81,10 +81,10 @@ defmodule Avrogen.Types.Test do
     end
   end
 
-  describe "is_primitive?" do
+  describe "primitive?" do
     test "detects primitive type in logicalType type" do
-      assert Avrogen.Types.is_primitive?(%{"logicalType" => "foo", "type" => "string"})
-      assert Avrogen.Types.is_primitive?(%{"logicalType" => "foo", "type" => "bytes"})
+      assert Avrogen.Types.primitive?(%{"logicalType" => "foo", "type" => "string"})
+      assert Avrogen.Types.primitive?(%{"logicalType" => "foo", "type" => "bytes"})
     end
   end
 
