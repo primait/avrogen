@@ -220,10 +220,23 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
 
     paths = Avrogen.Avro.Schema.filenames_from_schema(dest, schema)
 
+    stale_due_to_equal_mtime =
+      case paths do
+        [] ->
+          false
+
+        _ ->
+          modified_target = paths |> Enum.map(&Mix.Utils.last_modified/1) |> Enum.min()
+          Mix.Utils.last_modified(path_to_schema) == modified_target
+      end
+
     status =
-      case force || Mix.Utils.stale?(paths ++ deps ++ find_beam_files(), paths) do
-        true -> :stale
-        false -> :noop
+      if force ||
+           Mix.Utils.stale?([path_to_schema ++ deps ++ find_beam_files()], paths) ||
+           stale_due_to_equal_mtime do
+        :stale
+      else
+        :noop
       end
 
     {status, path_to_schema, deps, paths, scope}
