@@ -21,9 +21,9 @@ defmodule Avrogen.Avro.Types.Array do
     do: %__MODULE__{items_schema: Schema.parse(items)}
 end
 
+alias Avrogen.Avro.Schema.CodeGenerator
 alias Avrogen.Avro.Types
 alias Avrogen.Avro.Types.Array
-alias Avrogen.Avro.Schema.CodeGenerator
 
 defimpl Jason.Encoder, for: Array do
   def encode(%Array{items_schema: items, default: default}, opts) do

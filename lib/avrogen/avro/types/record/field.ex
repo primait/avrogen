@@ -60,7 +60,7 @@ defmodule Avrogen.Avro.Types.Record.Field do
   def has_default?(%__MODULE__{default: nil}), do: false
   def has_default?(%__MODULE__{}), do: true
 
-  def is_pii?(%__MODULE__{pii: pii}), do: pii
+  def pii?(%__MODULE__{pii: pii}), do: pii
 
   def range_opts(%__MODULE__{range: nil}), do: []
   def range_opts(%__MODULE__{range: range}), do: to_keywords(range)

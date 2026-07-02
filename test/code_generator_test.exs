@@ -487,6 +487,14 @@ defmodule Avrogen.CodeGenerator.Test do
                |> Macro.to_string()
     end
 
+    test "elixir type: 'duration_string logical type'" do
+      assert "Duration.t()" ==
+               %{"type" => "string", "logicalType" => "duration_string"}
+               |> Schema.parse()
+               |> CodeGenerator.elixir_type()
+               |> Macro.to_string()
+    end
+
     test "elixir type: [null, 'iso_date logical type']" do
       assert "nil | Date.t()" ==
                ["null", %{"type" => "string", "logicalType" => "iso_date"}]
@@ -530,6 +538,27 @@ defmodule Avrogen.CodeGenerator.Test do
                map_type
                |> Schema.parse()
                |> CodeGenerator.random_instance([], global)
+               |> Macro.to_string()
+    end
+
+    test "handling duration string logical types" do
+      duration_type = %{"type" => "string", "logicalType" => "duration_string"}
+
+      assert ~s'Constructors.duration()' ==
+               duration_type
+               |> Schema.parse()
+               |> CodeGenerator.random_instance([], %{})
+               |> Macro.to_string()
+    end
+
+    test "handling duration string logical types with range opts" do
+      duration_type = %{"type" => "string", "logicalType" => "duration_string"}
+      range_opts = [duration_string: [max_days: 5, max_microseconds: 2_000_000]]
+
+      assert ~s'Constructors.duration(max_days: 5, max_microseconds: 2_000_000)' ==
+               duration_type
+               |> Schema.parse()
+               |> CodeGenerator.random_instance(range_opts, %{})
                |> Macro.to_string()
     end
   end

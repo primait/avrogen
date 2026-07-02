@@ -181,7 +181,7 @@ defmodule Avrogen.Avro.Types.Record do
 
   defp pii_keys(%__MODULE__{fields: fields}) do
     fields
-    |> Enum.filter(&Field.is_pii?/1)
+    |> Enum.filter(&Field.pii?/1)
     |> Enum.map(&Field.name/1)
   end
 
@@ -327,8 +327,8 @@ defmodule Avrogen.Avro.Types.Record do
   end
 end
 
-alias Avrogen.Avro.Types.Record
 alias Avrogen.Avro.Types
+alias Avrogen.Avro.Types.Record
 
 defimpl CodeGenerator, for: Record do
   def external_dependencies(%Record{fields: fields}),

@@ -294,6 +294,7 @@ The following logical types are also supported:
 | `big-decimal`            | `bytes`              | `Decimal`       |
 | `date`                   | `int`                | `Date`          |
 | `date`                   | `string`             | `Date`          |
+| `duration_string`        | `string`             | `Duration`      |
 | `iso_date`               | `string`             | `Date`          |
 | `datetime`               | `string`             | `DateTime`      |
 | `iso_datetime`           | `string`             | `DateTime`      |

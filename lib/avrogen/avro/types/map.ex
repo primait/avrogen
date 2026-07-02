@@ -4,7 +4,6 @@ defmodule Avrogen.Avro.Types.Map do
   """
 
   alias Avrogen.Avro.Schema
-  alias Avrogen.Avro.Schema
   use TypedStruct
   @identifier "map"
 
@@ -21,9 +20,9 @@ defmodule Avrogen.Avro.Types.Map do
     do: %__MODULE__{value_schema: Schema.parse(values)}
 end
 
+alias Avrogen.Avro.Schema.CodeGenerator
 alias Avrogen.Avro.Types
 alias Avrogen.Avro.Types.Map
-alias Avrogen.Avro.Schema.CodeGenerator
 
 defimpl Jason.Encoder, for: Map do
   def encode(%Map{value_schema: value_schema, default: default}, opts) do

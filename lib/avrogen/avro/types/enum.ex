@@ -171,9 +171,9 @@ defmodule Avrogen.Avro.Types.Enum do
   end
 end
 
+alias Avrogen.Avro.Schema.CodeGenerator
 alias Avrogen.Avro.Types
 alias Avrogen.Avro.Types.Enum
-alias Avrogen.Avro.Schema.CodeGenerator
 
 defimpl CodeGenerator, for: Enum do
   def external_dependencies(_value), do: []
@@ -224,6 +224,7 @@ defimpl CodeGenerator, for: Enum do
 
   def random_instance(%Enum{name: name}, _range_opts, _global) do
     name = Code.string_to_quoted!(name)
+
     quote(do: Constructors.enum_value(unquote(name)))
   end
 end

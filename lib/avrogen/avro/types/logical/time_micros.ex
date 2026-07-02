@@ -28,8 +28,8 @@ defmodule Avrogen.Avro.Types.Logical.TimeMicros do
     do: %__MODULE__{logicalType: @logical_type, type: @avro_type}
 end
 
-alias Avrogen.Avro.Types.Logical.TimeMicros
 alias Avrogen.Avro.Schema.CodeGenerator
+alias Avrogen.Avro.Types.Logical.TimeMicros
 
 defimpl CodeGenerator, for: TimeMicros do
   def external_dependencies(_), do: []

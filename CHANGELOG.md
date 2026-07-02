@@ -10,6 +10,14 @@ and this project adheres to
 
 ---
 
+## [1.0.0] - 2026-06-18 
+
+- [BREAKING CHANGE] Add support for elixir 1.17 and drop support for lower elixir versions
+- [BREAKING CHANGE] Restrict union decoding to valid types only
+- Add support for ISO 8601 duration strings with duration_string logicalType
+
+---
+
 ## [0.12.1] - 2026-06-09
 
 - Add `pii_masking_on_inspect` option to toggle custom `Inspect` protocol

@@ -14,34 +14,26 @@ jobs:
     strategy:
       matrix:
         version: [
-          { elixir: '1.14', otp: '24' },
-          { elixir: '1.14', otp: '25' },
-          { elixir: '1.15', otp: '24' },
-          { elixir: '1.15', otp: '25' },
-          { elixir: '1.15', otp: '26' },
-          { elixir: '1.16', otp: '24' },
-          { elixir: '1.16', otp: '25' },
-          { elixir: '1.16', otp: '26' }
-        #  { elixir: '1.17', otp: '25' },
-        #  { elixir: '1.17', otp: '26' },
-        #  { elixir: '1.17', otp: '27' }
+          { elixir: '1.17', otp: '25' },
+          { elixir: '1.17', otp: '26' },
+          { elixir: '1.17', otp: '27' }
         ]
     env:
       MIX_ENV: test
     steps:
-      - uses: erlef/setup-beam@v1
+      - uses: erlef/setup-beam@v1.24.0
         with:
           elixir-version: ${{ matrix.version.elixir }}
           otp-version: ${{ matrix.version.otp }}
 
       # Check out the code.
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6.0.3
 
       # Define how to cache deps. Restores existing cache if present.
       - name: Cache deps
         id: cache-deps
-        uses: actions/cache@v3
+        uses: actions/cache@v6.1.0
         env:
           cache-name: cache-elixir-deps
         with:
@@ -54,7 +46,7 @@ jobs:
       # This includes not re-compiling our project's downloaded deps every run.
       - name: Cache compiled build
         id: cache-build
-        uses: actions/cache@v3
+        uses: actions/cache@v6.1.0
         env:
           cache-name: cache-compiled-build
         with:

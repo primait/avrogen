@@ -25,8 +25,8 @@ defmodule Avrogen.Avro.Types.Logical.DecimalString do
       do: %__MODULE__{logicalType: logical_type, type: @avro_type}
 end
 
-alias Avrogen.Avro.Types.Logical.DecimalString
 alias Avrogen.Avro.Schema.CodeGenerator
+alias Avrogen.Avro.Types.Logical.DecimalString
 
 defimpl CodeGenerator, for: DecimalString do
   def external_dependencies(_), do: []
