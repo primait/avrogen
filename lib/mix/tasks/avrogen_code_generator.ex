@@ -230,10 +230,22 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
           Mix.Utils.last_modified(path_to_schema) == modified_target
       end
 
+    stale_sources = [path_to_schema] ++ deps ++ find_beam_files()
+
+    stale_due_to_inputs = Mix.Utils.stale?(stale_sources, paths)
+
+    debug_stale_check(
+      path_to_schema,
+      paths,
+      deps,
+      stale_sources,
+      stale_due_to_inputs,
+      stale_due_to_equal_mtime,
+      force
+    )
+
     status =
-      if force ||
-           Mix.Utils.stale?([path_to_schema ++ deps ++ find_beam_files()], paths) ||
-           stale_due_to_equal_mtime do
+      if force || stale_due_to_inputs || stale_due_to_equal_mtime do
         :stale
       else
         :noop
@@ -384,5 +396,26 @@ defmodule Mix.Tasks.Compile.AvroCodeGenerator do
   defp log(message) do
     print_app_name()
     IO.puts(message)
+  end
+
+  defp debug_stale_check(
+         path_to_schema,
+         paths,
+         deps,
+         stale_sources,
+         stale_due_to_inputs,
+         stale_due_to_equal_mtime,
+         force
+       ) do
+    if System.get_env("AVROGEN_DEBUG_STALE") in ["1", "true", "TRUE"] do
+      Mix.shell().info("[avrogen][stale] path_to_schema=#{path_to_schema}")
+      Mix.shell().info("[avrogen][stale] paths(targets)=#{inspect(paths)}")
+      Mix.shell().info("[avrogen][stale] deps=#{inspect(deps)}")
+      Mix.shell().info("[avrogen][stale] stale_sources=#{inspect(stale_sources)}")
+
+      Mix.shell().info(
+        "[avrogen][stale] force=#{force} stale_due_to_inputs=#{stale_due_to_inputs} stale_due_to_equal_mtime=#{stale_due_to_equal_mtime}"
+      )
+    end
   end
 end
