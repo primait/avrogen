@@ -10,6 +10,20 @@ and this project adheres to
 
 ---
 
+## [1.1.0] - 2026-07-06
+
+- Fix stale detection in `Mix.Tasks.Compile.AvroCodeGenerator` so schemas are regenerated when source and target mtimes are equal.
+- Refactor stale-check input handling and add optional debug output for stale decisions via `AVROGEN_DEBUG_STALE=1`.
+- Bump `uniq` from 0.6.1 to 0.6.3.
+- Bump `decimal` from 2.4.1 to 3.1.1.
+- Bump `ex_doc` from 0.34.2 to 0.40.3.
+- Update CI tooling versions in GitHub Actions workflows:
+  - `actions/checkout` from 3 to 7.0.0 (via incremental updates).
+  - `actions/cache` from 3 to 6.1.0 (via incremental updates).
+  - `erlef/setup-beam` from 1 to 1.24.0.
+
+---
+
 ## [1.0.0] - 2026-06-18 
 
 - [BREAKING CHANGE] Add support for elixir 1.17 and drop support for lower elixir versions
@@ -185,7 +199,9 @@ and this project adheres to
 
 
 
-[Unreleased]: https://github.com/primait/avrogen/compare/0.12.1...HEAD
+
+[Unreleased]: https://github.com/primait/avrogen/compare/1.1.0...HEAD
+[1.1.0]: https://github.com/primait/avrogen/compare/1.0.0...1.1.0
 [0.12.1]: https://github.com/primait/avrogen/compare/0.12.0...0.12.1
 [0.12.0]: https://github.com/primait/avrogen/compare/0.11.5...0.12.0
 [0.11.5]: https://github.com/primait/avrogen/compare/0.11.4...0.11.5
