@@ -38,7 +38,7 @@ defmodule Avrogen.MixProject do
     [
       {:accessible, "~> 0.3"},
       {:credo, "~> 1.7.0", only: [:dev, :test], runtime: false},
-      {:decimal, "~> 3.1"},
+      {:decimal, "~> 2.0 or ~> 3.0"},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:erlavro, "~> 2.9"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
