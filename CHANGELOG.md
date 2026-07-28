@@ -10,6 +10,12 @@ and this project adheres to
 
 ---
 
+## [1.1.1] - 2026-07-28
+
+- Relax `decimal` dependency to support both 2.x and 3.x.
+
+---
+
 ## [1.1.0] - 2026-07-06
 
 - Fix stale detection in `Mix.Tasks.Compile.AvroCodeGenerator` so schemas are regenerated when source and target mtimes are equal.
@@ -200,7 +206,9 @@ and this project adheres to
 
 
 
-[Unreleased]: https://github.com/primait/avrogen/compare/1.1.0...HEAD
+
+[Unreleased]: https://github.com/primait/avrogen/compare/1.1.1...HEAD
+[1.1.1]: https://github.com/primait/avrogen/compare/1.1.0...1.1.1
 [1.1.0]: https://github.com/primait/avrogen/compare/1.0.0...1.1.0
 [0.12.1]: https://github.com/primait/avrogen/compare/0.12.0...0.12.1
 [0.12.0]: https://github.com/primait/avrogen/compare/0.11.5...0.12.0
