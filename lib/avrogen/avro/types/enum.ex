@@ -99,12 +99,9 @@ defmodule Avrogen.Avro.Types.Enum do
         def ensure_atom!(value) when is_atom(value), do: value
         def ensure_atom!(value) when is_binary(value), do: String.to_atom(value)
 
-        def value!(s), do: s |> value() |> unwrap!()
+        def value!(s), do: s |> value() |> Avrogen.Util.Either.unwrap!()
 
         unquote_splicing(constructor_functions(enum.symbols))
-
-        defp unwrap!({:ok, value}), do: value
-        defp unwrap!({:error, error}), do: raise(error)
 
         alias Avrogen.Util.FuzzyEnumMatch
         @index FuzzyEnumMatch.make_index(@values)

@@ -9,4 +9,7 @@ defmodule Avrogen.Util.Either do
   @spec map(either(), fun()) :: either()
   def map({:ok, something}, function), do: {:ok, function.(something)}
   def map({:error, something}, _function), do: {:error, something}
+
+  def unwrap!({:ok, value}), do: value
+  def unwrap!({:error, error}), do: raise(error)
 end

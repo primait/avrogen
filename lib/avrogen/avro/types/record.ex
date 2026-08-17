@@ -75,14 +75,7 @@ defmodule Avrogen.Avro.Types.Record do
         unquote(to_avro_map(record))
 
         @impl true
-        unquote(from_avro_map(record))
-
-        @required_keys MapSet.new(unquote(required_keys(record)))
-        def from_avro_map(%{} = invalid) do
-          actual = Map.keys(invalid) |> MapSet.new()
-          missing = MapSet.difference(@required_keys, actual) |> Enum.join(", ")
-          {:error, "Missing keys: " <> missing}
-        end
+        unquote_splicing(from_avro_map(record))
 
         def from_avro_map(_) do
           {:error, "Expected a map."}
@@ -97,14 +90,19 @@ defmodule Avrogen.Avro.Types.Record do
 
         unquote_splicing(decoding_functions(record, global))
 
-        defp unwrap!({:ok, value}), do: value
-        defp unwrap!({:error, error}), do: raise(error)
-
         alias Avrogen.Util.Random
         alias Avrogen.Util.Random.Constructors
 
         @spec random_instance(Random.rand_state()) :: {Random.rand_state(), struct()}
         unquote(random_instance(record, global))
+      end
+    end
+  end
+
+  defp to_avro_map(%__MODULE__{fields: []}) do
+    quote do
+      def to_avro_map(%__MODULE__{} = _value) do
+        %{}
       end
     end
   end
@@ -120,7 +118,17 @@ defmodule Avrogen.Avro.Types.Record do
     end
   end
 
-  defp from_avro_map(%__MODULE__{fields: fields}) do
+  defp from_avro_map(%__MODULE__{fields: []}) do
+    [
+      quote do
+        def from_avro_map(%{} = _value) do
+          {:ok, %__MODULE__{}}
+        end
+      end
+    ]
+  end
+
+  defp from_avro_map(%__MODULE__{fields: fields} = record) do
     name =
       fields
       |> Enum.any?(&Field.has_default?/1)
@@ -145,13 +153,23 @@ defmodule Avrogen.Avro.Types.Record do
         {String.to_atom(field.name), __MODULE__.Field.from_avro_map_clause(field)}
       end)
 
-    quote do
-      def from_avro_map(%{unquote_splicing(required_fields)} = unquote(name)) do
-        unquote_splicing(optional_fields)
+    [
+      quote do
+        def from_avro_map(%{unquote_splicing(required_fields)} = unquote(name)) do
+          unquote_splicing(optional_fields)
 
-        {:ok, %__MODULE__{unquote_splicing(record_fields)}}
+          {:ok, %__MODULE__{unquote_splicing(record_fields)}}
+        end
+      end,
+      quote(do: @required_keys(MapSet.new(unquote(required_keys(record))))),
+      quote do
+        def from_avro_map(%{} = invalid) do
+          actual = Map.keys(invalid) |> MapSet.new()
+          missing = MapSet.difference(@required_keys, actual) |> Enum.join(", ")
+          {:error, "Missing keys: " <> missing}
+        end
       end
-    end
+    ]
   end
 
   defp encoding_functions(%__MODULE__{fields: fields}, global) do
