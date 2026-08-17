@@ -81,6 +81,8 @@ defmodule Avrogen.Avro.Types.Record do
           {:error, "Expected a map."}
         end
 
+        unquote_splicing(unwrap!(record))
+
         @pii_fields MapSet.new(unquote(pii_keys(record)))
         def pii_fields, do: @pii_fields
 
@@ -168,7 +170,16 @@ defmodule Avrogen.Avro.Types.Record do
           missing = MapSet.difference(@required_keys, actual) |> Enum.join(", ")
           {:error, "Missing keys: " <> missing}
         end
-      end,
+      end
+    ]
+  end
+
+  defp unwrap!(%__MODULE__{fields: []}) do
+    []
+  end
+
+  defp unwrap!(%__MODULE__{}) do
+    [
       quote do
         defp unwrap!({:ok, value}), do: value
       end,
