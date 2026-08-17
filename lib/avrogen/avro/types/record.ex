@@ -163,7 +163,9 @@ defmodule Avrogen.Avro.Types.Record do
           {:ok, %__MODULE__{unquote_splicing(record_fields)}}
         end
       end,
-      quote(do: @required_keys(MapSet.new(unquote(required_keys(record))))),
+      quote do
+        @required_keys MapSet.new(unquote(required_keys(record)))
+      end,
       quote do
         def from_avro_map(%{} = invalid) do
           actual = Map.keys(invalid) |> MapSet.new()
