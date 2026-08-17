@@ -170,7 +170,7 @@ defimpl CodeGenerator, for: Field do
       defp unquote(function_name)(value) do
         value
         |> unquote(inner_function_name)()
-        |> Avrogen.Util.Either.unwrap!()
+        |> unwrap!()
       end
 
       unquote_splicing(inner)

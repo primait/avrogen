@@ -168,6 +168,12 @@ defmodule Avrogen.Avro.Types.Record do
           missing = MapSet.difference(@required_keys, actual) |> Enum.join(", ")
           {:error, "Missing keys: " <> missing}
         end
+      end,
+      quote do
+        defp unwrap!({:ok, value}), do: value
+      end,
+      quote do
+        defp unwrap!({:error, error}), do: raise(error)
       end
     ]
   end
