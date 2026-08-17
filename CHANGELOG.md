@@ -10,6 +10,12 @@ and this project adheres to
 
 ---
 
+## [1.1.2] - 2026-08-17
+
+- Prevent compiler warnings when using empty records.
+
+---
+
 ## [1.1.1] - 2026-07-28
 
 - Relax `decimal` dependency to support both 2.x and 3.x.
@@ -207,7 +213,8 @@ and this project adheres to
 
 
 
-[Unreleased]: https://github.com/primait/avrogen/compare/1.1.1...HEAD
+[Unreleased]: https://github.com/primait/avrogen/compare/1.1.2...HEAD
+[1.1.2]: https://github.com/primait/avrogen/compare/1.1.1...1.1.2
 [1.1.1]: https://github.com/primait/avrogen/compare/1.1.0...1.1.1
 [1.1.0]: https://github.com/primait/avrogen/compare/1.0.0...1.1.0
 [0.12.1]: https://github.com/primait/avrogen/compare/0.12.0...0.12.1
