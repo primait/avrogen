@@ -81,8 +81,6 @@ defmodule Avrogen.Avro.Types.Record do
           {:error, "Expected a map."}
         end
 
-        unquote_splicing(unwrap!(record))
-
         @pii_fields MapSet.new(unquote(pii_keys(record)))
         def pii_fields, do: @pii_fields
 
@@ -91,6 +89,8 @@ defmodule Avrogen.Avro.Types.Record do
         unquote_splicing(encoding_functions(record, global))
 
         unquote_splicing(decoding_functions(record, global))
+
+        unquote_splicing(unwrap!(record))
 
         alias Avrogen.Util.Random
         alias Avrogen.Util.Random.Constructors
