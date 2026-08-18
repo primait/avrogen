@@ -1,0 +1,7 @@
+  {
+    "type": "record",
+    "name": "TestRecordEmpty",
+    "namespace": "events.v1",
+    "fields": []
+  }
+  
