@@ -1,15 +1,49 @@
 version: 2
 updates:
-- package-ecosystem: github-actions
-  schedule:
-    interval: weekly
-  cooldown:
-    default-days: 7
-  directory: /
-- package-ecosystem: mix
-  schedule:
-    interval: weekly
-  cooldown:
-    default-days: 7
-  directories:
-  - '*'
+  - package-ecosystem: github-actions
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    directory: /
+    commit-message:
+      prefix: chore(deps-github-actions)
+    groups:
+      github-actions-non-major:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
+  - package-ecosystem: mix
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    directories:
+      - '*'
+    commit-message:
+      prefix: chore(deps-mix)
+    groups:
+      mix-non-major:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
+  - package-ecosystem: docker
+    directories:
+      - '*'
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: chore(deps-docker)
+    groups:
+      docker-non-major:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+          - patch
