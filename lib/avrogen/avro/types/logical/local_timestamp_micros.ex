@@ -48,8 +48,7 @@ defimpl CodeGenerator, for: LocalTimestampMicros do
   def decode_function(%LocalTimestampMicros{}, function_name, _global) do
     quote do
       defp unquote(function_name)(timestamp) when is_number(timestamp),
-        do:
-          {:ok, NaiveDateTime.add(~N[1970-01-01 00:00:00.000000], timestamp, :microsecond)}
+        do: {:ok, NaiveDateTime.add(~N[1970-01-01 00:00:00.000000], timestamp, :microsecond)}
 
       defp unquote(function_name)(timestamp),
         do: {:error, "Expected a long value, got: #{inspect(timestamp)}"}
