@@ -8,9 +8,15 @@ and this project adheres to
 
 ## [Unreleased]
 
+---
+
+## [1.1.3] - 2026-09-02
+
 ### Changed
 
-- Replaced `Timex` with Elixir stdlib (`NaiveDateTime`, `DateTime`) in `local_timestamp_millis`, `local_timestamp_micros`, and `Random.datetime/3`. This removes `timex` and its transitive dependencies from the dependency tree.
+- Replaced `Timex` with Elixir stdlib (`NaiveDateTime`, `DateTime`) in
+  `local_timestamp_millis`, `local_timestamp_micros`, and `Random.datetime/3`.
+  This removes `timex` and its transitive dependencies from the dependency tree.
 
 ---
 
@@ -28,8 +34,10 @@ and this project adheres to
 
 ## [1.1.0] - 2026-07-06
 
-- Fix stale detection in `Mix.Tasks.Compile.AvroCodeGenerator` so schemas are regenerated when source and target mtimes are equal.
-- Refactor stale-check input handling and add optional debug output for stale decisions via `AVROGEN_DEBUG_STALE=1`.
+- Fix stale detection in `Mix.Tasks.Compile.AvroCodeGenerator` so schemas are
+  regenerated when source and target mtimes are equal.
+- Refactor stale-check input handling and add optional debug output for stale
+  decisions via `AVROGEN_DEBUG_STALE=1`.
 - Bump `uniq` from 0.6.1 to 0.6.3.
 - Bump `decimal` from 2.4.1 to 3.1.1.
 - Bump `ex_doc` from 0.34.2 to 0.40.3.
@@ -40,9 +48,10 @@ and this project adheres to
 
 ---
 
-## [1.0.0] - 2026-06-18 
+## [1.0.0] - 2026-06-18
 
-- [BREAKING CHANGE] Add support for elixir 1.17 and drop support for lower elixir versions
+- [BREAKING CHANGE] Add support for elixir 1.17 and drop support for lower
+  elixir versions
 - [BREAKING CHANGE] Restrict union decoding to valid types only
 - Add support for ISO 8601 duration strings with duration_string logicalType
 
@@ -64,13 +73,15 @@ and this project adheres to
 
 ### Fixed
 
-- Fixed generated modules including a stray `nil` when no pii fields were present.
+- Fixed generated modules including a stray `nil` when no pii fields were
+  present.
 
 ---
 
 ## [0.11.4] - 2026-05-08
 
 ### Added
+
 - Implemented the `Inspect` protocol for generated structs to redact PII fields.
 
 ---
@@ -78,7 +89,9 @@ and this project adheres to
 ## [0.11.3] - 2026-03-19
 
 ### Fixed
-- A bug in the code generation causing boolean properties with default value == true to deserialize always as true
+
+- A bug in the code generation causing boolean properties with default value ==
+  true to deserialize always as true
 
 ---
 
@@ -86,7 +99,9 @@ and this project adheres to
 
 ### Fixed
 
-- Reverted the `from_avro_map/1` changes introduced in 0.11.0. The previous implementation incorrectly decoded union fields when all union member types had only nullable fields, always selecting the first type.
+- Reverted the `from_avro_map/1` changes introduced in 0.11.0. The previous
+  implementation incorrectly decoded union fields when all union member types
+  had only nullable fields, always selecting the first type.
 
 ---
 
@@ -98,7 +113,10 @@ and this project adheres to
 
 ### Changed
 
-- Enhanced `from_avro_map/1` to support backwards compatibility when schemas evolve. Nullable fields are no longer matched in the function signature, allowing newer versions of modules to successfully decode payloads encoded with older schema versions that don't include newly added nullable fields.
+- Enhanced `from_avro_map/1` to support backwards compatibility when schemas
+  evolve. Nullable fields are no longer matched in the function signature,
+  allowing newer versions of modules to successfully decode payloads encoded
+  with older schema versions that don't include newly added nullable fields.
 
 ---
 
@@ -106,7 +124,8 @@ and this project adheres to
 
 ### Fixed
 
-- Fix issue where `Avrogen.Schema.external_dependencies` was wrongly identifying references to previously defined types as external dependencies.
+- Fix issue where `Avrogen.Schema.external_dependencies` was wrongly identifying
+  references to previously defined types as external dependencies.
 
 ---
 
@@ -114,7 +133,10 @@ and this project adheres to
 
 ### Added
 
-- Support for the `bytes`-backed `big-decimal` scalable precision decimal type added in v1.12.0. The non-standard, `string`-backed [`big_decimal`](lib/avrogen/avro/types/logical/decimal_string.ex) is still supported and now also accepts `big-decimal` as the logical type name.
+- Support for the `bytes`-backed `big-decimal` scalable precision decimal type
+  added in v1.12.0. The non-standard, `string`-backed
+  [`big_decimal`](lib/avrogen/avro/types/logical/decimal_string.ex) is still
+  supported and now also accepts `big-decimal` as the logical type name.
 
 ---
 
@@ -130,7 +152,11 @@ and this project adheres to
 
 ### Changed
 
-- Enhanced enum decoding to handle schema evolution gracefully. When `from_avro_map/1` encounters an unknown enum symbol and the enum defines a default value, it now uses the default instead of returning an error. This enables forward compatibility when new enum symbols are added in newer schema versions.
+- Enhanced enum decoding to handle schema evolution gracefully. When
+  `from_avro_map/1` encounters an unknown enum symbol and the enum defines a
+  default value, it now uses the default instead of returning an error. This
+  enables forward compatibility when new enum symbols are added in newer schema
+  versions.
 
 ---
 
@@ -138,7 +164,8 @@ and this project adheres to
 
 ### Fixed
 
-- In-line the old version of `String.jaro_distance/2`, since the one introduced in Elixir 1.17.1 changes the behaviour
+- In-line the old version of `String.jaro_distance/2`, since the one introduced
+  in Elixir 1.17.1 changes the behaviour
 
 ---
 
@@ -210,14 +237,8 @@ and this project adheres to
   - `LocalTimestampMillis` (`long`).
   - `LocalTimestampMicros` (`long`).
 
-
-
-
-
-
-
-
-[Unreleased]: https://github.com/primait/avrogen/compare/1.1.2...HEAD
+[Unreleased]: https://github.com/primait/avrogen/compare/1.1.3...HEAD
+[1.1.3]: https://github.com/primait/avrogen/compare/1.1.2...1.1.3
 [1.1.2]: https://github.com/primait/avrogen/compare/1.1.1...1.1.2
 [1.1.1]: https://github.com/primait/avrogen/compare/1.1.0...1.1.1
 [1.1.0]: https://github.com/primait/avrogen/compare/1.0.0...1.1.0
