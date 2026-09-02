@@ -41,16 +41,14 @@ defimpl CodeGenerator, for: LocalTimestampMicros do
   def encode_function(%LocalTimestampMicros{}, function_name, _global) do
     quote do
       defp unquote(function_name)(%NaiveDateTime{} = timestamp),
-        do: Timex.diff(timestamp, ~N[1970-01-01 00:00:00.000000], :microsecond)
+        do: NaiveDateTime.diff(timestamp, ~N[1970-01-01 00:00:00.000000], :microsecond)
     end
   end
 
   def decode_function(%LocalTimestampMicros{}, function_name, _global) do
     quote do
       defp unquote(function_name)(timestamp) when is_number(timestamp),
-        do:
-          {:ok,
-           Timex.add(~N[1970-01-01 00:00:00.000000], Timex.Duration.from_microseconds(timestamp))}
+        do: {:ok, NaiveDateTime.add(~N[1970-01-01 00:00:00.000000], timestamp, :microsecond)}
 
       defp unquote(function_name)(timestamp),
         do: {:error, "Expected a long value, got: #{inspect(timestamp)}"}

@@ -8,6 +8,10 @@ and this project adheres to
 
 ## [Unreleased]
 
+### Changed
+
+- Replaced `Timex` with Elixir stdlib (`NaiveDateTime`, `DateTime`) in `local_timestamp_millis`, `local_timestamp_micros`, and `Random.datetime/3`. This removes `timex` and its transitive dependencies from the dependency tree.
+
 ---
 
 ## [1.1.2] - 2026-08-17

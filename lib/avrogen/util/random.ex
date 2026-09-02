@@ -306,15 +306,15 @@ defmodule Avrogen.Util.Random do
   """
   def datetime(rand_state, start_date, end_date) do
     {end_d, start_d} =
-      case Timex.compare(end_date, start_date) do
-        -1 -> {start_date, end_date}
+      case DateTime.compare(end_date, start_date) do
+        :lt -> {start_date, end_date}
         _ -> {end_date, start_date}
       end
 
-    range = abs(Timex.diff(end_d, start_d, :milliseconds))
+    range = abs(DateTime.diff(end_d, start_d, :millisecond))
     {s, millis} = integer(rand_state, 0, range)
 
-    d = Timex.add(start_d, Timex.Duration.from_milliseconds(millis))
+    d = DateTime.add(start_d, millis, :millisecond)
     {s, d}
   end
 
