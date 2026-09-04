@@ -10,6 +10,15 @@ and this project adheres to
 
 ---
 
+## [1.1.4] - 2026-09-07
+
+### Changed
+
+- Fixes bug that had arisen with the removal of `Timex` due to `DateTime` APIs
+  being used with `Date` structs
+
+---
+
 ## [1.1.3] - 2026-09-02
 
 ### Changed
@@ -237,7 +246,9 @@ and this project adheres to
   - `LocalTimestampMillis` (`long`).
   - `LocalTimestampMicros` (`long`).
 
-[Unreleased]: https://github.com/primait/avrogen/compare/1.1.3...HEAD
+
+[Unreleased]: https://github.com/primait/avrogen/compare/1.1.4...HEAD
+[1.1.4]: https://github.com/primait/avrogen/compare/1.1.3...1.1.4
 [1.1.3]: https://github.com/primait/avrogen/compare/1.1.2...1.1.3
 [1.1.2]: https://github.com/primait/avrogen/compare/1.1.1...1.1.2
 [1.1.1]: https://github.com/primait/avrogen/compare/1.1.0...1.1.1

@@ -297,7 +297,19 @@ defmodule Avrogen.Util.Random do
   Returns updated rand_state and random date between given start and end date.
   """
   def date(rand_state, start_date, end_date) do
-    datetime(rand_state, start_date, end_date)
+    {end_d, start_d} =
+      case Date.compare(end_date, start_date) do
+        :lt -> {start_date, end_date}
+        _ -> {end_date, start_date}
+      end
+
+    range = abs(Date.diff(end_d, start_d))
+
+    {s, days} = integer(rand_state, 0, range)
+
+    d = Date.add(start_d, days)
+
+    {s, d}
   end
 
   @doc """
