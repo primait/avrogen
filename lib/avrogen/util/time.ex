@@ -1,4 +1,24 @@
 defmodule Avrogen.Util.Time do
+  @moduledoc """
+  Utilities for comparing, adding, and calculating differences between
+  supported date and time representations.
+
+  The module provides a small common interface over Elixir's `Time`, `Date`,
+  `DateTime`, and `NaiveDateTime` types, as well as Erlang date and datetime
+  tuples.
+
+  The interface is intended to replace the subset of Timex functionality used
+  by Avrogen:
+
+    * `Timex.compare/2`
+    * `Timex.diff/3` with `:milliseconds`
+    * `Timex.add/2` with a duration created from milliseconds
+
+  `compare/2` returns `:lt`, `:eq`, or `:gt` instead of Timex's `-1`, `0`, or
+  `1`. The other operations preserve the behavior expected by existing
+  callers.
+  """
+
   @type year :: Calendar.year()
   @type month :: Calendar.month()
   @type day :: Calendar.day()
