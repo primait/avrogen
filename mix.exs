@@ -42,6 +42,7 @@ defmodule Avrogen.MixProject do
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:erlavro, "~> 2.9"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:stream_data, "~> 1.4", only: [:test], runtime: false},
       {:excribe, "~> 0.1"},
       {:jason, "~> 1.0"},
       {:libgraph, "~> 0.16"},
