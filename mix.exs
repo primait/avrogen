@@ -40,6 +40,7 @@ defmodule Avrogen.MixProject do
       {:credo, "~> 1.7.0", only: [:dev, :test], runtime: false},
       {:decimal, "~> 2.0 or ~> 3.0"},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:jsone, "~> 1.9", only: [:dev, :test]},
       {:erlavro, "~> 2.9"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:excribe, "~> 0.1"},
