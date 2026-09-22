@@ -14,7 +14,7 @@ and this project adheres to
 
 ### Changed
 
-- Fixes a bug that occurs when using an union with records that have matching fields. The 1recordst  might be attempted first but could fail. This catches those failures to allow the 2nd record to try.
+- Fixes a bug that occurs when using a union with records that have matching fields. The first record might be attempted but could fail. This catches those failures to allow the second record to be tried.
 
 ---
 
