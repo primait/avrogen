@@ -19,7 +19,7 @@ defmodule Avrogen.Test.SchemaHelpers do
   @doc """
   Generates all the modules from an Avro schema string.
 
-The schema is parsed, code is generated, compiled, and the resulting module names are returned.
+  The schema is parsed, code is generated, compiled, and the resulting module names are returned.
   """
   def generate_modules_from_schema(schema) do
     schema
