@@ -73,16 +73,14 @@ defmodule Avrogen.Avro.Types.UnionTest do
   describe "record unions" do
     test "decoding values with matching args picks correct type", %{record_module: record_module} do
       assert {:ok, record} =
-               apply(record_module, :from_avro_map, [
-                 %{
-                   "payment_plan" => %{
-                     "identifier" => "monthly-plan",
-                     "total_price" => %{
-                       "deposit" => "45.67"
-                     }
+               record_module.from_avro_map(%{
+                 "payment_plan" => %{
+                   "identifier" => "monthly-plan",
+                   "total_price" => %{
+                     "deposit" => "45.67"
                    }
                  }
-               ])
+               })
 
       assert %{identifier: "monthly-plan", total_price: %{deposit: %Decimal{}}} =
                record.payment_plan
@@ -92,13 +90,11 @@ defmodule Avrogen.Avro.Types.UnionTest do
 
     test "decoding annual plan picks annual plan type", %{record_module: record_module} do
       assert {:ok, record} =
-               apply(record_module, :from_avro_map, [
-                 %{
-                   "payment_plan" => %{
-                     "total_price" => "120.00"
-                   }
+               record_module.from_avro_map(%{
+                 "payment_plan" => %{
+                   "total_price" => "120.00"
                  }
-               ])
+               })
 
       assert %{total_price: %Decimal{}} = record.payment_plan
       assert Decimal.equal?(record.payment_plan.total_price, Decimal.new("120.00"))
