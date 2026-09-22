@@ -12,11 +12,21 @@ defmodule Avrogen.Test.SchemaHelpers do
   """
   def generate_module_from_schema(schema) do
     schema
+    |> generate_modules_from_schema()
+    |> List.first()
+  end
+
+  @doc """
+  Generates all the modules from an Avro schema string.
+
+  The schema is parsed, code is generated, compiled, and the resulting module name is returned.
+  """
+  def generate_modules_from_schema(schema) do
+    schema
     |> generate_code()
     |> Enum.map(&compile_code/1)
     |> Enum.map(&module_name/1)
     |> Enum.reject(&is_nil/1)
-    |> List.first()
   end
 
   @doc """

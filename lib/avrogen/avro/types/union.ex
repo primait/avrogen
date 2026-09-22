@@ -82,7 +82,15 @@ defimpl CodeGenerator, for: Union do
       types
       |> Enum.with_index()
       |> Enum.map(fn {_type, i} ->
-        quote(do: {:error, _} <- unquote(:"#{function_name}_#{i}")(value))
+        quote do
+          {:error, _} <-
+            try do
+              unquote(:"#{function_name}_#{i}")(value)
+            rescue
+              error ->
+                {:error, Exception.message(error)}
+            end
+        end
       end)
 
     # credo:disable-for-lines:3

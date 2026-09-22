@@ -10,6 +10,14 @@ and this project adheres to
 
 ---
 
+## [1.1.5] - 2026-09-22
+
+### Changed
+
+- Fixes a bug that occurs when using an union with records that have matching fields. The 1recordst  might be attempted first but could fail. This catches those failures to allow the 2nd record to try.
+
+---
+
 ## [1.1.4] - 2026-09-07
 
 ### Changed
