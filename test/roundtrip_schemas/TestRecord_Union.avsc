@@ -8,6 +8,11 @@
         "doc": "The payment plan selected for this offer.",
         "type": [
           {
+            "name": "NoPlan",
+            "type": "record",
+            "fields": []
+          },
+          {
             "name": "AnnualPlan",
             "type": "record",
             "fields": [

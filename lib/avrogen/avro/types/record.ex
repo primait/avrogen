@@ -123,7 +123,7 @@ defmodule Avrogen.Avro.Types.Record do
   defp from_avro_map(%__MODULE__{fields: []}) do
     [
       quote do
-        def from_avro_map(%{} = _value) do
+        def from_avro_map(%{} = value) when map_size(value) == 0 do
           {:ok, %__MODULE__{}}
         end
       end
