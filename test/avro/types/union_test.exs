@@ -43,7 +43,7 @@ defmodule Avrogen.Avro.Types.UnionTest do
       |> then(&File.read!(Path.join("test/roundtrip_schemas", "#{&1}.avsc")))
       |> SchemaHelpers.generate_modules_from_schema()
       |> Enum.find(fn module ->
-        module |> Atom.to_string() |> String.ends_with?(root_module_name)
+        module |> Atom.to_string() |> String.ends_with?(Macro.camelize(root_module_name))
       end)
 
     %{record_module: record_module}
