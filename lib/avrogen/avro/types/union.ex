@@ -36,8 +36,8 @@ defimpl Jason.Encoder, for: Union do
 end
 
 defimpl CodeGenerator, for: Union do
-  alias Avrogen.Avro.Types.Reference
   alias Avrogen.Avro.Types.Record
+  alias Avrogen.Avro.Types.Reference
 
   def external_dependencies(%{types: types}),
     do: Enum.flat_map(types, &CodeGenerator.external_dependencies/1)
