@@ -1,0 +1,57 @@
+  {
+    "type": "record",
+    "name": "TestRecord_Union",
+    "namespace": "events.v1",
+    "fields": [
+      {
+        "name": "payment_plan",
+        "doc": "The payment plan selected for this offer.",
+        "type": [
+          {
+            "name": "NoPlan",
+            "type": "record",
+            "fields": []
+          },
+          {
+            "name": "AnnualPlan",
+            "type": "record",
+            "fields": [
+              {
+                "name": "total_price",
+                "type": {
+                  "type": "string",
+                  "logicalType": "decimal"
+                }
+              }
+            ]
+          },
+          {
+            "name": "MonthlyPlan",
+            "type": "record",
+            "fields": [
+              {
+                "name": "identifier",
+                "type": "string"
+              },
+              {
+                "name": "total_price",
+                "type": {
+                  "name": "MonthlyPrice",
+                  "type": "record",
+                  "fields": [
+                    {
+                      "name": "deposit",
+                      "type": {
+                        "type": "string",
+                        "logicalType": "decimal"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
