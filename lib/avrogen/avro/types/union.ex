@@ -36,6 +36,9 @@ defimpl Jason.Encoder, for: Union do
 end
 
 defimpl CodeGenerator, for: Union do
+  alias Avrogen.Avro.Types.Reference
+  alias Avrogen.Avro.Types.Record
+
   def external_dependencies(%{types: types}),
     do: Enum.flat_map(types, &CodeGenerator.external_dependencies/1)
 
@@ -59,14 +62,49 @@ defimpl CodeGenerator, for: Union do
   end
 
   def encode_function(%Union{types: types}, function_name, global) do
-    functions =
-      types
-      |> Enum.map(&CodeGenerator.encode_function(&1, function_name, global))
-      |> MacroUtils.flatten_block()
+    {clauses, helpers} =
+      Enum.reduce(types, {[], []}, fn type, {clauses, helpers} ->
+        {member_clauses, member_helpers} =
+          encode_union_member(type, function_name, global)
+
+        {clauses ++ member_clauses, helpers ++ member_helpers}
+      end)
 
     quote do
-      (unquote_splicing(functions))
+      unquote_splicing(clauses)
+      unquote_splicing(helpers)
     end
+  end
+
+  defp encode_union_member(%Reference{} = reference, function_name, global) do
+    encode_union_member(global[reference.name] || reference, function_name, global)
+  end
+
+  defp encode_union_member(%Record{} = record, function_name, global) do
+    record_module = Code.string_to_quoted!(record.name)
+    fullname = Record.fullname(record, nil)
+    record_encoder_name = :"#{function_name}_record"
+
+    clause =
+      quote do
+        defp unquote(function_name)(%unquote(record_module){} = value) do
+          {unquote(fullname), unquote(record_encoder_name)(value)}
+        end
+      end
+
+    helper =
+      CodeGenerator.encode_function(record, record_encoder_name, global)
+      |> MacroUtils.flatten_block()
+
+    {[clause], helper}
+  end
+
+  defp encode_union_member(type, function_name, global) do
+    {
+      CodeGenerator.encode_function(type, function_name, global)
+      |> MacroUtils.flatten_block(),
+      []
+    }
   end
 
   def decode_function(%Union{types: types}, function_name, global) do

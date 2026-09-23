@@ -28,6 +28,7 @@ end
 defmodule Avrogen.Avro.Types.UnionTest do
   use ExUnit.Case, async: true
   alias __MODULE__.MacroSupport
+  alias Avrogen.Schema.SchemaRegistry
   alias Avrogen.Test.SchemaHelpers
   require MacroSupport
 
@@ -98,6 +99,28 @@ defmodule Avrogen.Avro.Types.UnionTest do
 
       assert %{total_price: %Decimal{}} = record.payment_plan
       assert Decimal.equal?(record.payment_plan.total_price, Decimal.new("120.00"))
+    end
+
+    test "binary roundtrip preserves record union members", %{record_module: record_module} do
+      schema = File.read!("test/roundtrip_schemas/TestRecord_Union.avsc")
+      encoder = SchemaRegistry.make_encoder(schema)
+      decoder = SchemaRegistry.make_decoder(schema)
+
+      [
+        %{},
+        %{"total_price" => "120.00"},
+        %{"identifier" => "monthly-plan", "total_price" => %{"deposit" => "45.67"}}
+      ]
+      |> Enum.each(fn payment_plan ->
+        assert {:ok, record} = record_module.from_avro_map(%{"payment_plan" => payment_plan})
+
+        avro_map = record_module.to_avro_map(record)
+
+        encoded = encoder.(record_module.avro_fqn(), avro_map)
+        decoded = decoder.(record_module.avro_fqn(), encoded)
+
+        assert {:ok, ^record} = record_module.from_avro_map(decoded)
+      end)
     end
   end
 end
