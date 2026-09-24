@@ -122,5 +122,17 @@ defmodule Avrogen.Avro.Types.UnionTest do
         assert {:ok, ^record} = record_module.from_avro_map(decoded)
       end)
     end
+
+    test "from_avro_map decodes tagged record union values", %{record_module: record_module} do
+      [%{}, %{"total_price" => "120.00"}, %{"identifier" => "monthly-plan", "total_price" => %{"deposit" => "45.67"}}]
+      |> Enum.each(fn payment_plan ->
+        assert {:ok, record} = record_module.from_avro_map(%{"payment_plan" => payment_plan})
+
+        assert {:ok, ^record} =
+                 record
+                 |> record_module.to_avro_map()
+                 |> record_module.from_avro_map()
+      end)
+    end
   end
 end

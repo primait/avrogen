@@ -116,6 +116,13 @@ defimpl CodeGenerator, for: Union do
       end)
       |> Enum.flat_map(&MacroUtils.flatten_block/1)
 
+    tagged_clauses =
+      types
+      |> Enum.with_index()
+      |> Enum.flat_map(fn {type, index} ->
+        tagged_decode_clause(type, function_name, :"#{function_name}_#{index}", global)
+      end)
+
     clauses =
       types
       |> Enum.with_index()
@@ -133,6 +140,8 @@ defimpl CodeGenerator, for: Union do
 
     # credo:disable-for-lines:3
     quote do
+      unquote_splicing(tagged_clauses)
+
       defp unquote(function_name)(value) do
         with unquote_splicing(clauses) do
           {:error, "Failed to decode union value #{inspect(value)}"}
@@ -142,6 +151,28 @@ defimpl CodeGenerator, for: Union do
       unquote_splicing(functions)
     end
   end
+
+  defp tagged_decode_clause(%Reference{} = reference, function_name, branch_function_name, global) do
+    tagged_decode_clause(
+      global[reference.name] || reference,
+      function_name,
+      branch_function_name,
+      global
+    )
+  end
+
+  defp tagged_decode_clause(%Record{} = record, function_name, branch_function_name, _global) do
+    fullname = Record.fullname(record, nil)
+
+    [
+      quote do
+        defp unquote(function_name)({unquote(fullname), value}),
+          do: unquote(branch_function_name)(value)
+      end
+    ]
+  end
+
+  defp tagged_decode_clause(_, _function_name, _branch_function_name, _global), do: []
 
   def contains_pii?(%Union{types: types}, global),
     do: Enum.any?(types, &CodeGenerator.contains_pii?(&1, global))
