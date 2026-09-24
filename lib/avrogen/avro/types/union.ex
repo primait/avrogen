@@ -138,11 +138,11 @@ defimpl CodeGenerator, for: Union do
         end
       end)
 
-    # credo:disable-for-lines:3
     quote do
       unquote_splicing(tagged_clauses)
 
       defp unquote(function_name)(value) do
+        # credo:disable-for-next-line
         with unquote_splicing(clauses) do
           {:error, "Failed to decode union value #{inspect(value)}"}
         end
