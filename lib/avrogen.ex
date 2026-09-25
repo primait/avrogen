@@ -26,7 +26,8 @@ defmodule Avrogen do
   def encode_schemaless(%module{} = record) do
     encoder = SchemaRegistry.get_encoder()
 
-    # This is to support consumers that may not have recompiled their avro schemas to include the to_avro_map/2 function.
+    # This is to support consumers that may not have recompiled
+    # their avro schemas to include the to_avro_map/2 function.
     intermediate =
       if Kernel.function_exported?(module, :to_avro_map, 2) do
         module.to_avro_map(record, encode_union_tags: true)
