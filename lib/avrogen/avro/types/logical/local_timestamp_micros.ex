@@ -40,7 +40,7 @@ defimpl CodeGenerator, for: LocalTimestampMicros do
 
   def encode_function(%LocalTimestampMicros{}, function_name, _global) do
     quote do
-      defp unquote(function_name)(%NaiveDateTime{} = timestamp),
+      defp unquote(function_name)(%NaiveDateTime{} = timestamp, _opts),
         do: NaiveDateTime.diff(timestamp, ~N[1970-01-01 00:00:00.000000], :microsecond)
     end
   end

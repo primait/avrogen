@@ -40,7 +40,7 @@ defimpl CodeGenerator, for: TimestampMillis do
 
   def encode_function(%TimestampMillis{}, function_name, _global) do
     quote do
-      defp unquote(function_name)(%DateTime{} = timestamp),
+      defp unquote(function_name)(%DateTime{} = timestamp, _opts),
         do: DateTime.to_unix(timestamp, :millisecond)
     end
   end

@@ -21,9 +21,24 @@ defmodule Avrogen do
   alias Avrogen.Schema.SchemaRegistry
   alias Avrogen.Util.Either
 
+  require Logger
+
   def encode_schemaless(%module{} = record) do
     encoder = SchemaRegistry.get_encoder()
-    intermediate = module.to_avro_map(record)
+
+    # This is to support consumers that may not have recompiled
+    # their avro schemas to include the to_avro_map/2 function.
+    intermediate =
+      if Kernel.function_exported?(module, :to_avro_map, 2) do
+        module.to_avro_map(record, encode_union_tags: true)
+      else
+        Logger.warning(
+          "Module #{module} does not implement to_avro_map/2, please recompile your avro schemas."
+        )
+
+        module.to_avro_map(record)
+      end
+
     bytes_io_data = encoder.(module.avro_fqn(), intermediate)
     {:ok, bytes_io_data}
   rescue

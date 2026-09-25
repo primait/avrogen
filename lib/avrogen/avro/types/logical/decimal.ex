@@ -81,7 +81,7 @@ defimpl CodeGenerator, for: Logical.Decimal do
     number_of_bytes = Logical.Decimal.number_of_bytes(decimal)
 
     quote do
-      defp unquote(function_name)(%Decimal{} = decimal) do
+      defp unquote(function_name)(%Decimal{} = decimal, _opts) do
         value = decimal |> Decimal.mult(unquote(scale)) |> Decimal.to_integer()
 
         <<value::unquote(number_of_bytes)-signed-integer-big>>

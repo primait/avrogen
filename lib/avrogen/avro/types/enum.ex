@@ -191,7 +191,7 @@ defimpl CodeGenerator, for: Enum do
 
   def encode_function(%Enum{}, function_name, _global) do
     quote do
-      defp unquote(function_name)(value) when is_atom(value) and not is_nil(value),
+      defp unquote(function_name)(value, _opts) when is_atom(value) and not is_nil(value),
         do: Atom.to_string(value)
     end
   end

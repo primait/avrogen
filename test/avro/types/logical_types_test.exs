@@ -48,9 +48,9 @@ defmodule Avrogen.Avro.Types.LogicalTypesTest do
       decimal = Decimal.new("1.2")
       assert {:ok, ^decimal} = decode_decimal_string("1.2")
 
-      assert_raise FunctionClauseError, fn -> encode_decimal_string("test") end
+      assert_raise FunctionClauseError, fn -> encode_decimal_string("test", []) end
 
-      assert "1.2" = encode_decimal_string(decimal)
+      assert "1.2" = encode_decimal_string(decimal, [])
     end
 
     test "a decimal value expressed as bytes" do
@@ -59,9 +59,9 @@ defmodule Avrogen.Avro.Types.LogicalTypesTest do
       decimal = Decimal.new("2.1")
       assert {:ok, ^decimal} = decode_decimal(<<21>>)
 
-      assert_raise FunctionClauseError, fn -> encode_decimal(1) end
+      assert_raise FunctionClauseError, fn -> encode_decimal(1, []) end
 
-      assert <<21>> = encode_decimal(decimal)
+      assert <<21>> = encode_decimal(decimal, [])
     end
 
     test "a uuid value expressed as string" do
@@ -71,10 +71,10 @@ defmodule Avrogen.Avro.Types.LogicalTypesTest do
       assert {:ok, ^uuid} = decode_uuid(uuid)
 
       assert_raise ArgumentError, fn ->
-        encode_uuid("test")
+        encode_uuid("test", [])
       end
 
-      assert ^uuid = encode_uuid(uuid)
+      assert ^uuid = encode_uuid(uuid, [])
     end
 
     test "a duration value expressed as a string" do
@@ -84,9 +84,9 @@ defmodule Avrogen.Avro.Types.LogicalTypesTest do
       assert {:error, _} = decode_duration_string("not a duration")
       assert {:ok, ^duration} = decode_duration_string(duration_string)
 
-      assert_raise FunctionClauseError, fn -> encode_duration_string("test") end
+      assert_raise FunctionClauseError, fn -> encode_duration_string("test", []) end
 
-      assert ^duration_string = encode_duration_string(duration)
+      assert ^duration_string = encode_duration_string(duration, [])
     end
 
     test "a date value expressed as a string" do
@@ -96,9 +96,9 @@ defmodule Avrogen.Avro.Types.LogicalTypesTest do
       date_string = "2024-06-28"
       assert {:ok, ^date} = decode_date_string(date_string)
 
-      assert_raise FunctionClauseError, fn -> encode_date_string("test") end
+      assert_raise FunctionClauseError, fn -> encode_date_string("test", []) end
 
-      assert ^date_string = encode_date_string(date)
+      assert ^date_string = encode_date_string(date, [])
     end
 
     test "a date value expressed as int" do
@@ -108,9 +108,9 @@ defmodule Avrogen.Avro.Types.LogicalTypesTest do
       date = ~D[2024-06-28]
       assert {:ok, ^date} = decode_date(date_int)
 
-      assert_raise FunctionClauseError, fn -> encode_date(to_string(date_int)) end
+      assert_raise FunctionClauseError, fn -> encode_date(to_string(date_int), []) end
 
-      assert ^date_int = encode_date(date)
+      assert ^date_int = encode_date(date, [])
     end
 
     test "a datetime value expressed as string" do
@@ -120,9 +120,9 @@ defmodule Avrogen.Avro.Types.LogicalTypesTest do
       date_string = "2024-06-28T11:15:30.000Z"
       assert {:ok, ^date} = decode_datetime_string(date_string)
 
-      assert_raise FunctionClauseError, fn -> encode_datetime_string("test") end
+      assert_raise FunctionClauseError, fn -> encode_datetime_string("test", []) end
 
-      assert ^date_string = encode_datetime_string(date)
+      assert ^date_string = encode_datetime_string(date, [])
     end
 
     test "a time-millis value expressed as int" do
@@ -134,10 +134,10 @@ defmodule Avrogen.Avro.Types.LogicalTypesTest do
       assert {:ok, ^time} = decode_time_millis(time_millis)
 
       assert_raise FunctionClauseError, fn ->
-        encode_time_millis(to_string(time_millis))
+        encode_time_millis(to_string(time_millis), [])
       end
 
-      assert ^time_millis = encode_time_millis(time)
+      assert ^time_millis = encode_time_millis(time, [])
     end
 
     test "a time-micros value expressed as long" do
@@ -149,10 +149,10 @@ defmodule Avrogen.Avro.Types.LogicalTypesTest do
       assert {:ok, ^time} = decode_time_micros(time_micros)
 
       assert_raise FunctionClauseError, fn ->
-        encode_time_micros(to_string(time_micros))
+        encode_time_micros(to_string(time_micros), [])
       end
 
-      assert ^time_micros = encode_time_micros(time)
+      assert ^time_micros = encode_time_micros(time, [])
     end
 
     test "a timestamp-millis value expressed as long" do
@@ -164,10 +164,10 @@ defmodule Avrogen.Avro.Types.LogicalTypesTest do
       assert {:ok, ^timestamp} = decode_timestamp_millis(timestamp_millis)
 
       assert_raise FunctionClauseError, fn ->
-        encode_timestamp_millis(to_string(timestamp_millis))
+        encode_timestamp_millis(to_string(timestamp_millis), [])
       end
 
-      assert ^timestamp_millis = encode_timestamp_millis(timestamp)
+      assert ^timestamp_millis = encode_timestamp_millis(timestamp, [])
     end
 
     test "a timestamp-micros value expressed as long" do
@@ -179,10 +179,10 @@ defmodule Avrogen.Avro.Types.LogicalTypesTest do
       assert {:ok, ^timestamp} = decode_timestamp_micros(timestamp_micros)
 
       assert_raise FunctionClauseError, fn ->
-        encode_timestamp_micros(to_string(timestamp_micros))
+        encode_timestamp_micros(to_string(timestamp_micros), [])
       end
 
-      assert ^timestamp_micros = encode_timestamp_micros(timestamp)
+      assert ^timestamp_micros = encode_timestamp_micros(timestamp, [])
     end
 
     test "a local-timestamp-millis value expressed as long" do
@@ -194,10 +194,10 @@ defmodule Avrogen.Avro.Types.LogicalTypesTest do
       assert {:ok, ^timestamp} = decode_local_timestamp_millis(timestamp_millis)
 
       assert_raise FunctionClauseError, fn ->
-        encode_local_timestamp_millis(to_string(timestamp_millis))
+        encode_local_timestamp_millis(to_string(timestamp_millis), [])
       end
 
-      assert ^timestamp_millis = encode_local_timestamp_millis(timestamp)
+      assert ^timestamp_millis = encode_local_timestamp_millis(timestamp, [])
     end
 
     test "a local-timestamp-micros value expressed as long" do
@@ -209,10 +209,10 @@ defmodule Avrogen.Avro.Types.LogicalTypesTest do
       assert {:ok, ^timestamp} = decode_local_timestamp_micros(timestamp_micros)
 
       assert_raise FunctionClauseError, fn ->
-        encode_local_timestamp_micros(to_string(timestamp_micros))
+        encode_local_timestamp_micros(to_string(timestamp_micros), [])
       end
 
-      assert ^timestamp_micros = encode_local_timestamp_micros(timestamp)
+      assert ^timestamp_micros = encode_local_timestamp_micros(timestamp, [])
     end
   end
 end

@@ -103,7 +103,7 @@ defmodule Avrogen.Avro.Types.Record do
 
   defp to_avro_map(%__MODULE__{fields: []}) do
     quote do
-      def to_avro_map(%__MODULE__{} = _value) do
+      def to_avro_map(%__MODULE__{} = _value, opts \\ []) when is_list(opts) do
         %{}
       end
     end
@@ -114,7 +114,7 @@ defmodule Avrogen.Avro.Types.Record do
       Enum.map(fields, fn field -> {field.name, __MODULE__.Field.to_avro_map_clause(field)} end)
 
     quote do
-      def to_avro_map(%__MODULE__{} = value) do
+      def to_avro_map(%__MODULE__{} = value, opts \\ []) when is_list(opts) do
         %{unquote_splicing(fields)}
       end
     end
@@ -394,8 +394,8 @@ defimpl CodeGenerator, for: Record do
     type_name = Code.string_to_quoted!(name)
 
     quote do
-      defp unquote(function_name)(%unquote(type_name){} = value) do
-        unquote(type_name).to_avro_map(value)
+      defp unquote(function_name)(%unquote(type_name){} = value, opts) do
+        unquote(type_name).to_avro_map(value, opts)
       end
     end
   end

@@ -21,6 +21,13 @@ defmodule Avrogen.Avro.Types.MapTest.MacroSupport do
   @map_schema_record %Types.Map{default: %{}, value_schema: @record_schema}
   @map_schema_union %Types.Map{default: %{}, value_schema: @union_schema}
 
+  @map_schema_record_union %Types.Map{
+    default: %{},
+    value_schema: %Types.Union{
+      types: [%Types.Primitive{type: :null}, @record_schema]
+    }
+  }
+
   defmacro gen_code do
     details =
       [
@@ -29,7 +36,12 @@ defmodule Avrogen.Avro.Types.MapTest.MacroSupport do
         CodeGenerator.decode_function(@map_schema_record, :test_decode_record_map, %{}),
         CodeGenerator.encode_function(@map_schema_record, :test_encode_record_map, %{}),
         CodeGenerator.decode_function(@map_schema_union, :test_decode_union_map, %{}),
-        CodeGenerator.encode_function(@map_schema_union, :test_encode_union_map, %{})
+        CodeGenerator.encode_function(@map_schema_union, :test_encode_union_map, %{}),
+        CodeGenerator.encode_function(
+          @map_schema_record_union,
+          :test_encode_record_union_map,
+          %{}
+        )
       ]
       |> Enum.flat_map(&MacroUtils.flatten_block/1)
 
@@ -51,6 +63,7 @@ defmodule Avrogen.Avro.Types.MapTest do
 
     def from_avro_map(%{"f1" => f1}), do: {:ok, %__MODULE__{f1: f1}}
     def to_avro_map(%__MODULE__{f1: f1}), do: %{"f1" => f1}
+    def to_avro_map(%__MODULE__{} = value, _opts), do: to_avro_map(value)
   end
 
   MacroSupport.gen_code()
@@ -59,27 +72,46 @@ defmodule Avrogen.Avro.Types.MapTest do
     test "primitive-valued map" do
       initial_map = %{"a" => "b"}
       assert {:ok, val} = test_decode_map(initial_map)
-      assert initial_map == test_encode_map(val)
+      assert initial_map == test_encode_map(val, [])
 
-      assert_raise FunctionClauseError, fn -> test_encode_map(%{"a" => 1}) end
+      assert_raise FunctionClauseError, fn -> test_encode_map(%{"a" => 1}, []) end
     end
 
     test "record-valued map" do
       initial_map = %{"a" => %{"f1" => 42}}
       assert {:ok, val} = test_decode_record_map(initial_map)
-      assert initial_map == test_encode_record_map(val)
+      assert initial_map == test_encode_record_map(val, [])
     end
   end
 
   describe "Map.encode_function" do
+    test "propagates union tag options to record-union values" do
+      values = %{
+        "a" => %ValueRecord{f1: 42},
+        "b" => nil,
+        "c" => %ValueRecord{f1: 7}
+      }
+
+      plain_map = %{"a" => %{"f1" => 42}, "b" => nil, "c" => %{"f1" => 7}}
+
+      assert test_encode_record_union_map(values, []) == plain_map
+      assert test_encode_record_union_map(values, encode_union_tags: false) == plain_map
+
+      assert test_encode_record_union_map(values, encode_union_tags: true) == %{
+               "a" => {"test.ValueRecord", %{"f1" => 42}},
+               "b" => nil,
+               "c" => {"test.ValueRecord", %{"f1" => 7}}
+             }
+    end
+
     test "record-valued map" do
       initial_map = %{"a" => 1}
       assert {:ok, val} = test_decode_union_map(initial_map)
-      assert initial_map == test_encode_union_map(val)
+      assert initial_map == test_encode_union_map(val, [])
 
       initial_map = %{"a" => "hello"}
       assert {:ok, val} = test_decode_union_map(initial_map)
-      assert initial_map == test_encode_union_map(val)
+      assert initial_map == test_encode_union_map(val, [])
     end
   end
 end
