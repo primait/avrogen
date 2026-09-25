@@ -37,7 +37,7 @@ defimpl CodeGenerator, for: DecimalString do
 
   def encode_function(%DecimalString{}, function_name, _global) do
     quote do
-      defp unquote(function_name)(%Decimal{} = decimal), do: Decimal.to_string(decimal)
+      defp unquote(function_name)(%Decimal{} = decimal, _opts), do: Decimal.to_string(decimal)
     end
   end
 

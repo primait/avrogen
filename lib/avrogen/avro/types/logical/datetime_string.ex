@@ -36,7 +36,8 @@ defimpl CodeGenerator, for: DateTimeString do
 
   def encode_function(%DateTimeString{}, function_name, _global) do
     quote do
-      defp unquote(function_name)(%DateTime{} = timestamp), do: DateTime.to_iso8601(timestamp)
+      defp unquote(function_name)(%DateTime{} = timestamp, _opts),
+        do: DateTime.to_iso8601(timestamp)
     end
   end
 

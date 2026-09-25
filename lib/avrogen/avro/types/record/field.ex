@@ -127,7 +127,7 @@ defmodule Avrogen.Avro.Types.Record.Field do
     function_name = encode_function_name(field)
 
     quote do
-      unquote(function_name)(value.unquote(name))
+      unquote(function_name)(value.unquote(name), opts)
     end
   end
 

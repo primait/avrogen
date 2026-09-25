@@ -23,7 +23,7 @@ defmodule Avrogen do
 
   def encode_schemaless(%module{} = record) do
     encoder = SchemaRegistry.get_encoder()
-    intermediate = module.to_avro_map(record)
+    intermediate = module.to_avro_map(record, encode_union_tags: true)
     bytes_io_data = encoder.(module.avro_fqn(), intermediate)
     {:ok, bytes_io_data}
   rescue

@@ -36,7 +36,7 @@ defimpl CodeGenerator, for: DurationString do
 
   def encode_function(%DurationString{}, function_name, _global) do
     quote do
-      defp unquote(function_name)(%Duration{} = duration),
+      defp unquote(function_name)(%Duration{} = duration, _opts),
         do: Duration.to_iso8601(duration)
     end
   end

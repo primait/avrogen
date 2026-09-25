@@ -48,7 +48,7 @@ defmodule Avrogen.Test.Roundtrip do
     encoder = SchemaRegistry.make_encoder(schema)
     decoder = SchemaRegistry.make_decoder(schema)
 
-    encoded = encoder.(module.avro_fqn(), module.to_avro_map(input))
+    encoded = encoder.(module.avro_fqn(), module.to_avro_map(input, encode_union_tags: true))
     {:ok, decoded} = decoder.(module.avro_fqn(), encoded) |> module.from_avro_map()
 
     assert decoded.is_active == false
@@ -65,7 +65,12 @@ defmodule Avrogen.Test.Roundtrip do
     encoder = SchemaRegistry.make_encoder(schema)
     decoder = SchemaRegistry.make_decoder(schema)
 
-    encoded = encoder.(mod_name.avro_fqn(), mod_name.to_avro_map(random_instance))
+    encoded =
+      encoder.(
+        mod_name.avro_fqn(),
+        mod_name.to_avro_map(random_instance, encode_union_tags: true)
+      )
+
     {:ok, decoded} = decoder.(mod_name.avro_fqn(), encoded) |> mod_name.from_avro_map()
 
     assert random_instance == decoded

@@ -6,7 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
 ## [Unreleased]
+
+---
+
+## [1.1.7] - 2026-09-25
+
+### Changed
+
+- Add optional `to_avro_map/2` encoding options, including `encode_union_tags` for unambiguous record-union serialization.
+If you are using `union` types, it is recommended to turn this on.
+This reverts to the behaviour in 1.1.4 when using `to_avro_map` and `from_avro_map` manually.
 
 ---
 
@@ -16,13 +27,17 @@ and this project adheres to
 
 - Fix record-union map conversions by preserving branch type tags through `to_avro_map/1` and `from_avro_map/1`.
 
+*NB: This is a breaking change if you manually call `to_avro_map` or `from_avro_map` manually (without avro encoding).*
+
 ---
 
 ## [1.1.5] - 2026-09-22
 
 ### Changed
 
-- Fixes a bug that occurs when using a union with records that have matching fields. The first record might be attempted but could fail. This catches those failures to allow the second record to be tried.
+- Fixes a bug that occurs when using a union with records that have matching fields. The first record might be attempted but could fail. This catches those failures to allow the second record to be tried. 
+
+*NB: This is a breaking change if you manually call `to_avro_map` or `from_avro_map` manually (without avro encoding).*
 
 ---
 
@@ -263,7 +278,8 @@ and this project adheres to
   - `LocalTimestampMicros` (`long`).
 
 
-[Unreleased]: https://github.com/primait/avrogen/compare/1.1.6...HEAD
+[Unreleased]: https://github.com/primait/avrogen/compare/1.1.7...HEAD
+[1.1.7]: https://github.com/primait/avrogen/compare/1.1.6...1.1.7
 [1.1.6]: https://github.com/primait/avrogen/compare/1.1.5...1.1.6
 [1.1.5]: https://github.com/primait/avrogen/compare/1.1.4...1.1.5
 [1.1.4]: https://github.com/primait/avrogen/compare/1.1.3...1.1.4
