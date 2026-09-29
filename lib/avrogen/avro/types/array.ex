@@ -60,8 +60,8 @@ defimpl CodeGenerator, for: Array do
     inner = CodeGenerator.encode_function(items_schema, function_name, global)
 
     quote do
-      defp unquote(function_name)(value) when is_list(value),
-        do: Enum.map(value, fn item -> unquote(function_name)(item) end)
+      defp unquote(function_name)(value, opts) when is_list(value),
+        do: Enum.map(value, fn item -> unquote(function_name)(item, opts) end)
 
       unquote(inner)
     end

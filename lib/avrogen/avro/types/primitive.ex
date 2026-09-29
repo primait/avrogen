@@ -100,7 +100,7 @@ defimpl CodeGenerator, for: Primitive do
 
   def encode_function(%Primitive{type: :null}, function_name, _global) do
     quote do
-      defp unquote(function_name)(nil), do: nil
+      defp unquote(function_name)(nil, _opts), do: nil
     end
   end
 
@@ -108,7 +108,7 @@ defimpl CodeGenerator, for: Primitive do
     # In the previous version of the library we allowed passing atoms when the field type is
     # a "string". We can decide to remove this if we would like
     quote do
-      defp unquote(function_name)(value) when is_binary(value) or is_atom(value), do: value
+      defp unquote(function_name)(value, _opts) when is_binary(value) or is_atom(value), do: value
     end
   end
 
@@ -116,7 +116,7 @@ defimpl CodeGenerator, for: Primitive do
     guard_clause = Primitive.guard_clause(type)
 
     quote do
-      defp unquote(function_name)(value) when unquote(guard_clause)(value), do: value
+      defp unquote(function_name)(value, _opts) when unquote(guard_clause)(value), do: value
     end
   end
 

@@ -40,7 +40,7 @@ defimpl CodeGenerator, for: TimeMicros do
 
   def encode_function(%TimeMicros{}, function_name, _global) do
     quote do
-      defp unquote(function_name)(%Time{} = time),
+      defp unquote(function_name)(%Time{} = time, _opts),
         do: Time.diff(time, ~T[00:00:00.000], :microsecond)
     end
   end

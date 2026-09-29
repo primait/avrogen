@@ -54,7 +54,7 @@ defmodule Avrogen.Avro.Types.UnionTest do
       ["hello", 1, true, 2.3, nil]
       |> Enum.each(fn union ->
         assert {:ok, val} = test_decode_union_primitives(union)
-        assert union == test_encode_union_primitives(val)
+        assert union == test_encode_union_primitives(val, [])
       end)
     end
 
@@ -62,7 +62,7 @@ defmodule Avrogen.Avro.Types.UnionTest do
       assert_raise FunctionClauseError, fn ->
         # It's a union of null, string, bool and numbers. Map isn't an union value.
         # Instead of returning the value itself, it should return an error.
-        test_encode_union_primitives(%{})
+        test_encode_union_primitives(%{}, [])
       end
     end
 
@@ -114,7 +114,7 @@ defmodule Avrogen.Avro.Types.UnionTest do
       |> Enum.each(fn payment_plan ->
         assert {:ok, record} = record_module.from_avro_map(%{"payment_plan" => payment_plan})
 
-        avro_map = record_module.to_avro_map(record)
+        avro_map = record_module.to_avro_map(record, encode_union_tags: true)
 
         encoded = encoder.(record_module.avro_fqn(), avro_map)
         decoded = decoder.(record_module.avro_fqn(), encoded)
@@ -136,7 +136,28 @@ defmodule Avrogen.Avro.Types.UnionTest do
                  record
                  |> record_module.to_avro_map()
                  |> record_module.from_avro_map()
+
+        assert {:ok, ^record} =
+                 record
+                 |> record_module.to_avro_map(encode_union_tags: true)
+                 |> record_module.from_avro_map()
       end)
+    end
+
+    test "to_avro_map only emits union tags when requested", %{record_module: record_module} do
+      assert {:ok, record} =
+               record_module.from_avro_map(%{
+                 "payment_plan" => %{
+                   "identifier" => "monthly-plan",
+                   "total_price" => %{"deposit" => "45.67"}
+                 }
+               })
+
+      assert %{"payment_plan" => %{"identifier" => "monthly-plan"}} =
+               record_module.to_avro_map(record)
+
+      assert %{"payment_plan" => {"events.v1.MonthlyPlan", _}} =
+               record_module.to_avro_map(record, encode_union_tags: true)
     end
   end
 end

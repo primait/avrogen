@@ -40,7 +40,7 @@ defimpl CodeGenerator, for: Logical.Date do
 
   def encode_function(%Logical.Date{}, function_name, _global) do
     quote do
-      defp unquote(function_name)(%Date{} = date),
+      defp unquote(function_name)(%Date{} = date, _opts),
         do: Date.diff(date, ~D[1970-01-01])
     end
   end

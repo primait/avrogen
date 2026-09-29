@@ -6,8 +6,14 @@ defmodule Avrogen.AvroModule do
   @doc """
   Turn a (nested) struct (as defined by the generated avro modules) into an
   intermediate map that can be passed to a suitable erlavro encoder.
+
+  Pass `encode_union_tags: true` to tag record members of unions for encoders
+  that require an explicit union member name. This disambiguates union records
+  with overlapping field names, ensuring the encoder selects the intended branch
+  rather than the first structurally compatible record.
   """
   @callback to_avro_map(map()) :: map()
+  @callback to_avro_map(map(), Keyword.t()) :: map()
 
   @doc """
   Turn a raw map from an erlavro decoding operation into (nested) structs as

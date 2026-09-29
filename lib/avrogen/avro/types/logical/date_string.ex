@@ -36,7 +36,7 @@ defimpl CodeGenerator, for: DateString do
 
   def encode_function(%DateString{}, function_name, _global) do
     quote do
-      defp unquote(function_name)(%Date{} = date), do: Date.to_iso8601(date)
+      defp unquote(function_name)(%Date{} = date, _opts), do: Date.to_iso8601(date)
     end
   end
 

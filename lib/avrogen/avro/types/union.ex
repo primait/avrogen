@@ -87,8 +87,14 @@ defimpl CodeGenerator, for: Union do
 
     clause =
       quote do
-        defp unquote(function_name)(%unquote(record_module){} = value) do
-          {unquote(fullname), unquote(record_encoder_name)(value)}
+        defp unquote(function_name)(%unquote(record_module){} = value, opts) do
+          encoded = unquote(record_encoder_name)(value, opts)
+
+          if Keyword.get(opts, :encode_union_tags, false) do
+            {unquote(fullname), encoded}
+          else
+            encoded
+          end
         end
       end
 
