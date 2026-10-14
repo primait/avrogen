@@ -5,6 +5,11 @@ defmodule Avrogen.Avro.Types.Logical.DurationString do
 
     This is useful when the Avro value is stored as an ISO 8601 duration string,
     but the generated Elixir type should be `Duration`.
+
+    Avrogen also implements `Jason.Encoder` for `Duration`, encoding it as an
+    ISO 8601 string when serializing generated records to JSON.
+
+    (Note the builtin JSON library supports Duration encoding natively.)
   """
 
   use TypedStruct
@@ -22,6 +27,14 @@ defmodule Avrogen.Avro.Types.Logical.DurationString do
 
   def parse(%{"logicalType" => @logical_type, "type" => @avro_type}),
     do: %__MODULE__{logicalType: @logical_type, type: @avro_type}
+end
+
+defimpl Jason.Encoder, for: Duration do
+  def encode(duration, opts) do
+    duration
+    |> Duration.to_iso8601()
+    |> Jason.Encode.string(opts)
+  end
 end
 
 alias Avrogen.Avro.Schema.CodeGenerator

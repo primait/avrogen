@@ -278,10 +278,14 @@ This reverts to the behaviour in 1.1.4 when using `to_avro_map` and `from_avro_m
   - `LocalTimestampMicros` (`long`).
 
 
+<<<<<<< HEAD
 [Unreleased]: https://github.com/primait/avrogen/compare/1.1.7...HEAD
 [1.1.7]: https://github.com/primait/avrogen/compare/1.1.6...1.1.7
 [1.1.6]: https://github.com/primait/avrogen/compare/1.1.5...1.1.6
 [1.1.5]: https://github.com/primait/avrogen/compare/1.1.4...1.1.5
+=======
+[Unreleased]: https://github.com/primait/avrogen/compare/1.1.4...HEAD
+>>>>>>> 1a0ab4f (add json encoder for Duration)
 [1.1.4]: https://github.com/primait/avrogen/compare/1.1.3...1.1.4
 [1.1.3]: https://github.com/primait/avrogen/compare/1.1.2...1.1.3
 [1.1.2]: https://github.com/primait/avrogen/compare/1.1.1...1.1.2
