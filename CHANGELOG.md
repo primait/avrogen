@@ -11,6 +11,12 @@ and this project adheres to
 
 ---
 
+## [1.1.8] - 2026-10-14
+
+- Add `Jason.Encoder` for builtin `Duration` struct as ISO8601 string
+
+---
+
 ## [1.1.7] - 2026-09-25
 
 ### Changed
@@ -277,8 +283,8 @@ This reverts to the behaviour in 1.1.4 when using `to_avro_map` and `from_avro_m
   - `LocalTimestampMillis` (`long`).
   - `LocalTimestampMicros` (`long`).
 
-
-[Unreleased]: https://github.com/primait/avrogen/compare/1.1.7...HEAD
+[Unreleased]: https://github.com/primait/avrogen/compare/1.1.8...HEAD
+[1.1.8]: https://github.com/primait/avrogen/compare/1.1.7...1.1.8
 [1.1.7]: https://github.com/primait/avrogen/compare/1.1.6...1.1.7
 [1.1.6]: https://github.com/primait/avrogen/compare/1.1.5...1.1.6
 [1.1.5]: https://github.com/primait/avrogen/compare/1.1.4...1.1.5

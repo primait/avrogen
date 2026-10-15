@@ -41,6 +41,33 @@ defmodule Avrogen.Avro.Types.LogicalTypesTest do
 
   MacroSupport.gen_code()
 
+  describe "Duration JSON encoding" do
+    test "encodes a zero duration as an ISO 8601 string" do
+      assert Jason.encode!(Duration.new!([])) == ~s("PT0S")
+    end
+
+    test "encodes calendar and time components as an ISO 8601 string" do
+      duration = Duration.new!(year: 1, month: 2, day: 3, hour: 4, minute: 5, second: 6)
+
+      assert Jason.encode!(duration) == ~s("P1Y2M3DT4H5M6S")
+    end
+
+    test "preserves fractional second precision" do
+      duration = Duration.new!(second: 4, microsecond: {567_000, 3})
+
+      assert Jason.encode!(duration) == ~s("PT4.567S")
+    end
+
+    test "encodes durations nested in maps and lists" do
+      duration = Duration.new!(month: 12, day: 3, second: 4, microsecond: {567_000, 3})
+      value = %{records: [%{duration: duration}, %{duration: nil}]}
+
+      assert value |> Jason.encode!() |> Jason.decode!() == %{
+               "records" => [%{"duration" => "P12M3DT4.567S"}, %{"duration" => nil}]
+             }
+    end
+  end
+
   describe "logical types module can be encoded and decoded" do
     test "a decimal value expressed as a string" do
       assert {:error, _} = decode_decimal_string("test")
