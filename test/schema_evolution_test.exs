@@ -1,144 +1,133 @@
 defmodule Avrogen.SchemaEvolution.Test do
   @moduledoc """
   Tests to showcase the limitations of schema evolution using Avrogen.
+
+  Avro binary doesn't contain record names, so each version of the schema lives in its own
+  namespace (and so its own generated module) while still being encoded and decoded through the
+  same registry.
   """
 
-  use ExUnit.Case
+  use ExUnit.Case, async: false
 
-  @basic_avsc """
-  [
-    {
-      "type": "record",
-      "name": "RecordWithString",
-      "namespace": "record_with_string",
-      "fields": [
-        {
-          "name": "string_field",
-          "type": "string"
-        }
-      ]
+  alias Avrogen.Schema.SchemaRegistry
+  alias Avrogen.Test.SchemaHelpers
+
+  @string_field %{"name" => "string_field", "type" => "string"}
+
+  defp record_schema(namespace, extra_fields) do
+    %{
+      "type" => "record",
+      "name" => "RecordWithString",
+      "namespace" => namespace,
+      "fields" => [@string_field | extra_fields]
     }
-  ]
-  """
+  end
 
-  # adds a new field marked as nullable, but with no default
-  # will be incompatible with the previous schema's data
-  @evolved_incomp_avsc """
-  [
-    {
-      "type": "record",
-      "name": "RecordWithString",
-      "namespace": "record_with_string",
-      "fields": [
-        {
-          "name": "string_field",
-          "type": "string"
-        },
-        {
-          "name": "new_field",
-          "type": ["null", "string"]
-        }
-      ]
+  setup_all do
+    Code.put_compiler_option(:ignore_already_consolidated, true)
+
+    schemas = %{
+      basic: record_schema("record_basic", []),
+      # adds a new field marked as nullable, but with no default
+      evolved_incomp:
+        record_schema("record_evolved_incomp", [
+          %{"name" => "new_field", "type" => ["null", "string"]}
+        ]),
+      # gives the new field a default of null as well
+      evolved_comp:
+        record_schema("record_evolved_comp", [
+          %{"name" => "new_field", "type" => ["null", "string"], "default" => nil}
+        ])
     }
-  ]
-  """
 
-  # gives the new field a default of null as well
-  # will be compatible with the previous schema's data
-  @evolved_comp_avsc """
-  [
-    {
-      "type": "record",
-      "name": "RecordWithString",
-      "namespace": "record_with_string",
-      "fields": [
-        {
-          "name": "string_field",
-          "type": "string"
-        },
-        {
-          "name": "new_field",
-          "type": ["null", "string"],
-          "default": null
-        }
-      ]
-    }
-  ]
-  """
+    modules =
+      Map.new(schemas, fn {version, schema} ->
+        fqn = "#{schema["namespace"]}.#{schema["name"]}"
 
-  test "basic evolution of adding a nullable field" do
-    encoder_basic = make_encoder(@basic_avsc)
-    decoder_basic = make_decoder(@basic_avsc)
-    encoder_evolved_incomp = make_encoder(@evolved_incomp_avsc)
-    decoder_evolved_incomp = make_decoder(@evolved_incomp_avsc)
-    encoder_evolved_comp = make_encoder(@evolved_comp_avsc)
-    decoder_evolved_comp = make_decoder(@evolved_comp_avsc)
+        module =
+          schema
+          |> Jason.encode!()
+          |> SchemaHelpers.generate_modules_from_schema()
+          |> Enum.find(&(&1.avro_fqn() == fqn))
 
-    roundtripper = fn data, encoder, decoder ->
-      fqn = "record_with_string.RecordWithString"
-      decoder.(fqn, encoder.(fqn, data))
-    end
+        {version, module}
+      end)
+
+    registry_avsc = schemas |> Map.values() |> Jason.encode!()
+
+    :ets.new(SchemaRegistry, [:set, :protected, :named_table])
+
+    :ets.insert(
+      SchemaRegistry,
+      {"all", registry_avsc, SchemaRegistry.make_encoder(registry_avsc),
+       SchemaRegistry.make_decoder(registry_avsc)}
+    )
+
+    modules
+  end
+
+  test "basic evolution of adding a nullable field", modules do
+    basic = struct(modules.basic, string_field: "mr")
+    evolved_comp = struct(modules.evolved_comp, string_field: "mr", new_field: nil)
+    evolved_incomp = struct(modules.evolved_incomp, string_field: "mr", new_field: nil)
 
     # 1) basic data roundtripped with basic schema is unchanged
-    assert %{"string_field" => "mr"} ==
-             roundtripper.(
-               %{"string_field" => "mr"},
-               encoder_basic,
-               decoder_basic
-             )
+    assert {:ok, bytes} = Avrogen.encode_schemaless(basic)
+    assert {:ok, ^basic} = Avrogen.decode_schemaless(modules.basic, bytes)
 
-    # 2) basic data passed through backwards-compatible evolved schema is populated with missing nullable fields
-    assert %{"string_field" => "mr", "new_field" => nil} ==
-             roundtripper.(
-               %{"string_field" => "mr"},
-               encoder_evolved_comp,
-               decoder_evolved_comp
-             )
-
-    # 3) basic data passed through backwards-incompatible evolved schema CRASHES
-    assert_raise ErlangError, fn ->
-      %{"string_field" => "mr", "new_field" => nil} ==
-        roundtripper.(
-          %{"string_field" => "mr"},
-          encoder_evolved_incomp,
-          decoder_evolved_incomp
-        )
+    # 2) data roundtripped with either evolved schema is unchanged, with the new field null
+    for {module, record} <- [
+          {modules.evolved_comp, evolved_comp},
+          {modules.evolved_incomp, evolved_incomp}
+        ] do
+      assert {:ok, bytes} = Avrogen.encode_schemaless(record)
+      assert {:ok, ^record} = Avrogen.decode_schemaless(module, bytes)
     end
 
-    # 4) basic bytes encoded by basic schema are NOT decodable by backwards-compatible evolved schema :(
-    assert_raise MatchError, fn ->
-      %{"string_field" => "mr", "new_field" => nil} ==
-        roundtripper.(
-          %{"string_field" => "mr"},
-          encoder_basic,
-          decoder_evolved_comp
-        )
+    # 3) the generated modules don't apply the schema's default: old-shaped data is rejected by
+    # from_avro_map even when the new field has a default of null
+    for module <- [modules.evolved_comp, modules.evolved_incomp] do
+      assert {:error, "Missing keys: new_field"} =
+               module.from_avro_map(%{"string_field" => "mr"})
+    end
+
+    # 4) bytes encoded by the basic schema are NOT decodable by either evolved schema :(
+    {:ok, basic_bytes} = Avrogen.encode_schemaless(basic)
+
+    for module <- [modules.evolved_comp, modules.evolved_incomp] do
+      assert {:error, message} = Avrogen.decode_schemaless(module, basic_bytes)
+      assert message =~ "MatchError"
     end
   end
 
-  # Helper functions copied from SchemaRegistry
-  # Creates a binary format encoder function for the given avsc.
-  def make_encoder(avsc) do
-    :avro.make_encoder(avsc, map_type: :map, record_type: :map)
-  end
+  test "base64 encoded avro bytes are incompatible across versions", modules do
+    basic = struct(modules.basic, string_field: "mr")
+    {:ok, b64} = Avrogen.encode_schemaless_base64(basic)
 
-  # Creates a binary format decoder function for the given avsc.
-  def make_decoder(avsc) do
-    :avro.make_decoder(avsc,
-      map_type: :map,
-      record_type: :map,
-      hook: &decoder_hook/4
-    )
-  end
+    assert {:ok, ^basic} = Avrogen.decode_schemaless_base64(modules.basic, b64)
 
-  @doc """
-  A decoder hook that will convert erlavro :null values to nil.
-  """
-  def decoder_hook(type, _sub_name_or_id, data, decode_fun) do
-    if :avro.get_type_name(type) == "null" do
-      {nil, data}
-    else
-      decode_fun.(data)
+    for module <- [modules.evolved_comp, modules.evolved_incomp] do
+      assert {:error, message} = Avrogen.decode_schemaless_base64(module, b64)
+      assert message =~ "MatchError"
     end
+  end
+
+  test "old bytes can be read by decoding with the old schema and upgrading the result",
+       modules do
+    {:ok, b64} = Avrogen.encode_schemaless_base64(struct(modules.basic, string_field: "mr"))
+
+    assert {:ok, old} = Avrogen.decode_schemaless_base64(modules.basic, b64)
+
+    assert {:ok, upgraded} =
+             old
+             |> modules.basic.to_avro_map()
+             |> Map.put("new_field", nil)
+             |> modules.evolved_comp.from_avro_map()
+
+    assert upgraded == struct(modules.evolved_comp, string_field: "mr", new_field: nil)
+
+    # and the upgraded record is now readable with the new schema
+    assert {:ok, new_b64} = Avrogen.encode_schemaless_base64(upgraded)
+    assert {:ok, ^upgraded} = Avrogen.decode_schemaless_base64(modules.evolved_comp, new_b64)
   end
 end
